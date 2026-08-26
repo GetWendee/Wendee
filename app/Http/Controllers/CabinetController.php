@@ -52,6 +52,7 @@ class CabinetController extends Controller
                 'name' => $validated['courtier_name'],
                 'email' => $validated['courtier_email'],
                 'password' => Hash::make($tempPassword),
+                'role' => 'courtier',
             ]);
         });
 
