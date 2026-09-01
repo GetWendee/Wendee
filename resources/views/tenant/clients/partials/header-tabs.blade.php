@@ -146,9 +146,6 @@ Patrimoine
 <a href="{{ route('tenant.clients.profil.edit', $client) }}" class="{{ ($active ?? null) === 'profil' ? 'active' : '' }}">
 Profil investisseur
 </a>
-<a href="{{ route('tenant.clients.mission', $client) }}" class="{{ ($active ?? null) === 'mission' ? 'active' : '' }}">
-Mission
-</a>
 <a href="{{ route('tenant.clients.aide-decision', $client) }}" class="{{ ($active ?? null) === 'analyse' ? 'active' : '' }}">
 Analyse
 </a>
@@ -162,4 +159,7 @@ Recommandation
 Plan d'action
 </a>
 @endif
+<a href="{{ route('tenant.clients.mission', $client) }}" class="{{ ($active ?? null) === 'mission' ? 'active' : '' }}">
+Mission
+</a>
 </nav>
