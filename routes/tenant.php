@@ -89,6 +89,9 @@ Route::get('/mandat-assurance-obseques/{client}/pdf', [ClientController::class, 
 Route::get('/mandat-complementaire-sante/{client}', [ClientController::class, 'mandatComplementaireSante'])->name('clients.mandat-complementaire-sante');
 Route::post('/mandat-complementaire-sante/{client}', [ClientController::class, 'enregistrerMandatComplementaireSante'])->name('clients.mandat-complementaire-sante.enregistrer');
 Route::get('/mandat-complementaire-sante/{client}/pdf', [ClientController::class, 'telechargerMandatComplementaireSantePdf'])->name('clients.mandat-complementaire-sante.pdf');
+Route::get('/mandat-contrat-capitalisation/{client}', [ClientController::class, 'mandatContratCapitalisation'])->name('clients.mandat-contrat-capitalisation');
+Route::post('/mandat-contrat-capitalisation/{client}', [ClientController::class, 'enregistrerMandatContratCapitalisation'])->name('clients.mandat-contrat-capitalisation.enregistrer');
+Route::get('/mandat-contrat-capitalisation/{client}/pdf', [ClientController::class, 'telechargerMandatContratCapitalisationPdf'])->name('clients.mandat-contrat-capitalisation.pdf');
         Route::get('/recommandation-patrimoniale/{client}', [ClientController::class, 'recommandationPatrimoniale'])->name('clients.recommandation-patrimoniale');
         Route::post('/recommandation-patrimoniale/{client}', [ClientController::class, 'genererRecommandation'])->name('clients.recommandation-patrimoniale.generer');
         Route::get('/recommandation-patrimoniale/{client}/pdf', [ClientController::class, 'telechargerRecommandationPdf'])->name('clients.recommandation-patrimoniale.pdf');
