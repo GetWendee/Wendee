@@ -421,6 +421,15 @@ class ClientController extends Controller
             ->with('status', 'Modifications enregistrées.');
     }
 
+    public function mission(
+        Client $client
+    ): \Illuminate\View\View
+    {
+        return view('tenant.clients.mission', [
+            'client' => $client,
+        ]);
+    }
+
     public function planAction(
         Client $client
     ): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
