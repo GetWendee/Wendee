@@ -421,6 +421,152 @@ class ClientController extends Controller
             ->with('status', 'Modifications enregistrées.');
     }
 
+    public function planAction(
+        Client $client
+    ): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+    {
+        $recommandation = $client->analyses()
+            ->where('type', 'recommandation')
+            ->where('status', 'completed')
+            ->latest('completed_at')
+            ->first();
+        if (! $recommandation) {
+            return redirect()
+                ->route('tenant.clients.recommandation-patrimoniale', $client)
+                ->with(
+                    'error',
+                    'Le plan d\'action nécessite une recommandation patrimoniale générée au préalable.'
+                );
+        }
+        $cabinet = \App\Models\CabinetProfile::query()->first();
+        $dernierPlanAction = $client->analyses()
+            ->where('type', 'plan_action')
+            ->latest('created_at')
+            ->first();
+        return view(
+            'tenant.clients.plan-action',
+            [
+                'client' => $client,
+                'cabinet' => $cabinet,
+                'planAction' => $dernierPlanAction,
+            ]
+        );
+    }
+
+    public function genererPlanAction(
+        \Illuminate\Http\Request $request,
+        Client $client,
+        \App\Services\AI\PlanActionAnalysisService $planActionAnalysis
+    ): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'contexte' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        try {
+            $planActionAnalysis->analyze($client, [
+                'contexte' => $validated['contexte'] ?? '',
+            ]);
+            return redirect()
+                ->route('tenant.clients.plan-action', $client)
+                ->with('status', 'Plan d\'action généré.');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Erreur génération plan d\'action',
+                [
+                    'client_id' => $client->id,
+                    'error' => $e->getMessage(),
+                ]
+            );
+            return redirect()
+                ->route('tenant.clients.plan-action', $client)
+                ->with('error', "Le plan d'action n'a pas pu être généré.");
+        }
+    }
+
+    public function telechargerPlanActionPdf(
+        \Illuminate\Http\Request $request,
+        Client $client
+    ): \Symfony\Component\HttpFoundation\Response
+    {
+        $planAction = $client->analyses()
+            ->where('type', 'plan_action')
+            ->where('status', 'completed')
+            ->latest('completed_at')
+            ->first();
+
+        if (! $planAction) {
+            return redirect()
+                ->route('tenant.clients.plan-action', $client)
+                ->with('error', 'Aucun plan d\'action généré à exporter.');
+        }
+
+        $cabinet = \App\Models\CabinetProfile::query()->first();
+        $conseiller = $client->conseiller;
+
+        $nomClient = trim(
+            ($client->civilite ? $client->civilite . ' ' : '')
+            . $client->prenom . ' ' . $client->nom
+        );
+
+        $corpsHtml = $planAction->result_json['plan_action_html']
+            ?? \App\Services\AI\RecommandationAnalysisService::convertirMarkdownEnHtml(
+                $planAction->result_json['plan_action'] ?? $planAction->raw_response ?? ''
+            );
+
+        $data = [
+            'client' => $client,
+            'cabinet' => $cabinet,
+            'planAction' => $planAction,
+            'nomClient' => $nomClient,
+            'nomConseiller' => $conseiller?->name ?? auth()->user()->name,
+            'telConseiller' => $conseiller?->telephone_mobile,
+            'mailConseiller' => $conseiller?->email,
+            'lieuSignature' => $request->query('lieu') ?: ($client->kyc?->lieu_signature ?: $cabinet?->ville),
+            'dateGeneration' => now()->translatedFormat('d F Y'),
+            'corpsHtml' => $corpsHtml,
+            'fontRegular' => base_path('resources/fonts/Montserrat-Regular.ttf'),
+            'fontMedium' => base_path('resources/fonts/Montserrat-Medium.ttf'),
+            'fontSemiBold' => base_path('resources/fonts/Montserrat-SemiBold.ttf'),
+            'fontBold' => base_path('resources/fonts/Montserrat-Bold.ttf'),
+            'logoPath' => $cabinet?->logo ? storage_path('app/public/' . $cabinet->logo) : null,
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'tenant.clients.pdf.plan-action',
+            $data
+        );
+
+        $filename = 'Plan-Action-'
+            . \Illuminate\Support\Str::slug($client->nom)
+            . '-' . now()->format('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    public function modifierPlanActionContenu(
+        \Illuminate\Http\Request $request,
+        Client $client,
+        \App\Models\ClientAnalysis $analysis
+    ): \Illuminate\Http\RedirectResponse
+    {
+        abort_unless($analysis->client_id === $client->id, 404);
+        abort_unless($analysis->type === 'plan_action', 404);
+        $validated = $request->validate([
+            'contenu_html' => ['required', 'string'],
+        ]);
+        $contenuNettoye = strip_tags(
+            $validated['contenu_html'],
+            '<h2><span><p><strong><br><ul><ol><li><em>'
+        );
+        $resultJson = $analysis->result_json ?? [];
+        $resultJson['plan_action_html'] = $contenuNettoye;
+        $analysis->update(['result_json' => $resultJson]);
+        return redirect()
+            ->route('tenant.clients.plan-action', $client)
+            ->with('status', 'Modifications enregistrées.');
+    }
+
     public function genererSuggestion(
         Client $client,
         \App\Services\AI\SuggestionAnalysisService $suggestionAnalysis

@@ -34,6 +34,12 @@
         ->latest('completed_at')
         ->first();
     $recommandationDisponible = (bool) $derniereSuggestion;
+    $derniereRecommandation = $client->analyses()
+        ->where('type', 'recommandation')
+        ->where('status', 'completed')
+        ->latest('completed_at')
+        ->first();
+    $planActionDisponible = (bool) $derniereRecommandation;
 @endphp
 <style>
 body > div > nav,
@@ -146,6 +152,11 @@ Analyse
 @if($recommandationDisponible)
 <a href="{{ route('tenant.clients.recommandation-patrimoniale', $client) }}" class="{{ ($active ?? null) === 'recommandation' ? 'active' : '' }}">
 Recommandation
+</a>
+@endif
+@if($planActionDisponible)
+<a href="{{ route('tenant.clients.plan-action', $client) }}" class="{{ ($active ?? null) === 'plan-action' ? 'active' : '' }}">
+Plan d'action
 </a>
 @endif
 </nav>

@@ -74,6 +74,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/recommandation-patrimoniale/{client}', [ClientController::class, 'genererRecommandation'])->name('clients.recommandation-patrimoniale.generer');
         Route::get('/recommandation-patrimoniale/{client}/pdf', [ClientController::class, 'telechargerRecommandationPdf'])->name('clients.recommandation-patrimoniale.pdf');
         Route::put('/recommandation-patrimoniale/{client}/lettre/{analysis}', [ClientController::class, 'modifierRecommandationContenu'])->name('clients.recommandation-patrimoniale.modifier');
+        Route::get('/plan-action/{client}', [ClientController::class, 'planAction'])->name('clients.plan-action');
+        Route::post('/plan-action/{client}', [ClientController::class, 'genererPlanAction'])->name('clients.plan-action.generer');
+        Route::get('/plan-action/{client}/pdf', [ClientController::class, 'telechargerPlanActionPdf'])->name('clients.plan-action.pdf');
+        Route::put('/plan-action/{client}/contenu/{analysis}', [ClientController::class, 'modifierPlanActionContenu'])->name('clients.plan-action.modifier');
         Route::post('/aide-decision/{client}/suggestion', [ClientController::class, 'genererSuggestion'])->name('clients.aide-decision.suggestion');
         Route::get('/clients/{client}/modifier', [ClientController::class, 'edit'])->name('clients.edit');
         Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
