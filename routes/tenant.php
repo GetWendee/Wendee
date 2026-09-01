@@ -80,6 +80,9 @@ Route::get('/mandat-assurance-deces/{client}/pdf', [ClientController::class, 'te
 Route::get('/mandat-assurance-emprunteur/{client}', [ClientController::class, 'mandatAssuranceEmprunteur'])->name('clients.mandat-assurance-emprunteur');
 Route::post('/mandat-assurance-emprunteur/{client}', [ClientController::class, 'enregistrerMandatAssuranceEmprunteur'])->name('clients.mandat-assurance-emprunteur.enregistrer');
 Route::get('/mandat-assurance-emprunteur/{client}/pdf', [ClientController::class, 'telechargerMandatAssuranceEmprunteurPdf'])->name('clients.mandat-assurance-emprunteur.pdf');
+Route::get('/mandat-assurance-habitation/{client}', [ClientController::class, 'mandatAssuranceHabitation'])->name('clients.mandat-assurance-habitation');
+Route::post('/mandat-assurance-habitation/{client}', [ClientController::class, 'enregistrerMandatAssuranceHabitation'])->name('clients.mandat-assurance-habitation.enregistrer');
+Route::get('/mandat-assurance-habitation/{client}/pdf', [ClientController::class, 'telechargerMandatAssuranceHabitationPdf'])->name('clients.mandat-assurance-habitation.pdf');
         Route::get('/recommandation-patrimoniale/{client}', [ClientController::class, 'recommandationPatrimoniale'])->name('clients.recommandation-patrimoniale');
         Route::post('/recommandation-patrimoniale/{client}', [ClientController::class, 'genererRecommandation'])->name('clients.recommandation-patrimoniale.generer');
         Route::get('/recommandation-patrimoniale/{client}/pdf', [ClientController::class, 'telechargerRecommandationPdf'])->name('clients.recommandation-patrimoniale.pdf');
