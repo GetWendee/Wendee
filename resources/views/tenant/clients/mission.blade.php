@@ -16,7 +16,7 @@
 .wd-mission-carte:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(23,21,20,.08);}
 .wd-mission-carte.wd-mission-indisponible{cursor:not-allowed;opacity:.5;}
 .wd-mission-carte.wd-mission-indisponible:hover{transform:none;box-shadow:none;}
-.wd-mission-icone{font-size:26px;margin-bottom:12px;}
+.wd-mission-icone{margin-bottom:12px;}.wd-mission-icone svg{width:26px;height:26px;stroke:var(--pink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .wd-mission-titre{font-weight:800;font-size:15px;color:var(--ink);margin-bottom:4px;}
 .wd-mission-sous-titre{color:var(--muted);font-size:12px;}
 .wd-mission-badge{margin-top:12px;display:inline-block;font-size:10px;background:var(--soft);color:var(--muted);padding:4px 10px;border-radius:20px;}
@@ -44,7 +44,7 @@
                 data-famille="{{ $prestation['famille'] }}"
                 @if($disponible) href="{{ route($prestation['route'], $client) }}" @endif
             >
-                <div class="wd-mission-icone">{{ $prestation['icone'] }}</div>
+                <div class="wd-mission-icone"><svg viewBox="0 0 24 24">{!! $prestation['icone'] !!}</svg></div>
                 <div class="wd-mission-titre">{{ $prestation['titre'] }}</div>
                 <div class="wd-mission-sous-titre">{{ $prestation['sous_titre'] }}</div>
                 @if(! $disponible)
