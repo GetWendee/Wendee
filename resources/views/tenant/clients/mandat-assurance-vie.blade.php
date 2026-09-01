@@ -56,6 +56,7 @@
 .wd-mandat-submit{height:40px;padding:0 20px;border:none;border-radius:9px;background:#242424;border-top:2px solid var(--pink);color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;}
 .wd-mandat-pdf-btn{height:40px;padding:0 20px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:12px;font-weight:700;cursor:pointer;}
 .wd-mandat-status{font-size:12px;color:var(--muted);}
+.wd-mandat-header-status{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;}
 .wd-modal-overlay{position:fixed;inset:0;background:rgba(23,21,20,.55);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(2px);display:none;}
 .wd-modal-card{background:#fff;border-radius:14px;padding:24px 26px;width:320px;box-shadow:0 20px 50px rgba(0,0,0,.25);position:relative;overflow:hidden;animation:wd-modal-in .18s ease;}
 .wd-modal-accent{position:absolute;top:0;left:0;right:0;height:4px;background:var(--pink);}
@@ -78,12 +79,21 @@
     </div>
 
     <div class="wd-mandat-body">
-        @if(session('status'))
-            <p class="wd-mandat-status">{{ session('status') }}</p>
-        @endif
-        @if($mandat)
-            <p class="wd-mandat-status">Dernier enregistrement : {{ $mandat->completed_at?->translatedFormat('d F Y à H:i') }}</p>
-        @endif
+        <div class="wd-mandat-header-status">
+            <div>
+                @if(session('status'))
+                    <p class="wd-mandat-status">{{ session('status') }}</p>
+                @endif
+                @if($mandat)
+                    <p class="wd-mandat-status">Dernier enregistrement : {{ $mandat->completed_at?->translatedFormat('d F Y à H:i') }}</p>
+                @endif
+            </div>
+            @if($mandat)
+                <button type="button" id="wd-mandat-pdf-btn" class="wd-mandat-pdf-btn" data-pdf-url="{{ route('tenant.clients.mandat-assurance-vie.pdf', $client) }}" data-lieu-defaut="{{ $client->kyc?->lieu_signature ?: $cabinet?->ville }}">
+                    Télécharger le mandat en PDF
+                </button>
+            @endif
+        </div>
 
         <form method="POST" action="{{ route('tenant.clients.mandat-assurance-vie.enregistrer', $client) }}">
             @csrf
@@ -242,11 +252,6 @@
 
             <div class="wd-mandat-actions">
                 <button type="submit" class="wd-mandat-submit">Enregistrer</button>
-                @if($mandat)
-                    <button type="button" id="wd-mandat-pdf-btn" class="wd-mandat-pdf-btn" data-pdf-url="{{ route('tenant.clients.mandat-assurance-vie.pdf', $client) }}" data-lieu-defaut="{{ $client->kyc?->lieu_signature ?: $cabinet?->ville }}">
-                        Télécharger le mandat en PDF
-                    </button>
-                @endif
             </div>
         </form>
     </div>
