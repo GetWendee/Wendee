@@ -1,6 +1,8 @@
 <x-tenant-app-layout>
 @include('tenant.clients.partials.header-tabs', ['active' => 'mission'])
 <style>
+.wd-mission-section-title{font-weight:800;font-size:16px;color:var(--ink);margin:28px 0 4px;}
+.wd-mission-section-title:first-of-type{margin-top:6px;}
 .wd-mission-filtres{display:flex;gap:16px;margin:22px 0 20px;flex-wrap:wrap;justify-content:center;}
 .wd-mission-filtre{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted);}
 .wd-mission-filtre input{display:none;}
@@ -21,11 +23,13 @@
 .wd-mission-sous-titre{color:var(--muted);font-size:12px;}
 .wd-mission-badge{margin-top:12px;display:inline-block;font-size:10px;background:var(--soft);color:var(--muted);padding:4px 10px;border-radius:20px;}
 </style>
+
+<h3 class="wd-mission-section-title">Nos services</h3>
 <section class="wd-section">
     <div class="wd-mission-filtres">
         @foreach(['audit' => 'Audit', 'etude' => 'Étude', 'simulation' => 'Simulation'] as $valeur => $label)
             <label class="wd-mission-filtre">
-                <input type="checkbox" class="wd-mission-filtre-checkbox" value="{{ $valeur }}" data-mission-filtre {{ $valeur === 'audit' ? 'checked' : '' }}>
+                <input type="checkbox" class="wd-mission-filtre-checkbox" value="{{ $valeur }}" data-mission-filtre="services" {{ $valeur === 'audit' ? 'checked' : '' }}>
                 <span class="wd-mission-filtre-box">
                     <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                 </span>
@@ -33,7 +37,7 @@
             </label>
         @endforeach
     </div>
-    <div class="wd-mission-grille" data-mission-grille>
+    <div class="wd-mission-grille" data-mission-grille="services">
         @foreach(config('prestations') as $prestation)
             @php
                 $disponible = (bool) $prestation['route'];
@@ -54,20 +58,57 @@
         @endforeach
     </div>
 </section>
+
+<h3 class="wd-mission-section-title">Nos solutions</h3>
+<section class="wd-section">
+    <div class="wd-mission-filtres">
+        @foreach(['fam_assurance' => 'Assurance', 'fam_banque' => 'Banque', 'fam_immobilier' => 'Immobilier', 'famille_fin' => 'Finance'] as $valeur => $label)
+            <label class="wd-mission-filtre">
+                <input type="checkbox" class="wd-mission-filtre-checkbox" value="{{ $valeur }}" data-mission-filtre="solutions" checked>
+                <span class="wd-mission-filtre-box">
+                    <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                </span>
+                <span>{{ $label }}</span>
+            </label>
+        @endforeach
+    </div>
+    <div class="wd-mission-grille" data-mission-grille="solutions">
+        @foreach(config('solutions') as $solution)
+            @php
+                $disponible = (bool) $solution['route'];
+                $balise = $disponible ? 'a' : 'div';
+            @endphp
+            <{{ $balise }}
+                class="wd-mission-carte{{ $disponible ? '' : ' wd-mission-indisponible' }}"
+                data-famille="{{ $solution['famille'] }}"
+                @if($disponible) href="{{ route($solution['route'], $client) }}" @endif
+            >
+                <div class="wd-mission-icone"><svg viewBox="0 0 24 24">{!! $solution['icone'] !!}</svg></div>
+                <div class="wd-mission-titre">{{ $solution['titre'] }}</div>
+                <div class="wd-mission-sous-titre">{{ $solution['sous_titre'] }}</div>
+                @if(! $disponible)
+                    <div class="wd-mission-badge">Indisponible pour le moment</div>
+                @endif
+            </{{ $balise }}>
+        @endforeach
+    </div>
+</section>
+
 <script>
 (function () {
-    var grille = document.querySelector('[data-mission-grille]');
-    var filtres = document.querySelectorAll('[data-mission-filtre]');
-    if (! grille) { return; }
-    function appliquer() {
-        var actifs = Array.prototype.filter.call(filtres, function (c) { return c.checked; })
-            .map(function (c) { return c.value; });
-        grille.querySelectorAll('[data-famille]').forEach(function (carte) {
-            carte.style.display = actifs.indexOf(carte.getAttribute('data-famille')) !== -1 ? '' : 'none';
-        });
-    }
-    filtres.forEach(function (c) { c.addEventListener('change', appliquer); });
-    appliquer();
+    document.querySelectorAll('[data-mission-grille]').forEach(function (grille) {
+        var groupe = grille.getAttribute('data-mission-grille');
+        var filtres = document.querySelectorAll('[data-mission-filtre="' + groupe + '"]');
+        function appliquer() {
+            var actifs = Array.prototype.filter.call(filtres, function (c) { return c.checked; })
+                .map(function (c) { return c.value; });
+            grille.querySelectorAll('[data-famille]').forEach(function (carte) {
+                carte.style.display = actifs.indexOf(carte.getAttribute('data-famille')) !== -1 ? '' : 'none';
+            });
+        }
+        filtres.forEach(function (c) { c.addEventListener('change', appliquer); });
+        appliquer();
+    });
 })();
 </script>
 </x-tenant-app-layout>

@@ -1,0 +1,261 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Catalogue des solutions (page Mission, section "Nos solutions")
+|--------------------------------------------------------------------------
+|
+| Contenu repris à l'identique du CPT WordPress "toutes-nos-solutions".
+| 'icone' contient le contenu interne (paths) d'une icône Lucide
+| (https://lucide.dev, licence ISC), rendu dans un <svg> commun
+| par la vue (voir mission.blade.php).
+| 'slug' est calculé à partir du titre (Str::slug), en attendant les
+| URLs définitives de l'associé de Niels.
+| 'route' est le nom de la route Laravel associée, null si la
+| fonctionnalité n'est pas encore construite (carte "Indisponible
+| pour le moment").
+|
+*/
+
+return [
+    [
+        'titre' => 'Assurance décès',
+        'sous_titre' => 'Une protection flexible pour vous protéger et assurer l\'avenir de vos proches',
+        'icone' => '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'assurance-deces',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Assurance Emprunteur',
+        'sous_titre' => 'L\'assurance emprunteur qui vous protège et vous libère des soucis financiers',
+        'icone' => '<rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'assurance-emprunteur',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Assurance Habitation',
+        'sous_titre' => 'Une assurance multirisque pour une protection totale et la tranquillité d\'esprit',
+        'icone' => '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'assurance-habitation',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Assurance Obsèques',
+        'sous_titre' => 'Préparez sereinement l\'avenir, organiser vos volontés soulager vos proches',
+        'icone' => '<path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'assurance-obseques',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Assurance Véhicule',
+        'sous_titre' => 'Assurez votre route vers la tranquillité : fiabilité, protection et assistance',
+        'icone' => '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" /><circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'assurance-vehicule',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Assurance vie',
+        'sous_titre' => 'Réalisez vos projets avec l\'assurance vie, le couteau suisse du placement',
+        'icone' => '<path d="M12 13v7a2 2 0 0 0 4 0" /><path d="M12 2v2" /><path d="M20.992 13a1 1 0 0 0 .97-1.274 10.284 10.284 0 0 0-19.923 0A1 1 0 0 0 3 13z" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'assurance-vie',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Complémentaire santé',
+        'sous_titre' => 'Une assurance santé qui prend soin de vous à chaque étape de votre vie',
+        'icone' => '<path d="m18 2 4 4" /><path d="m17 7 3-3" /><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5" /><path d="m9 11 4 4" /><path d="m5 19-3 3" /><path d="m14 4 6 6" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'complementaire-sante',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Contrat de capitalisation',
+        'sous_titre' => 'Capitalisez sur l\'avenir, assurez votre patrimoine d\'une stratégie gagnante',
+        'icone' => '<rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'contrat-de-capitalisation',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Garantie Accident De La Vie',
+        'sous_titre' => 'Anticipez l\'inattendu avec l\'assurance garantie accident de la vie',
+        'icone' => '<path d="M12 11v4" /><path d="M14 13h-4" /><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /><path d="M18 6v14" /><path d="M6 6v14" /><rect width="20" height="14" x="2" y="6" rx="2" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'garantie-accident-de-la-vie',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Plan épargne retraite',
+        'sous_titre' => 'Investissez en toute tranquillité aujourd\'hui pour une retraite sereine demain',
+        'icone' => '<path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4" /><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3" /><path d="M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35" /><path d="M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'plan-epargne-retraite',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Prévoyance Collective',
+        'sous_titre' => 'Assurer l\'avenir de votre équipe, c\'est investir dans la réussite de votre entreprise',
+        'icone' => '<rect width="20" height="14" x="2" y="3" rx="2" /><line x1="8" x2="16" y1="21" y2="21" /><line x1="12" x2="12" y1="17" y2="21" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'prevoyance-collective',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Santé Collective',
+        'sous_titre' => 'Choisissez l\'assurance santé collective solide pour le bien être de vos salariés',
+        'icone' => '<path d="M11 2v2" /><path d="M5 2v2" /><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" /><path d="M8 15a6 6 0 0 0 12 0v-3" /><circle cx="20" cy="10" r="2" />',
+        'famille' => 'fam_assurance',
+        'slug' => 'sante-collective',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Compte courant',
+        'sous_titre' => 'Votre allié du quotidien pour vos paiements, prélèvements et virements',
+        'icone' => '<path d="M10 18v-7" /><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z" /><path d="M14 18v-7" /><path d="M18 18v-7" /><path d="M3 22h18" /><path d="M6 18v-7" />',
+        'famille' => 'fam_banque',
+        'slug' => 'compte-courant',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Crédit immobilier',
+        'sous_titre' => 'Sélectionner le crédit immobilier avec les garanties qui vous conviennent',
+        'icone' => '<path d="M10 18v-7" /><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z" /><path d="M14 18v-7" /><path d="M18 18v-7" /><path d="M3 22h18" /><path d="M6 18v-7" />',
+        'famille' => 'fam_banque',
+        'slug' => 'credit-immobilier',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Epargne court terme',
+        'sous_titre' => 'Faire fructifier votre épargne de précaution, liquide à tout moment',
+        'icone' => '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />',
+        'famille' => 'fam_banque',
+        'slug' => 'epargne-court-terme',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Déficit foncier',
+        'sous_titre' => 'Optimisez votre fiscalité et votre patrimoine en rénovant des biens anciens',
+        'icone' => '<path d="M12 10h.01" /><path d="M12 14h.01" /><path d="M12 6h.01" /><path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M16 6h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" /><path d="M8 6h.01" /><path d="M9 22v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" /><rect x="4" y="2" width="16" height="20" rx="2" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'deficit-foncier',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Investissement Cosse',
+        'sous_titre' => 'Participez à l\'immobilier locatif social avec des loyers stables et des avantages',
+        'icone' => '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'investissement-cosse',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Investissement Denormandie',
+        'sous_titre' => 'Investissez dans l\'immobilier en région pour profiter d\'avantages fiscaux',
+        'icone' => '<path d="M10 12h4" /><path d="M10 8h4" /><path d="M14 21v-3a2 2 0 0 0-4 0v3" /><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" /><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'investissement-denormandie',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Investissement Malraux',
+        'sous_titre' => 'Investissez dans le patrimoine historique et bénéficiez d\'une réduction d\'impôts',
+        'icone' => '<path d="M10 18v-7" /><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z" /><path d="M14 18v-7" /><path d="M18 18v-7" /><path d="M3 22h18" /><path d="M6 18v-7" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'investissement-malraux',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Investissement Viager',
+        'sous_titre' => 'Constituez un patrimoine à moindre coût et sans contrainte locative',
+        'icone' => '<rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'investissement-viager',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Logement meublé',
+        'sous_titre' => 'Investissez dans la location meublée, revenus stables et une gestion simplifiée',
+        'icone' => '<path d="M2 4v16" /><path d="M2 8h18a2 2 0 0 1 2 2v10" /><path d="M2 17h20" /><path d="M6 8v9" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'logement-meuble',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Monument historique',
+        'sous_titre' => 'Soutenez la préservation du patrimoine et bénéficiez d\'avantages fiscaux',
+        'icone' => '<path d="M10 5V3" /><path d="M14 5V3" /><path d="M15 21v-3a3 3 0 0 0-6 0v3" /><path d="M18 3v8" /><path d="M18 5H6" /><path d="M22 11H2" /><path d="M22 9v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9" /><path d="M6 3v8" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'monument-historique',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Nue propriété',
+        'sous_titre' => 'Investissez en nue propriété pour un patrimoine à moindre coût',
+        'icone' => '<path d="m2 21 9.6-9.6" /><path d="m7.5 15.5 2.3 2.3a1 1 0 0 1 0 1.4l-2.1 2.1a1 1 0 0 1-1.4 0L4 19" /><circle cx="15.5" cy="7.5" r="5.5" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'nue-propriete',
+        'route' => null,
+    ],
+    [
+        'titre' => 'SCPI',
+        'sous_titre' => 'Investir dans l\'immobilier sans gestion directe et une diversification d\'actifs',
+        'icone' => '<path d="M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11" /><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z" /><path d="M6 13h12" /><path d="M6 17h12" />',
+        'famille' => 'fam_immobilier',
+        'slug' => 'scpi',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Compte titres',
+        'sous_titre' => 'Libérez votre potentiel d\'investissement avec le compte titres, un placement souple',
+        'icone' => '<path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z" /><path d="M21.21 15.89A10 10 0 1 1 8 2.83" />',
+        'famille' => 'famille_fin',
+        'slug' => 'compte-titres',
+        'route' => null,
+    ],
+    [
+        'titre' => 'FCPI',
+        'sous_titre' => 'Investissez dans la croissance de demain et bénéficiez d\'avantages fiscaux',
+        'icone' => '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" />',
+        'famille' => 'famille_fin',
+        'slug' => 'fcpi',
+        'route' => null,
+    ],
+    [
+        'titre' => 'FIP',
+        'sous_titre' => 'Investissez dans les PME françaises et soutenez les régions',
+        'icone' => '<path d="m8 3 4 8 5-5 5 15H2L8 3z" />',
+        'famille' => 'famille_fin',
+        'slug' => 'fip',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Groupement forestier',
+        'sous_titre' => 'Développez votre patrimoine de manière durable et préservez la nature',
+        'icone' => '<path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z" /><path d="M7 16v6" /><path d="M13 19v3" /><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5" />',
+        'famille' => 'famille_fin',
+        'slug' => 'groupement-forestier',
+        'route' => null,
+    ],
+    [
+        'titre' => 'Plan épargne actions',
+        'sous_titre' => 'Faites fructifier votre capital avec le PEA, la voie vers la croissance financière',
+        'icone' => '<path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" />',
+        'famille' => 'famille_fin',
+        'slug' => 'plan-epargne-actions',
+        'route' => null,
+    ],
+    [
+        'titre' => 'SOFICA',
+        'sous_titre' => 'Soutenez la création artistique, le cinéma et bénéficiez d\'avantages fiscaux',
+        'icone' => '<path d="m12.296 3.464 3.02 3.956" /><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z" /><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="m6.18 5.276 3.1 3.899" />',
+        'famille' => 'famille_fin',
+        'slug' => 'sofica',
+        'route' => null,
+    ],
+];
