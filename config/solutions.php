@@ -32,7 +32,7 @@ return [
         'icone' => '<rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" />',
         'famille' => 'fam_assurance',
         'slug' => 'assurance-emprunteur',
-        'route' => null,
+        'route' => 'tenant.clients.mandat-assurance-emprunteur',
     ],
     [
         'titre' => 'Assurance Habitation',

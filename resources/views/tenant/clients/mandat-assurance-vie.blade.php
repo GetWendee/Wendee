@@ -103,7 +103,7 @@
                 <div class="wd-cabinet-checkbox-group">
                     @foreach($objectifsOptions as $valeur => $label)
                         <label class="wd-cabinet-checkbox">
-                            <input type="checkbox" name="objectifs[]" value="{{ $valeur }}" {{ in_array($valeur, $objectifsSelectionnes) ? 'checked' : '' }}>
+                            <input type="checkbox" name="objectifs[]" value="{{ $valeur }}" {{ in_array($valeur, $objectifsSelectionnes) ? 'checked' : '' }} {{ $valeur === 'autre' ? 'data-toggle-target="champ-precision-objectif-autre"' : '' }}>
                             <span class="wd-cabinet-checkbox-box">
                                 <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                             </span>
@@ -112,7 +112,7 @@
                     @endforeach
                 </div>
             </div>
-            <div class="wd-mandat-field">
+            <div class="wd-mandat-field" id="champ-precision-objectif-autre" style="display:{{ in_array('autre', $objectifsSelectionnes) ? '' : 'none' }};">
                 <label class="wd-mandat-label">Précision si "Autre"</label>
                 <input type="text" name="objectif_autre_precision" class="wd-mandat-input" value="{{ $donnees['objectif_autre_precision'] ?? '' }}">
             </div>
@@ -273,6 +273,19 @@
 
 <script>
 (function () {
+    document.querySelectorAll('[data-toggle-target]').forEach(function (trigger) {
+        var cible = document.getElementById(trigger.getAttribute('data-toggle-target'));
+        if (! cible) { return; }
+        var groupe = document.getElementsByName(trigger.name);
+        function appliquer() {
+            cible.style.display = trigger.checked ? '' : 'none';
+        }
+        Array.prototype.forEach.call(groupe, function (input) {
+            input.addEventListener('change', appliquer);
+        });
+        appliquer();
+    });
+
     function ajouterLigne(conteneurId, prefixe, champs) {
         var conteneur = document.getElementById(conteneurId);
         var index = conteneur.querySelectorAll('.wd-mandat-repeater-item').length;

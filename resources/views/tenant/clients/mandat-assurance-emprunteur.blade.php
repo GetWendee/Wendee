@@ -2,27 +2,23 @@
 @include('tenant.clients.partials.header-tabs', ['active' => 'mission'])
 @php
     $donnees = $mandat->result_json ?? [];
-    $objectifOptions = [
-        'conjoint' => 'Protéger le conjoint',
-        'enfants' => 'Protéger les enfants',
-        'pret' => 'Couvrir un prêt',
-        'transmission' => 'Transmettre un capital',
-        'professionnel' => 'Obligations professionnelles',
+    $typePretOptions = [
+        'immobilier' => 'Prêt immobilier',
+        'consommation' => 'Prêt à la consommation',
+        'professionnel' => 'Prêt professionnel',
         'autre' => 'Autre',
     ];
-    $dureeOptions = [
-        'temporaire_duree' => 'Temporaire, durée fixe',
-        'jusqu_age' => "Jusqu'à un âge donné",
-        'viager' => 'Viager',
-        'adosse_pret' => 'Adossé à un prêt',
-    ];
     $garantiesOptions = [
-        'ptia' => 'Perte totale et irréversible d\'autonomie (PTIA)',
-        'invalidite' => 'Invalidité complémentaire',
-        'rente_education' => 'Rente éducation',
-        'rente_conjoint' => 'Rente de conjoint',
-        'double_effet' => 'Double effet',
-        'exoneration_cotisations' => 'Exonération des cotisations en cas d\'invalidité',
+        'deces' => 'Décès',
+        'ptia' => "Perte totale et irréversible d'autonomie (PTIA)",
+        'ipt' => 'Invalidité permanente totale (IPT)',
+        'itt' => 'Incapacité temporaire totale de travail (ITT)',
+        'invalidite' => 'Invalidité permanente partielle',
+        'perte_emploi' => "Perte d'emploi",
+    ];
+    $typeCouvertureOptions = [
+        'capital_initial_constant' => 'Capital initial constant',
+        'capital_restant_du' => 'Capital restant dû',
     ];
     $sportsOptions = [
         'aeriens' => 'Sports aériens',
@@ -31,15 +27,22 @@
         'montagne' => 'Alpinisme / haute montagne',
         'autre' => 'Autre sport à risque',
     ];
-    $garantiesSelectionnees = $donnees['garanties_complementaires'] ?? [];
+    $statutProfessionnelOptions = [
+        'salarie' => 'Salarié',
+        'independant' => 'Indépendant',
+        'fonctionnaire' => 'Fonctionnaire',
+        'autre' => 'Autre',
+    ];
+    $garantiesSelectionnees = $donnees['garanties_souhaitees'] ?? [];
     $sportsSelectionnes = $donnees['sports_a_risque'] ?? [];
-    $beneficiaires = $donnees['beneficiaires'] ?? [[]];
+    $emprunteurs = $donnees['emprunteurs'] ?? [[]];
 @endphp
 <style>
 .wd-mandat-card{background:#242424;color:#fff;border-radius:14px;padding:22px 26px;border-top:3px solid var(--pink);}
 .wd-mandat-card h2{margin:0;font-size:16px;}
 .wd-mandat-card p{margin:4px 0 0;color:#c9c2be;font-size:12px;}
 .wd-mandat-body{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-top:18px;}
+.wd-mandat-header-status{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;}
 .wd-mandat-section-title{font-size:13px;font-weight:800;color:var(--ink);margin:26px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);}
 .wd-mandat-section-title:first-child{margin-top:0;}
 .wd-mandat-field{margin-bottom:16px;}
@@ -56,7 +59,6 @@
 .wd-mandat-submit{height:40px;padding:0 20px;border:none;border-radius:9px;background:#242424;border-top:2px solid var(--pink);color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;}
 .wd-mandat-pdf-btn{height:40px;padding:0 20px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:12px;font-weight:700;cursor:pointer;}
 .wd-mandat-status{font-size:12px;color:var(--muted);}
-.wd-mandat-header-status{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;}
 .wd-mandat-note{font-size:11px;color:var(--muted);font-style:italic;margin:-8px 0 16px;}
 .wd-cabinet-checkbox-group{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px;}
 .wd-cabinet-checkbox{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #ded9d4;border-radius:7px;font-size:12px;font-weight:700;color:#817b76;cursor:pointer;}
@@ -87,7 +89,7 @@
 
 <section class="wd-section">
     <div class="wd-mandat-card">
-        <h2>Mandat de courtage en assurance décès</h2>
+        <h2>Mandat de courtage en assurance emprunteur</h2>
         <p>Recueil des besoins avant génération du mandat</p>
     </div>
 
@@ -102,75 +104,75 @@
                 @endif
             </div>
             @if($mandat)
-                <button type="button" id="wd-mandat-pdf-btn" class="wd-mandat-pdf-btn" data-pdf-url="{{ route('tenant.clients.mandat-assurance-deces.pdf', $client) }}" data-lieu-defaut="{{ $client->kyc?->lieu_signature ?: $cabinet?->ville }}">
+                <button type="button" id="wd-mandat-pdf-btn" class="wd-mandat-pdf-btn" data-pdf-url="{{ route('tenant.clients.mandat-assurance-emprunteur.pdf', $client) }}" data-lieu-defaut="{{ $client->kyc?->lieu_signature ?: $cabinet?->ville }}">
                     Télécharger le mandat en PDF
                 </button>
             @endif
         </div>
 
-        <form method="POST" action="{{ route('tenant.clients.mandat-assurance-deces.enregistrer', $client) }}">
+        <form method="POST" action="{{ route('tenant.clients.mandat-assurance-emprunteur.enregistrer', $client) }}">
             @csrf
 
-            <div class="wd-mandat-section-title">1. Objectif de la garantie</div>
+            <div class="wd-mandat-section-title">1. Prêt concerné</div>
             <div class="wd-mandat-field">
                 <div class="wd-cabinet-radio-group">
-                    @foreach($objectifOptions as $valeur => $label)
+                    @foreach($typePretOptions as $valeur => $label)
                         <label class="wd-cabinet-radio">
-                            <input type="radio" name="objectif_garantie" value="{{ $valeur }}" {{ ($donnees['objectif_garantie'] ?? '') === $valeur ? 'checked' : '' }} {{ $valeur === 'autre' ? 'data-toggle-target="champ-precision-objectif-autre"' : '' }}>
+                            <input type="radio" name="type_pret" value="{{ $valeur }}" {{ ($donnees['type_pret'] ?? '') === $valeur ? 'checked' : '' }} {{ $valeur === 'autre' ? 'data-toggle-target="champ-precision-type-pret"' : '' }}>
                             <span>{{ $label }}</span>
                         </label>
                     @endforeach
                 </div>
             </div>
-            <div class="wd-mandat-field" id="champ-precision-objectif-autre" style="display:{{ ($donnees['objectif_garantie'] ?? '') === 'autre' ? '' : 'none' }};">
+            <div class="wd-mandat-field" id="champ-precision-type-pret" style="display:{{ ($donnees['type_pret'] ?? '') === 'autre' ? '' : 'none' }};">
                 <label class="wd-mandat-label">Précision si "Autre"</label>
-                <input type="text" name="objectif_autre_precision" class="wd-mandat-input" value="{{ $donnees['objectif_autre_precision'] ?? '' }}">
-            </div>
-
-            <div class="wd-mandat-section-title">2. Capital et durée</div>
-            <div class="wd-mandat-row wd-mandat-row-2">
-                <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Capital assuré souhaité (€)</label>
-                    <input type="number" step="0.01" name="capital_assure_souhaite" class="wd-mandat-input" value="{{ $donnees['capital_assure_souhaite'] ?? '' }}">
-                </div>
-                <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Durée du contrat souhaitée</label>
-                    <select name="duree_contrat" class="wd-mandat-select">
-                        <option value="">Sélectionner...</option>
-                        @foreach($dureeOptions as $valeur => $label)
-                            <option value="{{ $valeur }}" {{ ($donnees['duree_contrat'] ?? '') === $valeur ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <input type="text" name="type_pret_autre_precision" class="wd-mandat-input" value="{{ $donnees['type_pret_autre_precision'] ?? '' }}">
             </div>
             <div class="wd-mandat-row wd-mandat-row-3">
                 <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Durée fixe envisagée (années)</label>
-                    <input type="number" name="duree_temporaire_annees" class="wd-mandat-input" value="{{ $donnees['duree_temporaire_annees'] ?? '' }}">
+                    <label class="wd-mandat-label">Montant emprunté (€)</label>
+                    <input type="number" step="0.01" name="montant_emprunte" class="wd-mandat-input" value="{{ $donnees['montant_emprunte'] ?? '' }}">
                 </div>
                 <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Âge terme souhaité</label>
-                    <input type="number" name="age_terme" class="wd-mandat-input" value="{{ $donnees['age_terme'] ?? '' }}">
+                    <label class="wd-mandat-label">Durée du prêt (années)</label>
+                    <input type="number" name="duree_pret" class="wd-mandat-input" value="{{ $donnees['duree_pret'] ?? '' }}">
                 </div>
-                <div class="wd-mandat-field"></div>
+                <div class="wd-mandat-field">
+                    <label class="wd-mandat-label">Taux du prêt (%)</label>
+                    <input type="number" step="0.01" name="taux_pret" class="wd-mandat-input" value="{{ $donnees['taux_pret'] ?? '' }}">
+                </div>
             </div>
-            <div class="wd-mandat-row wd-mandat-row-2">
-                <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Si adossé à un prêt : capital restant dû (€)</label>
-                    <input type="number" step="0.01" name="pret_capital_restant_du" class="wd-mandat-input" value="{{ $donnees['pret_capital_restant_du'] ?? '' }}">
-                </div>
-                <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Durée restante du prêt (années)</label>
-                    <input type="number" name="pret_duree_restante" class="wd-mandat-input" value="{{ $donnees['pret_duree_restante'] ?? '' }}">
-                </div>
+            <div class="wd-mandat-field">
+                <label class="wd-mandat-label">Date de l'offre de prêt</label>
+                <input type="date" name="date_offre_pret" class="wd-mandat-input" value="{{ $donnees['date_offre_pret'] ?? '' }}">
             </div>
 
-            <div class="wd-mandat-section-title">3. Garanties complémentaires souhaitées</div>
+            <div class="wd-mandat-section-title">2. Quotité d'assurance par emprunteur</div>
+            <div id="wd-mandat-emprunteurs-liste">
+                @foreach($emprunteurs as $i => $emprunteur)
+                    <div class="wd-mandat-repeater-item">
+                        @if($i > 0)<button type="button" class="wd-mandat-repeater-remove" data-remove>Retirer</button>@endif
+                        <div class="wd-mandat-row wd-mandat-row-2">
+                            <div class="wd-mandat-field">
+                                <label class="wd-mandat-label">Nom de l'emprunteur</label>
+                                <input type="text" name="emprunteurs[{{ $i }}][nom]" class="wd-mandat-input" value="{{ $emprunteur['nom'] ?? '' }}">
+                            </div>
+                            <div class="wd-mandat-field">
+                                <label class="wd-mandat-label">Quotité assurée (%)</label>
+                                <input type="number" step="0.01" name="emprunteurs[{{ $i }}][quotite_pourcentage]" class="wd-mandat-input" value="{{ $emprunteur['quotite_pourcentage'] ?? '' }}">
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            <button type="button" class="wd-mandat-repeater-add" data-add="emprunteurs">+ Ajouter un emprunteur</button>
+
+            <div class="wd-mandat-section-title" style="margin-top:24px;">3. Garanties souhaitées</div>
             <div class="wd-mandat-field">
                 <div class="wd-cabinet-checkbox-group">
                     @foreach($garantiesOptions as $valeur => $label)
                         <label class="wd-cabinet-checkbox">
-                            <input type="checkbox" name="garanties_complementaires[]" value="{{ $valeur }}" {{ in_array($valeur, $garantiesSelectionnees) ? 'checked' : '' }}>
+                            <input type="checkbox" name="garanties_souhaitees[]" value="{{ $valeur }}" {{ in_array($valeur, $garantiesSelectionnees) ? 'checked' : '' }}>
                             <span class="wd-cabinet-checkbox-box">
                                 <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                             </span>
@@ -179,69 +181,16 @@
                     @endforeach
                 </div>
             </div>
-            <div class="wd-mandat-row wd-mandat-row-2">
-                <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Rente éducation : montant souhaité (€/an)</label>
-                    <input type="number" step="0.01" name="rente_education_montant" class="wd-mandat-input" value="{{ $donnees['rente_education_montant'] ?? '' }}">
-                </div>
-                <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Rente éducation : jusqu'à quel âge des enfants</label>
-                    <input type="number" name="rente_education_age_limite" class="wd-mandat-input" value="{{ $donnees['rente_education_age_limite'] ?? '' }}">
-                </div>
-            </div>
 
-            <div class="wd-mandat-section-title">4. Bénéficiaires en cas de décès</div>
-            <div id="wd-mandat-beneficiaires-liste">
-                @foreach($beneficiaires as $i => $beneficiaire)
-                    <div class="wd-mandat-repeater-item">
-                        @if($i > 0)<button type="button" class="wd-mandat-repeater-remove" data-remove>Retirer</button>@endif
-                        <div class="wd-mandat-row wd-mandat-row-3">
-                            <div class="wd-mandat-field">
-                                <label class="wd-mandat-label">Nom</label>
-                                <input type="text" name="beneficiaires[{{ $i }}][nom]" class="wd-mandat-input" value="{{ $beneficiaire['nom'] ?? '' }}">
-                            </div>
-                            <div class="wd-mandat-field">
-                                <label class="wd-mandat-label">Lien avec le client</label>
-                                <input type="text" name="beneficiaires[{{ $i }}][lien]" class="wd-mandat-input" value="{{ $beneficiaire['lien'] ?? '' }}">
-                            </div>
-                            <div class="wd-mandat-field">
-                                <label class="wd-mandat-label">Quote-part</label>
-                                <input type="text" name="beneficiaires[{{ $i }}][quote_part]" class="wd-mandat-input" value="{{ $beneficiaire['quote_part'] ?? '' }}">
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-            <button type="button" class="wd-mandat-repeater-add" data-add="beneficiaires">+ Ajouter un bénéficiaire</button>
-
-            <div class="wd-mandat-field" style="margin-top:16px;">
-                <label class="wd-mandat-label">Clause bénéficiaire</label>
-                <div class="wd-cabinet-radio-group">
-                    <label class="wd-cabinet-radio">
-                        <input type="radio" name="clause_beneficiaire_type" value="standard" {{ ($donnees['clause_beneficiaire_type'] ?? 'standard') === 'standard' ? 'checked' : '' }}>
-                        <span>Clause type (conjoint, à défaut les enfants, à défaut les héritiers)</span>
-                    </label>
-                    <label class="wd-cabinet-radio">
-                        <input type="radio" name="clause_beneficiaire_type" value="personnalisee" {{ ($donnees['clause_beneficiaire_type'] ?? '') === 'personnalisee' ? 'checked' : '' }}>
-                        <span>Clause personnalisée</span>
-                    </label>
-                </div>
-            </div>
+            <div class="wd-mandat-section-title">4. Type de couverture</div>
             <div class="wd-mandat-field">
-                <label class="wd-mandat-label">Texte de la clause personnalisée (si applicable)</label>
-                <textarea name="clause_beneficiaire_texte" class="wd-mandat-textarea">{{ $donnees['clause_beneficiaire_texte'] ?? '' }}</textarea>
-            </div>
-            <div class="wd-mandat-field">
-                <label class="wd-mandat-label">Démembrement de la clause bénéficiaire souhaité</label>
                 <div class="wd-cabinet-radio-group">
-                    <label class="wd-cabinet-radio">
-                        <input type="radio" name="demembrement_clause" value="oui" {{ ($donnees['demembrement_clause'] ?? '') === 'oui' ? 'checked' : '' }}>
-                        <span>Oui</span>
-                    </label>
-                    <label class="wd-cabinet-radio">
-                        <input type="radio" name="demembrement_clause" value="non" {{ ($donnees['demembrement_clause'] ?? 'non') === 'non' ? 'checked' : '' }}>
-                        <span>Non</span>
-                    </label>
+                    @foreach($typeCouvertureOptions as $valeur => $label)
+                        <label class="wd-cabinet-radio">
+                            <input type="radio" name="type_couverture" value="{{ $valeur }}" {{ ($donnees['type_couverture'] ?? '') === $valeur ? 'checked' : '' }}>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
                 </div>
             </div>
 
@@ -276,7 +225,7 @@
                 <div class="wd-cabinet-checkbox-group">
                     @foreach($sportsOptions as $valeur => $label)
                         <label class="wd-cabinet-checkbox">
-                            <input type="checkbox" name="sports_a_risque[]" value="{{ $valeur }}" {{ in_array($valeur, $sportsSelectionnes) ? 'checked' : '' }}>
+                            <input type="checkbox" name="sports_a_risque[]" value="{{ $valeur }}" {{ in_array($valeur, $sportsSelectionnes) ? 'checked' : '' }} {{ $valeur === 'autre' ? 'data-toggle-target="champ-precision-sport-autre"' : '' }}>
                             <span class="wd-cabinet-checkbox-box">
                                 <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                             </span>
@@ -285,7 +234,7 @@
                     @endforeach
                 </div>
             </div>
-            <div class="wd-mandat-field">
+            <div class="wd-mandat-field" id="champ-precision-sport-autre" style="display:{{ in_array('autre', $sportsSelectionnes) ? '' : 'none' }};">
                 <label class="wd-mandat-label">Précision sport à risque</label>
                 <input type="text" name="sports_a_risque_autre_precision" class="wd-mandat-input" value="{{ $donnees['sports_a_risque_autre_precision'] ?? '' }}">
             </div>
@@ -309,36 +258,62 @@
                 <label class="wd-mandat-label">Précisions (antécédents / traitement)</label>
                 <textarea name="antecedents_precision" class="wd-mandat-textarea" placeholder="Facultatif">{{ $donnees['antecedents_precision'] ?? '' }}</textarea>
             </div>
+            <div class="wd-mandat-field">
+                <label class="wd-mandat-label">Arrêt de travail récent (12 derniers mois)</label>
+                <div class="wd-cabinet-radio-group">
+                    <label class="wd-cabinet-radio"><input type="radio" name="arret_travail_recent" value="oui" {{ ($donnees['arret_travail_recent'] ?? '') === 'oui' ? 'checked' : '' }}><span>Oui</span></label>
+                    <label class="wd-cabinet-radio"><input type="radio" name="arret_travail_recent" value="non" {{ ($donnees['arret_travail_recent'] ?? '') === 'non' ? 'checked' : '' }}><span>Non</span></label>
+                </div>
+            </div>
+
+            <div class="wd-mandat-section-title">6. Situation professionnelle</div>
+            <div class="wd-mandat-field">
+                <div class="wd-cabinet-radio-group">
+                    @foreach($statutProfessionnelOptions as $valeur => $label)
+                        <label class="wd-cabinet-radio">
+                            <input type="radio" name="statut_professionnel" value="{{ $valeur }}" {{ ($donnees['statut_professionnel'] ?? '') === $valeur ? 'checked' : '' }} {{ $valeur === 'autre' ? 'data-toggle-target="champ-precision-statut-autre"' : '' }}>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+            <div class="wd-mandat-field" id="champ-precision-statut-autre" style="display:{{ ($donnees['statut_professionnel'] ?? '') === 'autre' ? '' : 'none' }};">
+                <label class="wd-mandat-label">Précision si "Autre"</label>
+                <input type="text" name="statut_professionnel_autre_precision" class="wd-mandat-input" value="{{ $donnees['statut_professionnel_autre_precision'] ?? '' }}">
+            </div>
             <div class="wd-mandat-row wd-mandat-row-2">
                 <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Hospitalisation dans les 5 dernières années</label>
-                    <div class="wd-cabinet-radio-group">
-                        <label class="wd-cabinet-radio"><input type="radio" name="hospitalisation_5_ans" value="oui" {{ ($donnees['hospitalisation_5_ans'] ?? '') === 'oui' ? 'checked' : '' }}><span>Oui</span></label>
-                        <label class="wd-cabinet-radio"><input type="radio" name="hospitalisation_5_ans" value="non" {{ ($donnees['hospitalisation_5_ans'] ?? '') === 'non' ? 'checked' : '' }}><span>Non</span></label>
-                    </div>
+                    <label class="wd-mandat-label">Ancienneté (années)</label>
+                    <input type="number" name="anciennete_annees" class="wd-mandat-input" value="{{ $donnees['anciennete_annees'] ?? '' }}">
                 </div>
                 <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Arrêt de travail &gt; 30 jours (3 dernières années)</label>
-                    <div class="wd-cabinet-radio-group">
-                        <label class="wd-cabinet-radio"><input type="radio" name="arret_travail_3_ans" value="oui" {{ ($donnees['arret_travail_3_ans'] ?? '') === 'oui' ? 'checked' : '' }}><span>Oui</span></label>
-                        <label class="wd-cabinet-radio"><input type="radio" name="arret_travail_3_ans" value="non" {{ ($donnees['arret_travail_3_ans'] ?? '') === 'non' ? 'checked' : '' }}><span>Non</span></label>
+                    <label class="wd-mandat-label">Revenu annuel (€)</label>
+                    <input type="number" step="0.01" name="revenu_annuel" class="wd-mandat-input" value="{{ $donnees['revenu_annuel'] ?? '' }}">
+                </div>
+            </div>
+
+            <div class="wd-mandat-section-title">7. Contrat actuel et délégation d'assurance</div>
+            <div class="wd-mandat-field">
+                <label class="wd-mandat-label">Délégation d'assurance envisagée</label>
+                <div class="wd-cabinet-radio-group">
+                    <label class="wd-cabinet-radio"><input type="radio" name="delegation_assurance" value="oui" {{ ($donnees['delegation_assurance'] ?? '') === 'oui' ? 'checked' : '' }} data-toggle-target="champ-delegation-details"><span>Oui</span></label>
+                    <label class="wd-cabinet-radio"><input type="radio" name="delegation_assurance" value="non" {{ ($donnees['delegation_assurance'] ?? '') === 'non' ? 'checked' : '' }}><span>Non</span></label>
+                </div>
+            </div>
+            <div id="champ-delegation-details" style="display:{{ ($donnees['delegation_assurance'] ?? '') === 'oui' ? '' : 'none' }};">
+                <div class="wd-mandat-row wd-mandat-row-2">
+                    <div class="wd-mandat-field">
+                        <label class="wd-mandat-label">Assureur actuel (contrat groupe)</label>
+                        <input type="text" name="assureur_actuel" class="wd-mandat-input" value="{{ $donnees['assureur_actuel'] ?? '' }}">
+                    </div>
+                    <div class="wd-mandat-field">
+                        <label class="wd-mandat-label">Date d'échéance pour changement</label>
+                        <input type="date" name="date_echeance_actuelle" class="wd-mandat-input" value="{{ $donnees['date_echeance_actuelle'] ?? '' }}">
                     </div>
                 </div>
             </div>
 
-            <div class="wd-mandat-section-title">6. Situation financière</div>
-            <div class="wd-mandat-row wd-mandat-row-2">
-                <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Revenu annuel du foyer (€)</label>
-                    <input type="number" step="0.01" name="revenu_annuel_foyer" class="wd-mandat-input" value="{{ $donnees['revenu_annuel_foyer'] ?? '' }}">
-                </div>
-                <div class="wd-mandat-field">
-                    <label class="wd-mandat-label">Charges mensuelles fixes (€)</label>
-                    <input type="number" step="0.01" name="charges_mensuelles_fixes" class="wd-mandat-input" value="{{ $donnees['charges_mensuelles_fixes'] ?? '' }}">
-                </div>
-            </div>
-
-            <div class="wd-mandat-section-title">7. Commentaire du conseiller</div>
+            <div class="wd-mandat-section-title">8. Commentaire du conseiller</div>
             <div class="wd-mandat-field">
                 <textarea name="commentaire_conseiller" class="wd-mandat-textarea" placeholder="Facultatif">{{ $donnees['commentaire_conseiller'] ?? '' }}</textarea>
             </div>
@@ -353,7 +328,7 @@
 <div id="wd-modal-lieu" class="wd-modal-overlay" style="display:none;">
     <div class="wd-modal-card">
         <div class="wd-modal-accent"></div>
-        <div class="wd-modal-eyebrow">Mandat assurance décès</div>
+        <div class="wd-modal-eyebrow">Mandat assurance emprunteur</div>
         <div class="wd-modal-title">Lieu de signature</div>
         <input type="text" id="wd-modal-lieu-input" class="wd-modal-input" placeholder="Ville..." autocomplete="off">
         <div id="wd-modal-lieu-suggestions" class="wd-modal-suggestions"></div>
@@ -384,7 +359,7 @@
         var index = conteneur.querySelectorAll('.wd-mandat-repeater-item').length;
         var item = document.createElement('div');
         item.className = 'wd-mandat-repeater-item';
-        var html = '<button type="button" class="wd-mandat-repeater-remove" data-remove>Retirer</button><div class="wd-mandat-row wd-mandat-row-3">';
+        var html = '<button type="button" class="wd-mandat-repeater-remove" data-remove>Retirer</button><div class="wd-mandat-row wd-mandat-row-2">';
         champs.forEach(function (champ) {
             html += '<div class="wd-mandat-field"><label class="wd-mandat-label">' + champ.label + '</label>'
                 + '<input type="' + champ.type + '" name="' + prefixe + '[' + index + '][' + champ.name + ']" class="wd-mandat-input"></div>';
@@ -395,10 +370,9 @@
     }
     document.querySelectorAll('[data-add]').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            ajouterLigne('wd-mandat-beneficiaires-liste', 'beneficiaires', [
-                { name: 'nom', label: 'Nom', type: 'text' },
-                { name: 'lien', label: 'Lien avec le client', type: 'text' },
-                { name: 'quote_part', label: 'Quote-part', type: 'text' },
+            ajouterLigne('wd-mandat-emprunteurs-liste', 'emprunteurs', [
+                { name: 'nom', label: "Nom de l'emprunteur", type: 'text' },
+                { name: 'quotite_pourcentage', label: 'Quotité assurée (%)', type: 'number' },
             ]);
         });
     });
