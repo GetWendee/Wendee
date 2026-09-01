@@ -74,6 +74,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/mandat-assurance-vie/{client}', [ClientController::class, 'mandatAssuranceVie'])->name('clients.mandat-assurance-vie');
         Route::post('/mandat-assurance-vie/{client}', [ClientController::class, 'enregistrerMandatAssuranceVie'])->name('clients.mandat-assurance-vie.enregistrer');
         Route::get('/mandat-assurance-vie/{client}/pdf', [ClientController::class, 'telechargerMandatAssuranceViePdf'])->name('clients.mandat-assurance-vie.pdf');
+Route::get('/mandat-assurance-deces/{client}', [ClientController::class, 'mandatAssuranceDeces'])->name('clients.mandat-assurance-deces');
+Route::post('/mandat-assurance-deces/{client}', [ClientController::class, 'enregistrerMandatAssuranceDeces'])->name('clients.mandat-assurance-deces.enregistrer');
+Route::get('/mandat-assurance-deces/{client}/pdf', [ClientController::class, 'telechargerMandatAssuranceDecesPdf'])->name('clients.mandat-assurance-deces.pdf');
         Route::get('/recommandation-patrimoniale/{client}', [ClientController::class, 'recommandationPatrimoniale'])->name('clients.recommandation-patrimoniale');
         Route::post('/recommandation-patrimoniale/{client}', [ClientController::class, 'genererRecommandation'])->name('clients.recommandation-patrimoniale.generer');
         Route::get('/recommandation-patrimoniale/{client}/pdf', [ClientController::class, 'telechargerRecommandationPdf'])->name('clients.recommandation-patrimoniale.pdf');
