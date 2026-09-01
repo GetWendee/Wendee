@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4.1'),
+    ],
+
+
+    'sirene' => [
+        'url' => env(
+            'INSEE_SIRENE_URL',
+            'https://api.insee.fr/api-sirene/3.11'
+        ),
+
+        'token' => env('INSEE_SIRENE_TOKEN'),
+    ],
+
 ];

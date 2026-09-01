@@ -21,6 +21,7 @@ foreach (config('tenancy.central_domains') as $domain) {
 
             Route::get('/cabinets', [CabinetController::class, 'index'])->name('cabinets.index');
             Route::get('/cabinets/creer', [CabinetController::class, 'create'])->name('cabinets.create');
+            Route::post('/cabinets/sirene', [CabinetController::class, 'searchSirene'])->name('cabinets.sirene');
             Route::post('/cabinets', [CabinetController::class, 'store'])->name('cabinets.store');
         });
 

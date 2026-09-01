@@ -1,0 +1,74 @@
+<x-tenant-app-layout>
+    <div class="p-8 space-y-8">
+
+        <section class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div>
+                <p class="text-xs uppercase tracking-[0.18em] text-[#ff008a] font-semibold">
+                    {{ $profileUser->role === 'courtier' ? 'Courtier' : 'Conseiller' }}
+                </p>
+
+                <h1 class="mt-2 text-3xl font-semibold text-gray-900">
+                    {{ $profileUser->name }}
+                </h1>
+
+                @if ($profileUser->parent)
+                    <p class="mt-2 text-sm text-gray-500">
+                        Rattaché à {{ $profileUser->parent->name }}
+                    </p>
+                @endif
+            </div>
+
+            <a href="{{ route('tenant.portefeuille-cabinet.index') }}"
+               class="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-600 hover:border-[#ff008a] hover:text-[#ff008a] transition">
+                Retour au portefeuille
+            </a>
+        </section>
+
+        <section class="bg-white rounded-3xl border border-gray-200 p-6">
+            <p class="text-xs uppercase tracking-[0.18em] text-[#ff008a] font-semibold">
+                Coordonnées
+            </p>
+
+            <dl class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <dt class="text-gray-500">E-mail</dt>
+                    <dd class="text-gray-900">{{ $profileUser->email }}</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="bg-white rounded-3xl border border-gray-200 overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-100">
+                <p class="text-xs uppercase tracking-[0.18em] text-[#ff008a] font-semibold">
+                    Portefeuille
+                </p>
+
+                <h2 class="mt-1 text-xl font-semibold text-gray-900">
+                    Clients rattachés
+                    <span class="ml-2 align-middle inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-500">
+                        {{ $profileUser->clients->count() }}
+                    </span>
+                </h2>
+            </div>
+
+            <div class="p-6">
+                @if ($profileUser->clients->isEmpty())
+                    <p class="text-sm text-gray-400">Aucun client rattaché.</p>
+                @else
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                        @foreach ($profileUser->clients as $client)
+                            <a href="{{ route('tenant.clients.show', $client) }}"
+                               class="group block rounded-2xl border border-gray-100 bg-gray-50 p-5 transition hover:border-[#ff008a] hover:bg-white hover:shadow-sm">
+                                <p class="font-semibold text-gray-900 group-hover:text-[#ff008a] transition">
+                                    {{ $client->prenom }} {{ $client->nom }}
+                                </p>
+                                <p class="mt-1 text-xs text-gray-400 truncate">{{ $client->email }}</p>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </section>
+
+    </div>
+</x-tenant-app-layout>

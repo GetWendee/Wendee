@@ -26,7 +26,7 @@
                         <div>
                             <x-input-label for="civilite" value="Civilité" />
                             <select id="civilite" name="civilite" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full">
-                                <option value="">—</option>
+                                <option value="">-</option>
                                 <option value="M." {{ old('civilite') == 'M.' ? 'selected' : '' }}>M.</option>
                                 <option value="Mme" {{ old('civilite') == 'Mme' ? 'selected' : '' }}>Mme</option>
                             </select>
@@ -51,7 +51,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="telephone_mobile" value="Téléphone mobile" />
-                            <x-text-input id="telephone_mobile" name="telephone_mobile" type="text" class="block mt-1 w-full" :value="old('telephone_mobile')" />
+                            <x-text-input id="telephone_mobile" name="telephone_mobile" type="text" maxlength="10" inputmode="numeric" class="block mt-1 w-full" :value="old('telephone_mobile')" />
                         </div>
                         <div>
                             <x-input-label for="telephone_domicile" value="Téléphone domicile" />
@@ -64,9 +64,22 @@
                         <x-text-input id="email" name="email" type="email" class="block mt-1 w-full" :value="old('email')" />
                     </div>
 
-                    <div>
+                    <div class="relative" x-data="addressAutocomplete('housenumber', @js(old('adresse', '')))">
                         <x-input-label for="adresse" value="Adresse" />
-                        <x-text-input id="adresse" name="adresse" type="text" class="block mt-1 w-full" :value="old('adresse')" />
+                        <input id="adresse" name="adresse" type="text" autocomplete="off"
+                               class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full"
+                               x-model="query" @input.debounce.300ms="search()">
+                        <ul x-show="open" @click.outside="open = false"
+                            class="absolute z-10 bg-white border border-gray-200 rounded-md shadow-md mt-1 w-full max-h-56 overflow-y-auto text-sm">
+                            <template x-for="f in results" :key="f.properties.id">
+                                <li @click="select(f, (p) => {
+                                        query = p.name;
+                                        document.getElementById('code_postal').value = p.postcode;
+                                        document.getElementById('ville').value = p.city;
+                                    })"
+                                    class="px-3 py-2 hover:bg-gray-100 cursor-pointer" x-text="f.properties.label"></li>
+                            </template>
+                        </ul>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">

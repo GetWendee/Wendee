@@ -28,7 +28,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('tenant.dashboard', absolute: false));
+        return redirect()->intended(
+            route('tenant.dashboard', absolute: false)
+        );
     }
 
     /**
@@ -42,6 +44,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('tenant.login');
     }
 }

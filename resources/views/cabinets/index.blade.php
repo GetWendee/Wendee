@@ -18,7 +18,7 @@
                     <p class="font-semibold">Cabinet « {{ session('status')['cabinet'] }} » créé.</p>
                     <p class="mt-1 text-sm">URL : <a class="underline" href="https://{{ session('status')['domain'] }}" target="_blank">https://{{ session('status')['domain'] }}</a></p>
                     <p class="mt-1 text-sm">Compte courtier : {{ session('status')['courtier_email'] }}</p>
-                    <p class="mt-1 text-sm">Mot de passe temporaire : <code class="bg-green-100 px-1 rounded">{{ session('status')['temp_password'] }}</code> — à transmettre au courtier, non récupérable après ce message.</p>
+                    <p class="mt-1 text-sm">Un e-mail d’activation a été envoyé au courtier à l’adresse indiquée. Il pourra définir son mot de passe depuis le lien reçu.</p>
                 </div>
             @endif
 
