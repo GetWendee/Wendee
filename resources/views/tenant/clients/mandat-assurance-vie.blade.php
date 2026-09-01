@@ -35,9 +35,18 @@
 .wd-mandat-input,.wd-mandat-select,.wd-mandat-textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font:inherit;font-size:13px;color:var(--ink);box-sizing:border-box;}
 .wd-mandat-textarea{min-height:80px;resize:vertical;}
 .wd-mandat-input:focus,.wd-mandat-select:focus,.wd-mandat-textarea:focus{outline:none;border-color:var(--pink);}
-.wd-mandat-choices{display:flex;flex-wrap:wrap;gap:10px;}
-.wd-mandat-choice{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:7px 14px;cursor:pointer;}
-.wd-mandat-choice:has(input:checked){color:var(--pink);border-color:var(--pink);font-weight:700;}
+.wd-cabinet-checkbox-group{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px;}
+.wd-cabinet-checkbox{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #ded9d4;border-radius:7px;font-size:12px;font-weight:700;color:#817b76;cursor:pointer;}
+.wd-cabinet-checkbox input{display:none;}
+.wd-cabinet-checkbox-box{width:16px;height:16px;flex:0 0 16px;display:grid;place-items:center;border:1px solid #ded9d4;border-radius:4px;background:#fff;}
+.wd-cabinet-checkbox-box svg{width:10px;height:10px;display:none;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+.wd-cabinet-checkbox:has(input:checked){border-color:#242424;color:#242424;background:#f3f1ee;}
+.wd-cabinet-checkbox:has(input:checked) .wd-cabinet-checkbox-box{border-color:#242424;background:#242424;}
+.wd-cabinet-checkbox:has(input:checked) .wd-cabinet-checkbox-box svg{display:block;}
+.wd-cabinet-radio-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.wd-cabinet-radio{flex:1 1 auto;min-width:110px;display:flex;align-items:center;justify-content:center;padding:9px 8px;border:1px solid #ded9d4;border-radius:7px;font-size:11px;font-weight:700;color:#817b76;cursor:pointer;text-align:center;}
+.wd-cabinet-radio input{display:none;}
+.wd-cabinet-radio:has(input:checked){border-color:#242424;color:#242424;background:#f3f1ee;}
 .wd-mandat-row{display:grid;grid-template-columns:1fr;gap:12px;}
 @media (min-width:720px){.wd-mandat-row-2{grid-template-columns:1fr 1fr;}.wd-mandat-row-3{grid-template-columns:1fr 1fr 1fr;}}
 .wd-mandat-repeater-item{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px;position:relative;}
@@ -81,11 +90,14 @@
 
             <div class="wd-mandat-section-title">1. Objectifs</div>
             <div class="wd-mandat-field">
-                <div class="wd-mandat-choices">
+                <div class="wd-cabinet-checkbox-group">
                     @foreach($objectifsOptions as $valeur => $label)
-                        <label class="wd-mandat-choice">
+                        <label class="wd-cabinet-checkbox">
                             <input type="checkbox" name="objectifs[]" value="{{ $valeur }}" {{ in_array($valeur, $objectifsSelectionnes) ? 'checked' : '' }}>
-                            {{ $label }}
+                            <span class="wd-cabinet-checkbox-box">
+                                <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <span>{{ $label }}</span>
                         </label>
                     @endforeach
                 </div>
@@ -177,14 +189,14 @@
 
             <div class="wd-mandat-field" style="margin-top:16px;">
                 <label class="wd-mandat-label">Clause bénéficiaire</label>
-                <div class="wd-mandat-choices">
-                    <label class="wd-mandat-choice">
+                <div class="wd-cabinet-radio-group">
+                    <label class="wd-cabinet-radio">
                         <input type="radio" name="clause_beneficiaire_type" value="standard" {{ ($donnees['clause_beneficiaire_type'] ?? 'standard') === 'standard' ? 'checked' : '' }}>
-                        Clause type (conjoint, à défaut les enfants nés ou à naître, à défaut les héritiers)
+                        <span>Clause type (conjoint, à défaut les enfants, à défaut les héritiers)</span>
                     </label>
-                    <label class="wd-mandat-choice">
+                    <label class="wd-cabinet-radio">
                         <input type="radio" name="clause_beneficiaire_type" value="personnalisee" {{ ($donnees['clause_beneficiaire_type'] ?? '') === 'personnalisee' ? 'checked' : '' }}>
-                        Clause personnalisée
+                        <span>Clause personnalisée</span>
                     </label>
                 </div>
             </div>
