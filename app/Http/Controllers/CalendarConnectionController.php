@@ -23,7 +23,7 @@ class CalendarConnectionController extends Controller
         $driver = Socialite::driver($provider)->stateless();
 
         if ($provider === 'google') {
-            $driver->scopes(['https://www.googleapis.com/auth/calendar.readonly'])
+            $driver->scopes(['https://www.googleapis.com/auth/calendar'])
                 ->with(['access_type' => 'offline', 'prompt' => 'consent']);
         }
 
