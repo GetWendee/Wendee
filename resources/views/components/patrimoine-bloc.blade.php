@@ -3,6 +3,10 @@
     'label',
     'modeDetention' => false,
     'foyerAvecConjoint' => false,
+    'typeDetention' => false,
+    'detentionLabel' => 'Type de détention',
+    'detentionPropreLabel' => 'Propre',
+    'periodiciteMontant' => false,
 ])
 
 @php
@@ -34,7 +38,7 @@
 
             <div class="border border-gray-200 rounded-xl px-5 py-5">
 
-                <div class="grid grid-cols-1 md:grid-cols-{{ $estPassif ? '4' : '3' }} gap-5">
+                <div class="grid grid-cols-1 {{ $estPassif ? 'md:grid-cols-4' : 'md:grid-cols-3' }} gap-5">
 
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-2">
@@ -120,6 +124,7 @@
                             type="date"
                             :name="`elements[{{ $categorie }}_${i}][date_souscription]`"
                             x-model="e.date_souscription"
+                            max="{{ now()->format('Y-m-d') }}"
                             class="border-gray-300 rounded-md shadow-sm w-full text-sm"
                         >
                     </div>
@@ -129,13 +134,27 @@
                             {{ $montantLabel }}
                         </label>
 
-                        <input
-                            type="number"
-                            step="0.01"
-                            :name="`elements[{{ $categorie }}_${i}][montant]`"
-                            x-model.number="e.montant"
-                            class="border-gray-300 rounded-md shadow-sm w-full text-sm"
-                        >
+                        <div class="flex gap-2">
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                :name="`elements[{{ $categorie }}_${i}][montant]`"
+                                x-model.number="e.montant"
+                                class="border-gray-300 rounded-md shadow-sm w-full text-sm"
+                            >
+
+                            @if($periodiciteMontant)
+                                <select
+                                    :name="`elements[{{ $categorie }}_${i}][periodicite]`"
+                                    x-model="e.periodicite"
+                                    class="border-gray-300 rounded-md shadow-sm text-sm w-28 flex-none"
+                                >
+                                    <option value="annuel">Annuel</option>
+                                    <option value="mensuel">Mensuel</option>
+                                </select>
+                            @endif
+                        </div>
                     </div>
                     @endif
 
@@ -150,6 +169,7 @@
                         <input
                             type="number"
                             step="0.01"
+                            min="0"
                             :name="`elements[{{ $categorie }}_${i}][montant]`"
                             x-model.number="e.montant"
                             class="border-gray-300 rounded-md shadow-sm w-full text-sm"
@@ -161,6 +181,8 @@
                         </label>
                         <input
                             type="number"
+                            min="0"
+                            max="30"
                             :name="`elements[{{ $categorie }}_${i}][duree]`"
                             x-model.number="e.duree"
                             class="border-gray-300 rounded-md shadow-sm w-full text-sm"
@@ -173,6 +195,7 @@
                         <input
                             type="number"
                             step="0.01"
+                            min="0"
                             :name="`elements[{{ $categorie }}_${i}][taux_interet]`"
                             x-model.number="e.taux_interet"
                             class="border-gray-300 rounded-md shadow-sm w-full text-sm"
@@ -185,6 +208,7 @@
                         <input
                             type="number"
                             step="0.01"
+                            min="0"
                             :name="`elements[{{ $categorie }}_${i}][taux_assurance]`"
                             x-model.number="e.taux_assurance"
                             class="border-gray-300 rounded-md shadow-sm w-full text-sm"
@@ -229,7 +253,43 @@
 
                 @endif
 
-                @if($foyerAvecConjoint)
+                @if($typeDetention)
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">
+                                {{ $detentionLabel }}
+                            </label>
+
+                            <select
+                                :name="`elements[{{ $categorie }}_${i}][bien]`"
+                                x-model="e.bien"
+                                class="border-gray-300 rounded-md shadow-sm w-full text-sm"
+                            >
+                                <option value="">Choisir</option>
+                                @foreach($bienOptions as $value => $bienLabel)
+                                    <option value="{{ $value }}">{{ $value === 'propre' ? $detentionPropreLabel : $bienLabel }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div x-show="e.bien === 'commun' || e.bien === 'indivision'">
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">
+                                Quotité de détention (%)
+                            </label>
+
+                            <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                :name="`elements[{{ $categorie }}_${i}][quotite_detention]`"
+                                x-model.number="e.quotite_detention"
+                                class="border-gray-300 rounded-md shadow-sm w-full text-sm"
+                            >
+                        </div>
+
+                    </div>
+                @elseif($foyerAvecConjoint)
                     <div class="mt-4">
 
                         <div class="text-xs font-semibold text-gray-600 mb-3">
@@ -295,7 +355,9 @@
                 duree:'',
                 taux_interet:'',
                 taux_assurance:'',
-                bien:''
+                bien:'',
+                quotite_detention:'',
+                periodicite:'annuel'
             })"
             class="text-sm font-semibold text-gray-800 mt-2"
         >
