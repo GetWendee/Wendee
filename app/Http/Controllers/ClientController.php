@@ -430,6 +430,24 @@ class ClientController extends Controller
         ]);
     }
 
+    public function contratsClients(
+        Client $client
+    ): \Illuminate\View\View
+    {
+        return view('tenant.clients.contrats-clients', [
+            'client' => $client,
+        ]);
+    }
+
+    public function conformitesClients(
+        Client $client
+    ): \Illuminate\View\View
+    {
+        return view('tenant.clients.conformites-clients', [
+            'client' => $client,
+        ]);
+    }
+
     public function mandatAssuranceVie(
         Client $client
     ): \Illuminate\View\View

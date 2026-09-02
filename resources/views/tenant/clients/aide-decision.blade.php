@@ -152,7 +152,18 @@
 
     $recommandationDisponible = (bool) $derniereSuggestion;
 
+    $derniereRecommandation = $client->analyses()
+        ->where('type', 'recommandation')
+        ->where('status', 'completed')
+        ->latest('completed_at')
+        ->first();
 
+    $planActionDisponible = (bool) $derniereRecommandation;
+
+    $dossierStatus = $client->completionStatus();
+    $dossierComplet = $dossierStatus['items']['kyc']['done']
+        && $dossierStatus['items']['pat']['done']
+        && $dossierStatus['items']['inv']['done'];
 
 @endphp
 
@@ -422,12 +433,45 @@ html,body{
 }
 
 .wd-tabs a{
+    flex:1;
+    text-align:center;
     padding:10px 16px;
     border-radius:7px;
     text-decoration:none;
     color:#77706c;
     font-size:11px;
 }
+
+.wd-btn-dark{
+    flex:0 0 auto;
+    min-height:40px;
+    padding:0 20px;
+    border:1px solid rgba(255,255,255,.10);
+    border-top:2px solid #FF3399;
+    border-radius:8px;
+    background:#242424;
+    color:#ffffff;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-family:inherit;
+    transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.wd-btn-dark:hover{
+    background:#242424;
+    border-color:rgba(255,255,255,.10);
+    border-top-color:#FF3399;
+    color:#ffffff;
+    box-shadow:0 0 0 2px rgba(255,51,153,.10);
+    transform:translateY(-1px);
+}
+.wd-tabs-action{margin-left:auto;}
 
 .wd-tabs a.active{
     background:#fff;
@@ -2465,11 +2509,6 @@ Modifier
 @endif
 
 <div>
-<span>Dossier KYC</span>
-<strong>{{ $kycCompletion }} % complété</strong>
-</div>
-
-<div>
 <span>Dernière mise à jour</span>
 <strong>{{ $client->updated_at?->translatedFormat('d F Y') }}</strong>
 </div>
@@ -2480,33 +2519,84 @@ Modifier
 
 <nav class="wd-tabs">
 
+<a href="{{ route('tenant.dashboard') }}">
+Tableau de bord
+</a>
+
 <a href="{{ route('tenant.clients.show', $client) }}">
-Vue d'ensemble
-</a>
-
-<a href="{{ route('tenant.clients.kyc.edit', $client) }}">
-KYC
-</a>
-
-<a href="{{ route('tenant.clients.patrimoine.edit', $client) }}">
-Patrimoine
-</a>
-
-<a href="{{ route('tenant.clients.profil.edit', $client) }}">
-Profil investisseur
+Profil
 </a>
 
 <a href="{{ route('tenant.clients.aide-decision', $client) }}"
 class="active">
 Analyse
 </a>
-@if($recommandationDisponible)
-<a href="{{ route('tenant.clients.recommandation-patrimoniale', $client) }}">
-Recommandation
+
+<a href="{{ route('tenant.clients.mission', $client) }}">
+Mission
 </a>
-@endif
+
+<a href="{{ route('tenant.clients.contrats-clients', $client) }}">
+Contrat
+</a>
+
+<a href="{{ route('tenant.clients.conformites-clients', $client) }}">
+Archives
+</a>
+
+<button type="button" class="wd-btn-dark wd-tabs-action" data-dossier-trigger>
+{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
+</button>
+
 </nav>
 
+<div class="wd-newaccount-overlay" data-dossier-modal hidden>
+<div class="wd-newaccount-modal">
+<div class="wd-newaccount-head">
+<div>
+<div class="wd-eyebrow">Dossier client</div>
+<h3>{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}</h3>
+</div>
+<button type="button" class="wd-newaccount-close" data-dossier-close aria-label="Fermer">&times;</button>
+</div>
+<div class="wd-newaccount-choices">
+<a href="{{ route('tenant.clients.kyc.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">KYC</span>
+<span class="wd-newaccount-choice-desc">Recueil de connaissance client.</span>
+</a>
+<a href="{{ route('tenant.clients.patrimoine.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">Patrimoine</span>
+<span class="wd-newaccount-choice-desc">Analyse patrimoniale du client.</span>
+</a>
+<a href="{{ route('tenant.clients.profil.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">Profil investisseur</span>
+<span class="wd-newaccount-choice-desc">Profil de risque et objectifs.</span>
+</a>
+</div>
+</div>
+</div>
+
+
+<div style="display:flex;gap:12px;justify-content:flex-end;margin:22px 0 0;">
+@if($recommandationDisponible)
+<a href="{{ route('tenant.clients.recommandation-patrimoniale', $client) }}" class="wd-recommandation-button">
+Recommandation
+</a>
+@else
+<span class="wd-recommandation-button-disabled">
+Recommandation
+</span>
+@endif
+@if($planActionDisponible)
+<a href="{{ route('tenant.clients.plan-action', $client) }}" class="wd-recommandation-button">
+Plan d'action
+</a>
+@else
+<span class="wd-recommandation-button-disabled">
+Plan d'action
+</span>
+@endif
+</div>
 
 <section class="wd-section wd-analysis-content">
 
@@ -2865,4 +2955,18 @@ Recommandation
 </section>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var overlay = document.querySelector('[data-dossier-modal]');
+    var triggers = document.querySelectorAll('[data-dossier-trigger]');
+    var closeBtn = document.querySelector('[data-dossier-close]');
+    if (!overlay || !triggers.length) { return; }
+    triggers.forEach(function (trigger) {
+        trigger.addEventListener('click', function () { overlay.hidden = false; });
+    });
+    if (closeBtn) { closeBtn.addEventListener('click', function () { overlay.hidden = true; }); }
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) { overlay.hidden = true; } });
+});
+</script>
 </x-tenant-app-layout>

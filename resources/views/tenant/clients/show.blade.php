@@ -457,6 +457,8 @@ html,body{
 }
 
 .wd-tabs a{
+    flex:1;
+    text-align:center;
     padding:10px 16px;
     border-radius:7px;
     text-decoration:none;
@@ -472,6 +474,54 @@ html,body{
 
 .wd-tabs-action{
     margin-left:auto;
+}
+
+.wd-btn-dark{
+    flex:0 0 auto;
+    min-height:40px;
+    padding:0 20px;
+    border:1px solid rgba(255,255,255,.10);
+    border-top:2px solid #FF3399;
+    border-radius:8px;
+    background:#242424;
+    color:#ffffff;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-family:inherit;
+    transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.wd-btn-dark:hover{
+    background:#242424;
+    border-color:rgba(255,255,255,.10);
+    border-top-color:#FF3399;
+    color:#ffffff;
+    box-shadow:0 0 0 2px rgba(255,51,153,.10);
+    transform:translateY(-1px);
+}
+.wd-btn-dark-disabled{
+    flex:0 0 auto;
+    min-height:40px;
+    padding:0 20px;
+    border:1px solid #D2D8D5;
+    border-top:2px solid #C8CFCC;
+    border-radius:8px;
+    background:#E2E5E4;
+    color:#929A97;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    cursor:not-allowed;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .wd-btn-outline{
@@ -1982,6 +2032,10 @@ Modifier
 
 <nav class="wd-tabs">
 
+<a href="{{ route('tenant.dashboard') }}">
+Tableau de bord
+</a>
+
 <a href="{{ route('tenant.clients.show', $client) }}"
 class="active">
 Profil
@@ -1991,7 +2045,19 @@ Profil
 Analyse
 </a>
 
-<button type="button" class="wd-profile-edit wd-tabs-action" data-dossier-trigger>
+<a href="{{ route('tenant.clients.mission', $client) }}">
+Mission
+</a>
+
+<a href="{{ route('tenant.clients.contrats-clients', $client) }}">
+Contrat
+</a>
+
+<a href="{{ route('tenant.clients.conformites-clients', $client) }}">
+Archives
+</a>
+
+<button type="button" class="wd-btn-dark wd-tabs-action" data-dossier-trigger>
 {{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
 </button>
 
@@ -2087,7 +2153,7 @@ Voir ses données
     </div>
     <a
     href="{{ route('tenant.clients.patrimoine.edit', $client) }}"
-    class="wd-profile-edit">
+    class="wd-btn-dark">
     Modifier le patrimoine
     </a>
 </div>
@@ -2640,7 +2706,7 @@ Voir ses données
 
 <a
 href="{{ route('tenant.clients.profil.edit', $client) }}"
-class="wd-profile-edit">
+class="wd-btn-dark">
 Modifier le profil investisseur
 </a>
 

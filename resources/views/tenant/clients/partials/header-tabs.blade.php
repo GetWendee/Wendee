@@ -84,11 +84,56 @@ html,body{
 .wd-hero-foot span{display:block;color:#8f8883;font-size:9px;text-transform:uppercase;letter-spacing:.11em;font-weight:800;}
 .wd-hero-foot strong{display:block;margin-top:6px;font-size:13px;}
 .wd-tabs{display:flex;gap:4px;margin:16px 0 24px;padding:5px;background:#ebe8e5;border-radius:10px;}
-.wd-tabs a{padding:10px 16px;border-radius:7px;text-decoration:none;color:#77706c;font-size:11px;}
+.wd-tabs a{flex:1;text-align:center;padding:10px 16px;border-radius:7px;text-decoration:none;color:#77706c;font-size:11px;}
 .wd-tabs a.active{background:#fff;color:#171514;font-weight:750;}
 .wd-tabs-action{margin-left:auto;}
-.wd-profile-edit{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:#fff;color:#514c48;text-decoration:none;font-size:10px;font-weight:750;cursor:pointer;font-family:inherit;}
-.wd-profile-edit:hover{border-color:var(--pink);color:var(--pink);}
+.wd-btn-dark{
+    flex:0 0 auto;
+    min-height:40px;
+    padding:0 20px;
+    border:1px solid rgba(255,255,255,.10);
+    border-top:2px solid #FF3399;
+    border-radius:8px;
+    background:#242424;
+    color:#ffffff;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-family:inherit;
+    transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.wd-btn-dark:hover{
+    background:#242424;
+    border-color:rgba(255,255,255,.10);
+    border-top-color:#FF3399;
+    color:#ffffff;
+    box-shadow:0 0 0 2px rgba(255,51,153,.10);
+    transform:translateY(-1px);
+}
+.wd-btn-dark-disabled{
+    flex:0 0 auto;
+    min-height:40px;
+    padding:0 20px;
+    border:1px solid #D2D8D5;
+    border-top:2px solid #C8CFCC;
+    border-radius:8px;
+    background:#E2E5E4;
+    color:#929A97;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    cursor:not-allowed;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
 .wd-section{margin-top:22px;}
 </style>
 <div class="wd-wrap">
@@ -137,26 +182,25 @@ Modifier
 </div>
 </section>
 <nav class="wd-tabs">
+<a href="{{ route('tenant.dashboard') }}" class="{{ ($active ?? null) === 'dashboard' ? 'active' : '' }}">
+Tableau de bord
+</a>
 <a href="{{ route('tenant.clients.show', $client) }}" class="{{ ($active ?? null) === 'vue' ? 'active' : '' }}">
 Profil
 </a>
 <a href="{{ route('tenant.clients.aide-decision', $client) }}" class="{{ ($active ?? null) === 'analyse' ? 'active' : '' }}">
 Analyse
 </a>
-@if($recommandationDisponible)
-<a href="{{ route('tenant.clients.recommandation-patrimoniale', $client) }}" class="{{ ($active ?? null) === 'recommandation' ? 'active' : '' }}">
-Recommandation
-</a>
-@endif
-@if($planActionDisponible)
-<a href="{{ route('tenant.clients.plan-action', $client) }}" class="{{ ($active ?? null) === 'plan-action' ? 'active' : '' }}">
-Plan d'action
-</a>
-@endif
 <a href="{{ route('tenant.clients.mission', $client) }}" class="{{ ($active ?? null) === 'mission' ? 'active' : '' }}">
 Mission
 </a>
-<button type="button" class="wd-profile-edit wd-tabs-action" data-dossier-trigger>
+<a href="{{ route('tenant.clients.contrats-clients', $client) }}" class="{{ ($active ?? null) === 'contrats' ? 'active' : '' }}">
+Contrat
+</a>
+<a href="{{ route('tenant.clients.conformites-clients', $client) }}" class="{{ ($active ?? null) === 'archives' ? 'active' : '' }}">
+Archives
+</a>
+<button type="button" class="wd-btn-dark wd-tabs-action" data-dossier-trigger>
 {{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
 </button>
 </nav>
