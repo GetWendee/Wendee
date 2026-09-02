@@ -71,6 +71,11 @@ class Client extends Model
     }
 
 
+    public function rendezVous(): HasMany
+    {
+        return $this->hasMany(RendezVous::class);
+    }
+
     public function analyses(): HasMany
     {
         return $this->hasMany(ClientAnalysis::class);

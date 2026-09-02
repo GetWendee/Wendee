@@ -2324,6 +2324,26 @@ function rdvPopup(urlDisponibilites, urlStore) {
 
 </section>
 
+@if($rendezVousAVenir->isNotEmpty())
+<section style="background:#fff;border:1px solid #ded9d4;border-radius:14px;padding:20px 24px;margin-bottom:20px;">
+    <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:14px;">Prochains rendez-vous</div>
+    @foreach($rendezVousAVenir as $rdv)
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;{{ !$loop->last ? 'border-bottom:1px solid #ded9d4;' : '' }}">
+        <div>
+            <strong style="font-size:13.5px;color:#151515;">{{ $rdv->starts_at->translatedFormat('d F Y') }} à {{ $rdv->starts_at->format('H:i') }}</strong>
+            @if($rdv->format)
+            <span style="font-size:12px;color:#817b76;margin-left:8px;">{{ ucfirst(str_replace('_', ' ', $rdv->format)) }}</span>
+            @endif
+        </div>
+        <form method="POST" action="{{ route('tenant.rendez-vous.annuler', $rdv) }}" onsubmit="return confirm('Annuler ce rendez-vous ?');">
+            @csrf
+            <button type="submit" style="background:none;border:1px solid #ded9d4;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;color:#b94d4d;cursor:pointer;">Annuler</button>
+        </form>
+    </div>
+    @endforeach
+</section>
+@endif
+
 <nav class="wd-tabs">
 
 <a href="{{ route('tenant.dashboard') }}">

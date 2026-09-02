@@ -154,6 +154,12 @@ class ClientController extends Controller
             (float) $repartitionPatrimoine->max()
         );
 
+        $rendezVousAVenir = $client->rendezVous()
+            ->where('statut', 'confirme')
+            ->where('starts_at', '>=', now())
+            ->orderBy('starts_at')
+            ->get();
+
         return view('tenant.clients.show', compact(
             'client',
             'actifsFinanciers',
@@ -167,6 +173,7 @@ class ClientController extends Controller
             'repartitionPatrimoine',
             'maxRepartition',
             'compatibilitesPlacements',
+            'rendezVousAVenir',
         ));
     }
 

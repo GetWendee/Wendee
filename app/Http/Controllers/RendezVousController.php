@@ -85,4 +85,23 @@ class RendezVousController extends Controller
 
         return back()->with('status', 'Rendez-vous enregistré.');
     }
+
+    public function annuler(RendezVous $rendezVous): RedirectResponse
+    {
+        abort_unless($rendezVous->user_id === Auth::id(), 403);
+
+        if ($rendezVous->calendar_provider === 'google' && $rendezVous->external_event_id) {
+            $connexionGoogle = CalendarConnection::where('user_id', Auth::id())
+                ->where('provider', 'google')
+                ->first();
+
+            if ($connexionGoogle) {
+                $this->googleCalendar->deleteEvent($connexionGoogle, $rendezVous->external_event_id);
+            }
+        }
+
+        $rendezVous->update(['statut' => 'annule']);
+
+        return back()->with('status', 'Rendez-vous annulé.');
+    }
 }

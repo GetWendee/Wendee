@@ -91,6 +91,32 @@ class GoogleCalendarService
         return $response->json('id');
     }
 
+    /**
+     * Supprime un événement du calendrier Google du conseiller.
+     */
+    public function deleteEvent(CalendarConnection $connection, string $eventId): bool
+    {
+        $this->ensureFreshToken($connection);
+
+        $calendarId = $connection->calendar_id ?: 'primary';
+
+        $response = Http::withToken($connection->access_token)
+            ->delete("https://www.googleapis.com/calendar/v3/calendars/{$calendarId}/events/{$eventId}?sendUpdates=all");
+
+        // 410 Gone : l'événement était déjà supprimé côté Google, on considère que c'est fait.
+        if (! $response->successful() && $response->status() !== 410) {
+            Log::warning('Google Calendar suppression événement a échoué', [
+                'connection_id' => $connection->id,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
     protected function ensureFreshToken(CalendarConnection $connection): void
     {
         if (! $connection->isExpired() || ! $connection->refresh_token) {

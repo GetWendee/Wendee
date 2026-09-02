@@ -132,6 +132,7 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::delete('/rendez-vous/{connection}', [CalendarConnectionController::class, 'destroy'])->name('calendrier.destroy');
         Route::get('/rendez-vous/disponibilites', [RendezVousController::class, 'disponibilites'])->name('rendez-vous.disponibilites');
         Route::post('/clients/{client}/rendez-vous', [RendezVousController::class, 'store'])->name('clients.rendez-vous.store');
+        Route::post('/rendez-vous/{rendezVous}/annuler', [RendezVousController::class, 'annuler'])->name('rendez-vous.annuler');
     });
 
     require __DIR__.'/tenant-auth.php';
