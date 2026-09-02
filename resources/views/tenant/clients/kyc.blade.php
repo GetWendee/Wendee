@@ -380,7 +380,7 @@
                 residenceIdentique: '{{ $old('residence_fiscale_identique') }}',
                 estPpe: '{{ $old('est_ppe') }}',
                 prochePpe: '{{ $old('proche_ppe') }}',
-                pac: {{ $client->personnesACharge->count() ? $client->personnesACharge->map(fn($p) => ['civilite' => $p->civilite, 'prenom' => $p->prenom, 'nom' => $p->nom, 'date_naissance' => $p->date_naissance?->format('Y-m-d'), 'enfant_de' => $p->enfant_de, 'fiscalement_a_charge' => $p->fiscalement_a_charge])->toJson() : '[]' }},
+                pac: {{ $client->personnesACharge->count() ? $client->personnesACharge->map(fn($p) => ['civilite' => $p->civilite, 'prenom' => $p->prenom, 'nom' => $p->nom, 'date_naissance' => $p->date_naissance?->format('Y-m-d'), 'enfant_de' => $p->enfant_de, 'fiscalement_a_charge' => $p->fiscalement_a_charge, 'garde_alternee' => $p->garde_alternee, 'invalidite' => $p->invalidite])->toJson() : '[]' }},
             }">
                 @csrf
                 @method('PUT')
@@ -625,7 +625,7 @@
                         </div>
                         <div x-show="aPac" class="space-y-4">
                             <template x-for="(p, i) in pac" :key="i">
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 items-end border rounded-md p-3">
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 items-end border rounded-md p-3">
                                     <div>
                                         <label class="text-xs text-gray-500">Civilité</label>
                                         <select :name="`personnes_a_charge[${i}][civilite]`" x-model="p.civilite" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
@@ -659,12 +659,24 @@
                                             {!! $opts($listes['oui_non'], '') !!}
                                         </select>
                                     </div>
-                                    <div class="col-span-2 md:col-span-3 flex justify-end">
+                                    <div>
+                                        <label class="text-xs text-gray-500">Garde alternée</label>
+                                        <select :name="`personnes_a_charge[${i}][garde_alternee]`" x-model="p.garde_alternee" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
+                                            {!! $opts($listes['oui_non'], '') !!}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500">Invalidité</label>
+                                        <select :name="`personnes_a_charge[${i}][invalidite]`" x-model="p.invalidite" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
+                                            {!! $opts($listes['oui_non'], '') !!}
+                                        </select>
+                                    </div>
+                                    <div class="col-span-2 md:col-span-4 flex justify-end">
                                         <button type="button" @click="pac.splice(i, 1)" class="text-red-600 text-sm underline">Retirer</button>
                                     </div>
                                 </div>
                             </template>
-                            <button type="button" @click="pac.push({civilite:'',prenom:'',nom:'',date_naissance:'',enfant_de:'',fiscalement_a_charge:''})" class="text-sm text-gray-700 underline">
+                            <button type="button" @click="pac.push({civilite:'',prenom:'',nom:'',date_naissance:'',enfant_de:'',fiscalement_a_charge:'',garde_alternee:'',invalidite:''})" class="text-sm text-gray-700 underline">
                                 + Ajouter une personne à charge
                             </button>
                         </div>

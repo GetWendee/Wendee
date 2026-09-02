@@ -494,6 +494,7 @@
                         </div>
                     </div>
 
+                    <div x-show="residentFiscal === 'oui'">
                     <div class="text-xs font-semibold text-gray-600 mb-3">Impôt sur le revenu (IRPP)</div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                         <div>
@@ -502,7 +503,8 @@
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Nombre de parts</label>
-                            <input type="number" step="0.25" name="irpp_nombre_parts" value="{{ old('irpp_nombre_parts', $fiscalite?->irpp_nombre_parts ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <input type="number" step="0.25" name="irpp_nombre_parts" value="{{ old('irpp_nombre_parts', $fiscalite?->irpp_nombre_parts ?? $nombreDePartsCalcule) }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <p class="text-xs text-gray-400 mt-1">Calculé depuis le KYC ({{ $nombreDePartsCalcule }}), modifiable si besoin.</p>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Connaissez-vous votre TMI (IR) ?</label>
@@ -523,14 +525,10 @@
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Réductions et crédits d'impôts</label>
                             <input type="number" step="0.01" name="reductions_credits_impots" value="{{ old('reductions_credits_impots', $fiscalite?->reductions_credits_impots ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-2">Impôt net à payer</label>
-                            <input type="number" step="0.01" name="impot_net_a_payer" value="{{ old('impot_net_a_payer', $fiscalite?->impot_net_a_payer ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Contributions sociales</label>
@@ -582,6 +580,7 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
                     </div>
                 </div>
 

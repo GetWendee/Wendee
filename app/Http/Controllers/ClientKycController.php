@@ -120,6 +120,8 @@ class ClientKycController extends Controller
             'personnes_a_charge.*.date_naissance' => ['nullable', 'date'],
             'personnes_a_charge.*.enfant_de' => ['nullable', 'string'],
             'personnes_a_charge.*.fiscalement_a_charge' => ['nullable', 'string'],
+            'personnes_a_charge.*.garde_alternee' => ['nullable', 'string', 'in:oui,non'],
+            'personnes_a_charge.*.invalidite' => ['nullable', 'string', 'in:oui,non'],
         ]);
 
         $validated['a_conjoint'] = $request->boolean('a_conjoint');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\PatrimoineFiscalite;
 use App\Models\VerificationClient;
+use App\Services\PartsFiscalesCalculator;
 use App\Services\VerificationCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class PatrimoineController extends Controller
 
     public function edit(Client $client, VerificationCodeService $verification): View
     {
-        $client->load('patrimoineElements', 'patrimoineFiscalite', 'patrimoineObjectifs', 'kyc');
+        $client->load('patrimoineElements', 'patrimoineFiscalite', 'patrimoineObjectifs', 'kyc', 'personnesACharge');
 
         if (! VerificationClient::where('client_id', $client->id)->where('module', 'patrimoine')->exists()) {
             $verification->enregistrerModification($client, 'patrimoine');
@@ -57,12 +58,18 @@ class PatrimoineController extends Controller
 
         $foyerAvecConjoint = in_array($client->kyc?->situation_familiale, ['marie', 'pacse'], true);
 
+        $nombreDePartsCalcule = PartsFiscalesCalculator::calculer(
+            $client->kyc?->situation_familiale,
+            $client->personnesACharge
+        );
+
         return view('tenant.clients.patrimoine', [
             'client' => $client,
             'elements' => $elements,
             'fiscalite' => $fiscalite,
             'objectifs' => $objectifs,
             'foyerAvecConjoint' => $foyerAvecConjoint,
+            'nombreDePartsCalcule' => $nombreDePartsCalcule,
             'verificationRequise' => $verificationRequise,
         ]);
     }
