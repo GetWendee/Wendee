@@ -556,8 +556,18 @@ html,body{
     color:var(--pink);
 }
 
+.wd-kyc-row{
+    display:flex;
+    gap:16px;
+}
+
 .wd-kyc-progress{
+    flex:0 0 66%;
     padding:20px 24px;
+}
+
+.wd-kyc-donnees-btn{
+    flex:1;
 }
 
 .wd-donnees-modal{
@@ -2112,10 +2122,9 @@ Archives
 <div class="wd-eyebrow">KYC</div>
 <h2>Recueil de connaissance</h2>
 </div>
-<button type="button" class="wd-btn-outline" data-donnees-trigger>
-Voir ses données
-</button>
 </div>
+
+<div class="wd-kyc-row">
 
 <div class="wd-panel wd-kyc-progress">
 <div class="wd-bar-row">
@@ -2123,6 +2132,12 @@ Voir ses données
 <div class="wd-bar-track"><div class="wd-bar-fill" style="width: {{ $kycCompletion }}%"></div></div>
 <div class="wd-bar-value">{{ $kycCompletion }} %</div>
 </div>
+</div>
+
+<button type="button" class="wd-btn-dark wd-kyc-donnees-btn" data-donnees-trigger>
+Voir ses données
+</button>
+
 </div>
 
 </section>
