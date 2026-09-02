@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientKycController;
+use App\Http\Controllers\SireneLookupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatrimoineController;
 use App\Http\Controllers\ProfilInvestisseurController;
@@ -121,6 +122,7 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
         Route::get('/kyc/{client}', [ClientKycController::class, 'edit'])->name('clients.kyc.edit');
         Route::put('/kyc/{client}', [ClientKycController::class, 'update'])->name('clients.kyc.update');
+        Route::get('/sirene/{siret}', [SireneLookupController::class, 'rechercher'])->name('sirene.rechercher');
         Route::get('/patrimoine/{client}', [PatrimoineController::class, 'edit'])->name('clients.patrimoine.edit');
         Route::put('/patrimoine/{client}', [PatrimoineController::class, 'update'])->name('clients.patrimoine.update');
         Route::get('/investisseur/{client}', [ProfilInvestisseurController::class, 'edit'])->name('clients.profil.edit');

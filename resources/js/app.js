@@ -55,6 +55,33 @@ window.villeAutocomplete = function (initial) {
     };
 };
 
+window.siretLookup = function (societeFieldId) {
+    return {
+        loading: false,
+        async rechercher(e) {
+            const siret = (e.target.value || '').replace(/\D/g, '');
+            if (siret.length !== 14) {
+                return;
+            }
+            this.loading = true;
+            try {
+                const res = await fetch(`/sirene/${siret}`);
+                if (!res.ok) {
+                    return;
+                }
+                const data = await res.json();
+                const target = document.getElementById(societeFieldId);
+                if (target && !target.value && data.raison_sociale) {
+                    target.value = data.raison_sociale;
+                }
+            } catch (err) {
+                // Silencieux : la recherche SIRENE est un confort de saisie, jamais un blocage.
+            }
+            this.loading = false;
+        },
+    };
+};
+
 window.patrimoineForm = function (elements) {
     return {
         blocks: elements,
