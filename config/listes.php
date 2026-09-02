@@ -337,6 +337,11 @@ return [
         'oui_proche_ppe' => 'Oui',
         'non_proche_ppe' => 'non',
     ],
+    'oui_non_nsp' => [
+        'oui_ddv' => 'Oui',
+        'non_ddv' => 'Non',
+        'nsp_ddv' => 'Je ne sais pas',
+    ],
     'capacite_juridique' => [
         'majeur_capable' => 'Majeur capable',
         'majeur_protege_sous_tutelle' => 'Majeur protégé sous tutelle',

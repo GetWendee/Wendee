@@ -562,13 +562,13 @@
                             <div>
                                 <x-input-label value="Donation au dernier vivant à votre profit" />
                                 <select name="donation_dernier_vivant_profit" class="border-gray-300 rounded-md shadow-sm mt-1 w-full">
-                                    {!! $opts($listes['oui_non'], 'donation_dernier_vivant_profit') !!}
+                                    {!! $opts($listes['oui_non_nsp'], 'donation_dernier_vivant_profit') !!}
                                 </select>
                             </div>
                             <div>
                                 <x-input-label value="Donation au dernier vivant au profit du conjoint" />
                                 <select name="donation_dernier_vivant_conjoint" class="border-gray-300 rounded-md shadow-sm mt-1 w-full">
-                                    {!! $opts($listes['oui_non'], 'donation_dernier_vivant_conjoint') !!}
+                                    {!! $opts($listes['oui_non_nsp'], 'donation_dernier_vivant_conjoint') !!}
                                 </select>
                             </div>
                         </div>
@@ -609,7 +609,7 @@
                                 <x-text-input id="conjoint_nom" name="conjoint_nom" type="text" class="block mt-1 w-full" :value="$old('conjoint_nom')" />
                             </div>
                             <div>
-                                <x-input-label for="conjoint_nom_naissance" value="Nom de naissance" />
+                                <x-input-label for="conjoint_nom_naissance" value="Nom de naissance (conjoint)" />
                                 <x-text-input id="conjoint_nom_naissance" name="conjoint_nom_naissance" type="text" class="block mt-1 w-full" :value="$old('conjoint_nom_naissance')" />
                             </div>
                             <div>
