@@ -185,6 +185,32 @@
             grid-column: 1 / -1;
         }
 
+        .wd-investisseur-section-title {
+            grid-column: 1 / -1;
+            margin-top: 8px;
+            padding-top: 16px;
+            border-top: 1px solid #ebe7e3;
+        }
+
+        .wd-investisseur-section-title:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 0;
+        }
+
+        .wd-investisseur-section-title-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #242424;
+            margin-bottom: 4px;
+        }
+
+        .wd-investisseur-section-title-desc {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #8a847f;
+        }
+
         .wd-investisseur-question {
             min-width: 0;
             padding: 18px 20px;
@@ -910,6 +936,15 @@
                     <div class="wd-investisseur-questions">
 
                     @foreach ($section['champs'] as $champ)
+                        @if (($champ['type'] ?? null) === 'section-title')
+                            <div class="wd-investisseur-section-title">
+                                <p class="wd-investisseur-section-title-label">{{ $champ['label'] }}</p>
+                                @if (!empty($champ['desc']))
+                                    <p class="wd-investisseur-section-title-desc">{{ $champ['desc'] }}</p>
+                                @endif
+                            </div>
+                            @continue
+                        @endif
                         @php
                             $nom = $champ['name'];
 
@@ -1459,6 +1494,49 @@
                                     @endif
                                     @break
 
+                                @case('objectifs-patrimoine-field')
+                                    <div
+                                        x-data="objectifsPatrimoineField(@js($client->patrimoineObjectifs->pluck('objectif')->values()), reponses['{{ $nom }}'])"
+                                        class="wd-objectifs-profil"
+                                    >
+                                        <p class="text-sm text-gray-400 mb-2" x-show="items.length === 0">
+                                            Aucun objectif renseigné dans la fiche Patrimoine pour l’instant.
+                                        </p>
+
+                                        <template x-for="(item, index) in items" :key="index">
+                                            <label class="flex items-center gap-2 mb-1">
+                                                <input
+                                                    type="checkbox"
+                                                    name="reponses[{{ $nom }}][]"
+                                                    :value="item.label"
+                                                    x-model="item.checked"
+                                                >
+                                                <span x-text="item.label" class="flex-1"></span>
+                                                <button
+                                                    type="button"
+                                                    class="text-xs text-red-600"
+                                                    @click="items.splice(index, 1)"
+                                                >Retirer</button>
+                                            </label>
+                                        </template>
+
+                                        <div class="flex gap-2 mt-2">
+                                            <input
+                                                type="text"
+                                                x-model="nouveauLabel"
+                                                @keydown.enter.prevent="ajouter()"
+                                                placeholder="Ajouter un objectif spécifique"
+                                                class="border rounded px-3 py-2 flex-1"
+                                            >
+                                            <button
+                                                type="button"
+                                                class="text-sm font-medium text-pink-600"
+                                                @click="ajouter()"
+                                            >+ Ajouter</button>
+                                        </div>
+                                    </div>
+                                    @break
+
                                 @default
                                     <input
                                         type="text"
@@ -1508,6 +1586,36 @@
                 select(s) {
                     this.query = s.nom;
                     this.suggestions = [];
+                },
+            };
+        }
+
+        function objectifsPatrimoineField(patrimoineLabels, savedValue) {
+            const saved = Array.isArray(savedValue) ? savedValue : null;
+
+            const items = patrimoineLabels.map((label) => ({
+                label: label,
+                checked: saved ? saved.includes(label) : true,
+            }));
+
+            if (saved) {
+                saved.forEach((label) => {
+                    if (!patrimoineLabels.includes(label)) {
+                        items.push({ label: label, checked: true });
+                    }
+                });
+            }
+
+            return {
+                items: items,
+                nouveauLabel: '',
+                ajouter() {
+                    const label = this.nouveauLabel.trim();
+                    if (!label) {
+                        return;
+                    }
+                    this.items.push({ label: label, checked: true });
+                    this.nouveauLabel = '';
                 },
             };
         }

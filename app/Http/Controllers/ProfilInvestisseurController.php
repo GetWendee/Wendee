@@ -22,7 +22,7 @@ class ProfilInvestisseurController extends Controller
             $reponses['risque_1_profil_investisseur'] = $client->date_naissance->format('Y-m-d');
         }
 
-        $client->loadMissing('kyc', 'personnesACharge');
+        $client->loadMissing('kyc', 'personnesACharge', 'patrimoineObjectifs');
         $estCouple = in_array($client->kyc?->situation_familiale, ['marie', 'pacse'], true);
         $nbEnfants = $client->personnesACharge->count();
 

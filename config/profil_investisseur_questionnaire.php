@@ -41,10 +41,15 @@ return [
                 ],
             ],
             [
+                'type' => 'section-title',
+                'name' => 'titre_connaissance_produits_profil_investisseur',
+                'label' => 'Connaissez-vous les produits suivants ?',
+                'desc' => 'Cochez ce qui correspond à votre niveau de connaissance.',
+            ],
+            [
                 'type' => 'radio-field',
                 'name' => 'assurance_vie_et_capitalisation_profil_investisseur',
                 'label' => 'Assurance-vie et capitalisation',
-                'desc' => 'Connaissez-vous ce type de produit ?',
                 'options' => [
                     ['label' => 'Oui', 'value' => 'oui_ass_vie_capitalisation_profil_investisseur'],
                     ['label' => 'Non', 'value' => 'non_ass_vie_capitalisation_profil_investisseur'],
@@ -160,6 +165,12 @@ return [
                 'conditions' => [
                     ['field' => 'epargne_salariale_profil_investisseur', 'operator' => 'equal', 'value' => 'oui_epargne_salariale_profil_investisseur'],
                 ],
+            ],
+            [
+                'type' => 'section-title',
+                'name' => 'titre_instruments_financiers_profil_investisseur',
+                'label' => 'Connaissez-vous ou avez-vous utilisé, au cours des 12 derniers mois, les instruments financiers suivants ?',
+                'desc' => 'Cochez ceux dont vous connaissez le fonctionnement.',
             ],
             [
                 'type' => 'radio-field',
@@ -995,20 +1006,10 @@ return [
         'titre' => 'Préférences',
         'champs' => [
             [
-                'type' => 'select-field',
+                'type' => 'objectifs-patrimoine-field',
                 'name' => 'profil_investisseur_objetifs',
                 'label' => 'Quels sont vos objectifs ?',
-                'options' => [
-                    ['label' => 'Optimiser la rentabilité de ses placements', 'value' => 'optimiser_rentabilite_placements'],
-                    ['label' => 'Préparer sa retraite', 'value' => 'preparer_retraite'],
-                    ['label' => 'Réduire sa fiscalité', 'value' => 'reduire_fiscalite'],
-                    ['label' => 'Préparer la transmission de son patrimoine', 'value' => 'preparer_transmission'],
-                    ['label' => 'Générer des revenus complémentaires', 'value' => 'generer_revenus_complementaires'],
-                    ['label' => 'Se constituer une épargne de précaution', 'value' => 'constituer_epargne_precaution'],
-                    ['label' => 'Financer un projet', 'value' => 'financer_projet'],
-                    ['label' => 'Protéger sa famille', 'value' => 'proteger_famille'],
-                    ['label' => 'Autre', 'value' => 'autre'],
-                ],
+                'desc' => 'Objectifs repris de la fiche Patrimoine. Décochez ceux qui ne s’appliquent pas ici, ou ajoutez-en de nouveaux, spécifiques au profil investisseur.',
             ],
             [
                 'type' => 'radio-field',
