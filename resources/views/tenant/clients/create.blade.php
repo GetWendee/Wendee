@@ -1,110 +1,233 @@
 <x-tenant-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Nouveau client') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-
-                @if ($errors->any())
-                    <div class="mb-4 bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 text-sm">
-                        <ul class="list-disc list-inside">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('tenant.clients.store') }}" class="space-y-6">
-                    @csrf
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <x-input-label for="civilite" value="Civilité" />
-                            <select id="civilite" name="civilite" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full">
-                                <option value="">-</option>
-                                <option value="M." {{ old('civilite') == 'M.' ? 'selected' : '' }}>M.</option>
-                                <option value="Mme" {{ old('civilite') == 'Mme' ? 'selected' : '' }}>Mme</option>
-                            </select>
-                        </div>
-                        <div class="col-span-2">
-                            <x-input-label for="date_naissance" value="Date de naissance" />
-                            <x-text-input id="date_naissance" name="date_naissance" type="date" class="block mt-1 w-full" max="{{ now()->subYears(18)->format('Y-m-d') }}" :value="old('date_naissance')" />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <x-input-label for="prenom" value="Prénom" />
-                            <x-text-input id="prenom" name="prenom" type="text" class="block mt-1 w-full" :value="old('prenom')" required autofocus />
-                        </div>
-                        <div>
-                            <x-input-label for="nom" value="Nom" />
-                            <x-text-input id="nom" name="nom" type="text" class="block mt-1 w-full" :value="old('nom')" required />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <x-input-label for="telephone_mobile" value="Téléphone mobile" />
-                            <x-text-input id="telephone_mobile" name="telephone_mobile" type="text" maxlength="10" inputmode="numeric" class="block mt-1 w-full" :value="old('telephone_mobile')" />
-                        </div>
-                        <div>
-                            <x-input-label for="telephone_domicile" value="Téléphone domicile" />
-                            <x-text-input id="telephone_domicile" name="telephone_domicile" type="text" class="block mt-1 w-full" :value="old('telephone_domicile')" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <x-input-label for="email" value="E-mail" />
-                        <x-text-input id="email" name="email" type="email" class="block mt-1 w-full" :value="old('email')" />
-                    </div>
-
-                    <div class="relative" x-data="addressAutocomplete('housenumber', @js(old('adresse', '')))">
-                        <x-input-label for="adresse" value="Adresse" />
-                        <input id="adresse" name="adresse" type="text" autocomplete="off"
-                               class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full"
-                               x-model="query" @input.debounce.300ms="search()">
-                        <ul x-show="open" @click.outside="open = false"
-                            class="absolute z-10 bg-white border border-gray-200 rounded-md shadow-md mt-1 w-full max-h-56 overflow-y-auto text-sm">
-                            <template x-for="f in results" :key="f.properties.id">
-                                <li @click="select(f, (p) => {
-                                        query = p.name;
-                                        document.getElementById('code_postal').value = p.postcode;
-                                        document.getElementById('ville').value = p.city;
-                                    })"
-                                    class="px-3 py-2 hover:bg-gray-100 cursor-pointer" x-text="f.properties.label"></li>
-                            </template>
-                        </ul>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <x-input-label for="code_postal" value="Code postal" />
-                            <x-text-input id="code_postal" name="code_postal" type="text" class="block mt-1 w-full" :value="old('code_postal')" />
-                        </div>
-                        <div class="col-span-2">
-                            <x-input-label for="ville" value="Ville" />
-                            <x-text-input id="ville" name="ville" type="text" class="block mt-1 w-full" :value="old('ville')" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <x-input-label for="pays" value="Pays" />
-                        <x-text-input id="pays" name="pays" type="text" class="block mt-1 w-full" :value="old('pays', 'France')" />
-                    </div>
-
-                    <div class="flex justify-end">
-                        <x-primary-button>
-                            {{ __('Créer le client') }}
-                        </x-primary-button>
-                    </div>
-                </form>
-            </div>
+<style>
+.wd-wrap{max-width:1000px;margin:auto;padding:30px 34px 60px}
+.wd-head{display:flex;justify-content:space-between;align-items:end}
+.wd-eyebrow{font-size:12px;color:var(--pink);font-weight:850;letter-spacing:.2em;text-transform:uppercase}
+.wd-head h1{font-size:38px;line-height:1;margin:8px 0 0;letter-spacing:-.05em;font-weight:650}
+.wd-head p{color:var(--muted);margin:10px 0 0;font-size:15px}
+@media(max-width:650px){
+.wd-wrap{padding:22px 14px 50px}
+.wd-head{flex-direction:column;align-items:flex-start;gap:15px}
+}
+.wd-user-form{
+    margin-top:28px;
+    padding:23px;
+    background:#fff;
+    border:1px solid #ded9d4;
+    border-radius:10px;
+}
+.wd-cabinet-information-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:0;
+    margin-top:6px;
+    border-top:1px solid #eeeae7;
+}
+.wd-cabinet-field{
+    position:relative;
+    padding:16px 0 14px 0;
+    border-bottom:1px solid #eeeae7;
+}
+.wd-cabinet-field label{
+    display:block;
+    color:#9a928d;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+}
+.wd-cabinet-field input[type=text],
+.wd-cabinet-field input[type=email],
+.wd-cabinet-field input[type=date],
+.wd-cabinet-field select{
+    width:100%;
+    border:1px solid #ded9d4;
+    border-radius:7px;
+    padding:9px 11px;
+    font-size:13px;
+    color:#242424;
+    background:#fff;
+    font-family:inherit;
+}
+.wd-cabinet-field input:focus,
+.wd-cabinet-field select:focus{
+    outline:none;
+    border-color:#f40087;
+}
+.wd-cabinet-field .wd-field-error{
+    margin-top:6px;
+    color:#b94d4d;
+    font-size:11px;
+}
+.wd-cabinet-save{
+    margin-top:20px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 18px;
+    border-radius:7px;
+    background:#242424;
+    color:#fff;
+    border:0;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.02em;
+    cursor:pointer;
+    font-family:inherit;
+}
+.wd-cabinet-save:hover{
+    background:#171717;
+}
+.wd-address-results{
+    position:absolute;
+    z-index:10;
+    background:#fff;
+    border:1px solid #ded9d4;
+    border-radius:7px;
+    margin-top:4px;
+    width:100%;
+    max-height:220px;
+    overflow-y:auto;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+.wd-address-results li{
+    padding:9px 11px;
+    font-size:12px;
+    color:#242424;
+    cursor:pointer;
+    list-style:none;
+}
+.wd-address-results li:hover{
+    background:#f3f1ee;
+}
+</style>
+<div class="wd-wrap">
+    <section class="wd-head">
+        <div>
+            <div class="wd-eyebrow">Portefeuille</div>
+            <h1>Nouveau client.</h1>
+            <p>
+                Créez la fiche du client. Il recevra un email pour définir son mot de passe.
+            </p>
         </div>
-    </div>
+    </section>
+    <section class="wd-user-form">
+        <form method="POST" action="{{ route('tenant.clients.store') }}">
+            @csrf
+            <div class="wd-cabinet-information-grid">
+                <div class="wd-cabinet-field">
+                    <label>Civilité</label>
+                    <select name="civilite" data-civilite>
+                        <option value="">-</option>
+                        <option value="M." {{ old('civilite') === 'M.' ? 'selected' : '' }}>M.</option>
+                        <option value="Mme" {{ old('civilite') === 'Mme' ? 'selected' : '' }}>Mme</option>
+                    </select>
+                    @error('civilite')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field" data-nom-jeune-fille-field hidden>
+                    <label>Nom de jeune fille</label>
+                    <input type="text" name="nom_jeune_fille" value="{{ old('nom_jeune_fille') }}">
+                    @error('nom_jeune_fille')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Date de naissance</label>
+                    <input type="date" name="date_naissance" value="{{ old('date_naissance') }}" max="{{ now()->subYears(18)->format('Y-m-d') }}">
+                    @error('date_naissance')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Prénom</label>
+                    <input type="text" name="prenom" value="{{ old('prenom') }}" required autofocus>
+                    @error('prenom')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Nom</label>
+                    <input type="text" name="nom" value="{{ old('nom') }}" required>
+                    @error('nom')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Téléphone mobile</label>
+                    <input type="text" name="telephone_mobile" value="{{ old('telephone_mobile') }}" maxlength="10" inputmode="numeric" pattern="[0-9]{10}">
+                    @error('telephone_mobile')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Téléphone domicile</label>
+                    <input type="text" name="telephone_domicile" value="{{ old('telephone_domicile') }}" maxlength="10" inputmode="numeric" pattern="[0-9]{10}">
+                    @error('telephone_domicile')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>E-mail</label>
+                    <input type="email" name="email" value="{{ old('email') }}">
+                    @error('email')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field" x-data="addressAutocomplete('housenumber', @js(old('adresse', '')))">
+                    <label>Adresse</label>
+                    <input type="text" name="adresse" autocomplete="off" x-model="query" @input.debounce.300ms="search()">
+                    <ul class="wd-address-results" x-show="open" @click.outside="open = false">
+                        <template x-for="f in results" :key="f.properties.id">
+                            <li @click="select(f, (p) => {
+                                    query = p.name;
+                                    document.querySelector('[name=code_postal]').value = p.postcode;
+                                    document.querySelector('[name=ville]').value = p.city;
+                                })" x-text="f.properties.label"></li>
+                        </template>
+                    </ul>
+                    @error('adresse')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Code postal</label>
+                    <input type="text" name="code_postal" value="{{ old('code_postal') }}">
+                    @error('code_postal')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Ville</label>
+                    <input type="text" name="ville" value="{{ old('ville') }}">
+                    @error('ville')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Pays</label>
+                    <input type="text" name="pays" value="{{ old('pays', 'France') }}">
+                    @error('pays')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            <button type="submit" class="wd-cabinet-save">Créer le client</button>
+        </form>
+    </section>
+</div>
+<script>
+(function () {
+    var civilite = document.querySelector('[data-civilite]');
+    var champ = document.querySelector('[data-nom-jeune-fille-field]');
+    if (! civilite || ! champ) { return; }
+    function appliquer() {
+        champ.hidden = civilite.value !== 'Mme';
+    }
+    civilite.addEventListener('change', appliquer);
+    appliquer();
+})();
+</script>
 </x-tenant-app-layout>

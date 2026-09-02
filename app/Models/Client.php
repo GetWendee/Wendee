@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
-    'civilite', 'prenom', 'nom', 'date_naissance',
+    'civilite', 'prenom', 'nom', 'nom_jeune_fille', 'date_naissance',
     'telephone_mobile', 'telephone_domicile', 'email',
     'adresse', 'code_postal', 'ville', 'pays', 'conseiller_id', 'apporteur_id', 'user_id',
 ])]
