@@ -322,6 +322,11 @@ html,body{
     box-shadow:0 10px 30px rgba(27,23,22,.08);
 }
 
+.wd-hero-non-conforme{
+    background:#E67E22;
+}
+.wd-hero-conforme{border-top-color:var(--green);}
+
 .wd-hero-main{
     display:grid;
     grid-template-columns:1.4fr .6fr;
@@ -2449,7 +2454,7 @@ html,body{
 </style>
 <div class="wd-wrap">
 
-<section class="wd-hero">
+<section class="wd-hero {{ $dossierStatus['a_jour'] ? 'wd-hero-conforme' : 'wd-hero-non-conforme' }}">
 
 <div class="wd-hero-main">
 

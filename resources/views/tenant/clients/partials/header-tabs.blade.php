@@ -68,6 +68,8 @@ html,body{
 *{box-sizing:border-box}
 .wd-wrap{max-width:1540px;margin:auto;padding:28px 34px 60px;}
 .wd-hero{background:#242424;color:white;border-radius:14px;overflow:hidden;border-top:3px solid var(--pink);box-shadow:0 10px 30px rgba(27,23,22,.08);}
+.wd-hero-non-conforme{background:#E67E22;}
+.wd-hero-conforme{border-top-color:var(--green);}
 .wd-hero-main{display:grid;grid-template-columns:1.4fr .6fr;gap:24px;padding:28px 30px 25px;}
 .wd-identity{display:flex;align-items:center;gap:18px;}
 .wd-avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;font-size:18px;font-weight:800;}
@@ -137,7 +139,7 @@ html,body{
 .wd-section{margin-top:22px;}
 </style>
 <div class="wd-wrap">
-<section class="wd-hero">
+<section class="wd-hero {{ $dossierStatus['a_jour'] ? 'wd-hero-conforme' : 'wd-hero-non-conforme' }}">
 <div class="wd-hero-main">
 <div class="wd-identity">
 <div class="wd-avatar">{{ $initiales }}</div>
