@@ -101,6 +101,9 @@ Route::get('/mandat-assurance-vehicule/{client}/pdf', [ClientController::class, 
 Route::get('/mandat-plan-epargne-retraite/{client}', [ClientController::class, 'mandatPlanEpargneRetraite'])->name('clients.mandat-plan-epargne-retraite');
 Route::post('/mandat-plan-epargne-retraite/{client}', [ClientController::class, 'enregistrerMandatPlanEpargneRetraite'])->name('clients.mandat-plan-epargne-retraite.enregistrer');
 Route::get('/mandat-plan-epargne-retraite/{client}/pdf', [ClientController::class, 'telechargerMandatPlanEpargneRetraitePdf'])->name('clients.mandat-plan-epargne-retraite.pdf');
+Route::get('/lettre-mission-scpi/{client}', [ClientController::class, 'lettreMissionScpi'])->name('clients.lettre-mission-scpi');
+Route::post('/lettre-mission-scpi/{client}', [ClientController::class, 'enregistrerLettreMissionScpi'])->name('clients.lettre-mission-scpi.enregistrer');
+Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telechargerLettreMissionScpiPdf'])->name('clients.lettre-mission-scpi.pdf');
         Route::get('/recommandation-patrimoniale/{client}', [ClientController::class, 'recommandationPatrimoniale'])->name('clients.recommandation-patrimoniale');
         Route::post('/recommandation-patrimoniale/{client}', [ClientController::class, 'genererRecommandation'])->name('clients.recommandation-patrimoniale.generer');
         Route::get('/recommandation-patrimoniale/{client}/pdf', [ClientController::class, 'telechargerRecommandationPdf'])->name('clients.recommandation-patrimoniale.pdf');
