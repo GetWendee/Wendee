@@ -38,7 +38,10 @@ window.patrimoineForm = function (elements) {
     return {
         blocks: elements,
         total(cat) {
-            return this.blocks[cat].reduce((s, e) => s + (parseFloat(e.montant) || 0), 0);
+            return this.blocks[cat].reduce((s, e) => {
+                const montant = parseFloat(e.montant) || 0;
+                return s + (e.periodicite === 'mensuel' ? montant * 12 : montant);
+            }, 0);
         },
         get totalActifs() {
             return this.total('actif_financier') + this.total('actif_non_financier');
