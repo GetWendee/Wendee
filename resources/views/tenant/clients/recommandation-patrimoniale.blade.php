@@ -4,18 +4,18 @@
     $prestations = $cabinet->prestations ?? [];
     $missionTypes = [
         [
-            'key' => 'courtage_assurance_banque',
-            'label' => 'Mandat de courtage, assurance banque',
+            'key' => 'courtage_banque',
+            'label' => 'Mandat de courtage banque',
             'index' => 0,
         ],
         [
-            'key' => 'conseil_investissement_financier',
-            'label' => 'Conseils en investissement financier',
+            'key' => 'courtage_assurance',
+            'label' => 'Mandat de courtage assurance',
             'index' => 1,
         ],
         [
-            'key' => 'conseil_investissement_immobilier',
-            'label' => 'Conseils en investissement immobilier',
+            'key' => 'conseil_investissement_financier',
+            'label' => 'Conseils en investissements financiers (CIF)',
             'index' => 2,
         ],
     ];

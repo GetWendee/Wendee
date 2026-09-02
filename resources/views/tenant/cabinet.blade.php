@@ -1155,31 +1155,38 @@ backdrop-filter:blur(10px)
             <p class="wd-cabinet-tab-note" data-commission-note hidden>
                 Rémunération perçue via commissions des partenaires : aucune grille tarifaire client à renseigner ci-dessous.
             </p>
+            @php
+                $prestationLabels = [
+                    'Mandat de courtage banque',
+                    'Mandat de courtage assurance',
+                    'Conseils en investissements financiers (CIF)',
+                ];
+            @endphp
             @for($i = 0; $i < 3; $i++)
                 @php $presta = $prestations[$i] ?? []; @endphp
                 <div data-prestation-pricing>
                     <div class="wd-cabinet-information-subhead">
-                        Prestation {{ $i + 1 }}
+                        {{ $prestationLabels[$i] }}
                     </div>
                     <div class="wd-cabinet-information-grid">
                         <div class="wd-cabinet-field">
                             <label>Mode</label>
                             <div class="wd-cabinet-radio-group">
                                 <label class="wd-cabinet-radio">
-                                    <input type="radio" name="prestations[{{ $i }}][mode]" value="forfait" {{ ($presta['mode'] ?? '') === 'forfait' ? 'checked' : '' }}>
+                                    <input type="radio" name="prestations[{{ $i }}][mode]" value="forfait" data-prestation-mode {{ ($presta['mode'] ?? '') === 'forfait' ? 'checked' : '' }}>
                                     <span>Forfait</span>
                                 </label>
                                 <label class="wd-cabinet-radio">
-                                    <input type="radio" name="prestations[{{ $i }}][mode]" value="pourcentage" {{ ($presta['mode'] ?? '') === 'pourcentage' ? 'checked' : '' }}>
+                                    <input type="radio" name="prestations[{{ $i }}][mode]" value="pourcentage" data-prestation-mode {{ ($presta['mode'] ?? '') === 'pourcentage' ? 'checked' : '' }}>
                                     <span>Pourcentage</span>
                                 </label>
                             </div>
                         </div>
-                        <div class="wd-cabinet-field">
+                        <div class="wd-cabinet-field" data-prestation-champ="forfait">
                             <label>Montant forfait (€)</label>
                             <input type="number" step="0.01" name="prestations[{{ $i }}][forfait]" value="{{ $presta['forfait'] ?? '' }}">
                         </div>
-                        <div class="wd-cabinet-field">
+                        <div class="wd-cabinet-field" data-prestation-champ="pourcentage">
                             <label>Taux (%)</label>
                             <input type="number" step="0.01" name="prestations[{{ $i }}][pourcentage]" value="{{ $presta['pourcentage'] ?? '' }}">
                         </div>
@@ -1207,6 +1214,26 @@ backdrop-filter:blur(10px)
             }
             select.addEventListener('change', apply);
             apply();
+        })();
+
+        (function() {
+            document.querySelectorAll('[data-prestation-pricing]').forEach(function(block) {
+                var radios = block.querySelectorAll('[data-prestation-mode]');
+                var champForfait = block.querySelector('[data-prestation-champ="forfait"]');
+                var champPourcentage = block.querySelector('[data-prestation-champ="pourcentage"]');
+                function appliquer() {
+                    var choisi = null;
+                    radios.forEach(function(r) {
+                        if (r.checked) { choisi = r.value; }
+                    });
+                    if (champForfait) { champForfait.hidden = choisi !== 'forfait'; }
+                    if (champPourcentage) { champPourcentage.hidden = choisi !== 'pourcentage'; }
+                }
+                radios.forEach(function(r) {
+                    r.addEventListener('change', appliquer);
+                });
+                appliquer();
+            });
         })();
         </script>
     </section>

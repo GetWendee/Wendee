@@ -271,7 +271,7 @@ class ClientController extends Controller
             'missions' => ['nullable', 'array'],
             'missions.*' => [
                 'string',
-                'in:courtage_assurance_banque,conseil_investissement_financier,conseil_investissement_immobilier',
+                'in:courtage_banque,courtage_assurance,conseil_investissement_financier',
             ],
             'montants' => ['nullable', 'array'],
             'montants.*' => ['nullable', 'numeric'],
@@ -280,14 +280,14 @@ class ClientController extends Controller
         ]);
 
         $missionLabels = [
-            'courtage_assurance_banque' => 'Mandat de courtage, assurance banque',
-            'conseil_investissement_financier' => 'Conseils en investissement financier',
-            'conseil_investissement_immobilier' => 'Conseils en investissement immobilier',
+            'courtage_banque' => 'Mandat de courtage banque',
+            'courtage_assurance' => 'Mandat de courtage assurance',
+            'conseil_investissement_financier' => 'Conseils en investissements financiers (CIF)',
         ];
         $missionIndex = [
-            'courtage_assurance_banque' => 0,
-            'conseil_investissement_financier' => 1,
-            'conseil_investissement_immobilier' => 2,
+            'courtage_banque' => 0,
+            'courtage_assurance' => 1,
+            'conseil_investissement_financier' => 2,
         ];
 
         $cabinet = \App\Models\CabinetProfile::query()->first();
