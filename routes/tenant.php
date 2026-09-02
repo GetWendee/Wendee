@@ -11,6 +11,8 @@ use App\Http\Controllers\PortefeuilleCabinetController;
 use App\Http\Controllers\CabinetProfileController;
 use Stancl\Tenancy\Controllers\TenantAssetsController;
 use App\Http\Controllers\UserAccountController;
+use App\Http\Controllers\CalendarConnectionController;
+use App\Http\Controllers\RendezVousController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -123,6 +125,13 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::put('/patrimoine/{client}', [PatrimoineController::class, 'update'])->name('clients.patrimoine.update');
         Route::get('/investisseur/{client}', [ProfilInvestisseurController::class, 'edit'])->name('clients.profil.edit');
         Route::put('/investisseur/{client}', [ProfilInvestisseurController::class, 'update'])->name('clients.profil.update');
+
+        Route::get('/rendez-vous', [CalendarConnectionController::class, 'index'])->name('calendrier.index');
+        Route::get('/rendez-vous/connecter/{provider}', [CalendarConnectionController::class, 'redirect'])->name('calendrier.connecter');
+        Route::get('/rendez-vous/callback/{provider}', [CalendarConnectionController::class, 'callback'])->name('calendrier.callback');
+        Route::delete('/rendez-vous/{connection}', [CalendarConnectionController::class, 'destroy'])->name('calendrier.destroy');
+        Route::get('/rendez-vous/disponibilites', [RendezVousController::class, 'disponibilites'])->name('rendez-vous.disponibilites');
+        Route::post('/clients/{client}/rendez-vous', [RendezVousController::class, 'store'])->name('clients.rendez-vous.store');
     });
 
     require __DIR__.'/tenant-auth.php';

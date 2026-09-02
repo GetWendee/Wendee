@@ -2143,11 +2143,108 @@ href="{{ route('tenant.clients.edit', $client) }}">
 Modifier
 </a>
 
-
+<button type="button" class="wd-btn" style="background:#f40087;color:#fff;border-color:#f40087;" x-data x-on:click="$dispatch('ouvrir-rdv')">
+Prendre rendez-vous
+</button>
 
 </div>
 
 </div>
+
+<div
+    x-data="rdvPopup(@js(route('tenant.rendez-vous.disponibilites')), @js(route('tenant.clients.rendez-vous.store', $client)))"
+    x-on:ouvrir-rdv.window="ouvrir()"
+    x-show="visible"
+    x-cloak
+    style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(21,21,21,.45);"
+>
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:92%;max-height:86vh;overflow-y:auto;" x-on:click.outside="fermer()">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+            <h2 style="font-size:17px;font-weight:800;color:#151515;">Prendre rendez-vous</h2>
+            <button type="button" x-on:click="fermer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#817b76;">&times;</button>
+        </div>
+
+        <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Date</label>
+        <input type="date" x-model="date" x-on:change="chargerCreneaux()" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;">
+
+        <template x-if="chargement">
+            <p style="font-size:12.5px;color:#817b76;">Chargement des créneaux…</p>
+        </template>
+
+        <template x-if="!chargement && date && creneaux.length === 0">
+            <p style="font-size:12.5px;color:#817b76;">Aucun créneau disponible ce jour-là.</p>
+        </template>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;">
+            <template x-for="c in creneaux" :key="c.start">
+                <button
+                    type="button"
+                    x-on:click="creneauChoisi = c"
+                    :style="creneauChoisi && creneauChoisi.start === c.start ? 'background:#f40087;color:#fff;border-color:#f40087;' : 'background:#fff;color:#151515;border-color:#ded9d4;'"
+                    style="border:1px solid #ded9d4;border-radius:8px;padding:8px 4px;font-size:12.5px;font-weight:600;cursor:pointer;"
+                    x-text="new Date(c.start).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})"
+                ></button>
+            </template>
+        </div>
+
+        <form x-on:submit.prevent="reserver()">
+            <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Notes (optionnel)</label>
+            <textarea x-model="notes" rows="2" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;resize:vertical;"></textarea>
+
+            <button type="submit" :disabled="!creneauChoisi" style="width:100%;background:#1b1716;color:#fff;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;opacity:1;" x-bind:style="!creneauChoisi ? 'width:100%;background:#ded9d4;color:#817b76;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:not-allowed;' : 'width:100%;background:#1b1716;color:#fff;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;'">
+                Confirmer le rendez-vous
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function rdvPopup(urlDisponibilites, urlStore) {
+    return {
+        visible: false,
+        date: '',
+        creneaux: [],
+        creneauChoisi: null,
+        notes: '',
+        chargement: false,
+        ouvrir() {
+            this.visible = true;
+            this.date = new Date().toISOString().slice(0, 10);
+            this.chargerCreneaux();
+        },
+        fermer() {
+            this.visible = false;
+        },
+        chargerCreneaux() {
+            if (!this.date) return;
+            this.chargement = true;
+            this.creneauChoisi = null;
+            fetch(urlDisponibilites + '?date=' + this.date)
+                .then(r => r.json())
+                .then(data => { this.creneaux = data.creneaux || []; })
+                .finally(() => { this.chargement = false; });
+        },
+        reserver() {
+            if (!this.creneauChoisi) return;
+            fetch(urlStore, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({
+                    starts_at: this.creneauChoisi.start,
+                    ends_at: this.creneauChoisi.end,
+                    notes: this.notes,
+                }),
+            }).then(() => {
+                this.visible = false;
+                window.location.reload();
+            });
+        },
+    };
+}
+</script>
 
 <div class="wd-hero-foot">
 

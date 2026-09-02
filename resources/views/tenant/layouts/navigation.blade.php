@@ -38,10 +38,9 @@
             <span>Créer un utilisateur</span>
         </a>
         @endif
-        <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
+        <a href="{{ route('tenant.calendrier.index') }}" class="{{ request()->routeIs('tenant.calendrier.*') ? 'active' : '' }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
             <span>Rendez-vous</span>
-            <span class="wd-soon">Bientot</span>
         </a>
         <div class="wd-nav-section">Activité</div>
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
