@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Services\PartsFiscalesCalculator;
 use App\Services\ProfilInvestisseurScoringService;
 use App\Models\VerificationClient;
 use App\Services\VerificationCodeService;
@@ -31,9 +32,10 @@ class ProfilInvestisseurController extends Controller
         }
 
         if (empty($reponses['risque_3_profil_investisseur'])) {
-            $partsBase = $estCouple ? 2.0 : 1.0;
-            $partsEnfants = min($nbEnfants, 2) * 0.5 + max($nbEnfants - 2, 0) * 1.0;
-            $reponses['risque_3_profil_investisseur'] = $partsBase + $partsEnfants;
+            $reponses['risque_3_profil_investisseur'] = PartsFiscalesCalculator::calculer(
+                $client->kyc?->situation_familiale,
+                $client->personnesACharge
+            );
         }
 
         if (! VerificationClient::where('client_id', $client->id)->where('module', 'profil_investisseur')->exists()) {
