@@ -1691,6 +1691,19 @@ backdrop-filter:blur(10px)
     letter-spacing:.13em;
     text-transform:uppercase;
 }
+[data-prestation-pricing]{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:4px 20px 16px;
+    margin-bottom:16px;
+    background:#fafaf9;
+}
+[data-prestation-pricing] .wd-cabinet-information-subhead{
+    margin-top:18px;
+}
+[data-prestation-pricing] .wd-cabinet-field{
+    padding-right:24px;
+}
 .wd-cabinet-field{
     padding:16px 18px 14px 0;
     border-bottom:1px solid #eeeae7;
