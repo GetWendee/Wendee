@@ -456,6 +456,7 @@ html,body{
 
 .wd-btn-dark{
     flex:0 0 auto;
+    min-width:220px;
     min-height:40px;
     padding:0 20px;
     border:1px solid rgba(255,255,255,.10);
