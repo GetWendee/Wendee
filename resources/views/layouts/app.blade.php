@@ -32,5 +32,7 @@
                 {{ $slot }}
             </main>
         </div>
+
+        @include('partials.device-login-popup')
     </body>
 </html>

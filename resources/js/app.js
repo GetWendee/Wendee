@@ -115,6 +115,104 @@ window.patrimoineForm = function (elements) {
     };
 };
 
+window.deviceLoginWaiting = function (statusUrl, completeUrl, loginUrl) {
+    return {
+        state: 'pending',
+        intervalId: null,
+        init() {
+            this.poll();
+            this.intervalId = setInterval(() => this.poll(), 3000);
+        },
+        async poll() {
+            try {
+                const res = await fetch(statusUrl, { headers: { Accept: 'application/json' } });
+                if (res.status === 404) {
+                    this.arreter('expired');
+                    return;
+                }
+                const data = await res.json();
+                if (data.status === 'confirmed') {
+                    await this.completer();
+                } else if (data.status === 'denied' || data.status === 'expired') {
+                    this.arreter(data.status);
+                }
+            } catch (err) {
+                // on retente au prochain tick
+            }
+        },
+        async completer() {
+            clearInterval(this.intervalId);
+            try {
+                const res = await fetch(completeUrl, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                });
+                const data = await res.json();
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    this.arreter('error');
+                }
+            } catch (err) {
+                this.arreter('error');
+            }
+        },
+        arreter(state) {
+            clearInterval(this.intervalId);
+            this.state = state;
+        },
+    };
+};
+
+window.deviceLoginPopup = function (pendingUrl, confirmUrlTemplate, denyUrlTemplate) {
+    return {
+        challenge: null,
+        reponse: null,
+        intervalId: null,
+        init() {
+            this.poll();
+            this.intervalId = setInterval(() => this.poll(), 8000);
+        },
+        async poll() {
+            if (this.challenge || this.reponse) {
+                return;
+            }
+            try {
+                const res = await fetch(pendingUrl, { headers: { Accept: 'application/json' } });
+                const data = await res.json();
+                if (data.challenge) {
+                    this.challenge = data.challenge;
+                }
+            } catch (err) {
+                // silencieux, on retente au prochain tick
+            }
+        },
+        async repondre(accepter) {
+            const template = accepter ? confirmUrlTemplate : denyUrlTemplate;
+            const url = template.replace('__TOKEN__', this.challenge.token);
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                });
+            } catch (err) {
+                // silencieux
+            }
+            this.reponse = accepter ? 'confirme' : 'refuse';
+            this.challenge = null;
+            setTimeout(() => {
+                this.reponse = null;
+            }, 4000);
+        },
+    };
+};
+
 window.Alpine = Alpine;
 
 Alpine.start();

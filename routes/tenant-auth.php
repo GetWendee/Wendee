@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\TenantAuth\AuthenticatedSessionController;
 use App\Http\Controllers\TenantAuth\ConfirmablePasswordController;
+use App\Http\Controllers\TenantAuth\DeviceLoginController;
 use App\Http\Controllers\TenantAuth\EmailVerificationNotificationController;
 use App\Http\Controllers\TenantAuth\EmailVerificationPromptController;
 use App\Http\Controllers\TenantAuth\NewPasswordController;
@@ -26,6 +27,15 @@ Route::middleware('guest')->group(function () {
         ->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    // Contrôle du nouvel appareil de connexion : page d'attente affichée
+    // tant que la connexion n'est pas confirmée (mail ou autre session).
+    Route::get('device-login/attente', [DeviceLoginController::class, 'pending'])
+        ->name('device-login.pending');
+    Route::get('device-login/statut', [DeviceLoginController::class, 'status'])
+        ->name('device-login.status');
+    Route::post('device-login/terminer', [DeviceLoginController::class, 'complete'])
+        ->name('device-login.complete');
 });
 
 Route::middleware('auth')->group(function () {
@@ -43,4 +53,18 @@ Route::middleware('auth')->group(function () {
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+
+    // Popup de contrôle d'appareil, affichée sur une session déjà connectée
+    // pendant qu'un autre appareil attend une confirmation de connexion.
+    Route::get('device-login/en-attente-pour-moi', [DeviceLoginController::class, 'pendingForMe'])
+        ->name('device-login.pending-for-me');
 });
+
+// Confirmation/refus d'une connexion : accessible soit via le lien mail
+// signé (utilisateur pas encore connecté), soit depuis une session déjà
+// connectée qui est propriétaire du challenge (popup). Le contrôleur
+// vérifie lui-même laquelle des deux conditions s'applique.
+Route::match(['get', 'post'], 'device-login/{challenge}/confirmer', [DeviceLoginController::class, 'confirm'])
+    ->name('device-login.confirm');
+Route::match(['get', 'post'], 'device-login/{challenge}/refuser', [DeviceLoginController::class, 'deny'])
+    ->name('device-login.deny');

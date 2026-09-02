@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -51,6 +52,30 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Vérifie les identifiants sans ouvrir de session persistante
+     * (Auth::once), pour laisser l'appelant décider s'il connecte
+     * vraiment l'utilisateur (cf. contrôle de l'appareil de connexion).
+     *
+     * @throws ValidationException
+     */
+    public function authenticateOnce(): User
+    {
+        $this->ensureIsNotRateLimited();
+
+        if (! Auth::once($this->only('email', 'password'))) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed'),
+            ]);
+        }
+
+        RateLimiter::clear($this->throttleKey());
+
+        return Auth::user();
     }
 
     /**

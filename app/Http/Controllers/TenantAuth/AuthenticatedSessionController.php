@@ -4,6 +4,7 @@ namespace App\Http\Controllers\TenantAuth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\DeviceLoginChallengeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,13 +25,30 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $user = $request->authenticateOnce();
 
-        $request->session()->regenerate();
-
-        return redirect()->intended(
-            route('tenant.dashboard', absolute: false)
+        $appareilConnu = DeviceLoginChallengeService::appareilConnu(
+            $user,
+            $request->cookie(DeviceLoginChallengeService::COOKIE_NAME)
         );
+
+        if ($appareilConnu) {
+            Auth::login($user, $request->boolean('remember'));
+
+            $request->session()->regenerate();
+
+            return redirect()->intended(
+                route('tenant.dashboard', absolute: false)
+            );
+        }
+
+        // Appareil inconnu : on ne connecte pas tout de suite, on attend la
+        // confirmation par mail ou par une autre session déjà connectée.
+        $challenge = DeviceLoginChallengeService::creerChallenge($user, $request);
+
+        $request->session()->put('device_login_challenge', $challenge->token);
+
+        return redirect()->route('tenant.device-login.pending');
     }
 
     /**
