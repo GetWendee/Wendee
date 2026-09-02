@@ -562,12 +562,12 @@ html,body{
 }
 
 .wd-kyc-progress{
-    flex:0 0 66%;
+    flex:0 0 75%;
     padding:20px 24px;
 }
 
 .wd-kyc-donnees-btn{
-    flex:1;
+    flex:0 0 25%;
 }
 
 .wd-donnees-modal{
