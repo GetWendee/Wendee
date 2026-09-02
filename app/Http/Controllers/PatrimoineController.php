@@ -44,6 +44,7 @@ class PatrimoineController extends Controller
                     'taux_interet' => $e->taux_interet,
                     'taux_assurance' => $e->taux_assurance,
                     'bien' => $e->bien,
+                    'quotite_detention' => $e->quotite_detention,
                 ]);
         }
 
@@ -84,7 +85,8 @@ class PatrimoineController extends Controller
             'elements.*.duree' => ['nullable', 'integer'],
             'elements.*.taux_interet' => ['nullable', 'numeric'],
             'elements.*.taux_assurance' => ['nullable', 'numeric'],
-            'elements.*.bien' => ['nullable', 'string', 'in:propre,commun,conjoint'],
+            'elements.*.bien' => ['nullable', 'string', 'in:propre,commun,conjoint,indivision'],
+            'elements.*.quotite_detention' => ['nullable', 'integer', 'min:0', 'max:100'],
 
             'resident_fiscal_francais' => ['nullable', 'string', 'in:oui,non'],
             'irpp_montant' => ['nullable', 'numeric'],
@@ -167,6 +169,7 @@ class PatrimoineController extends Controller
                 'taux_interet' => $element['taux_interet'] ?? null,
                 'taux_assurance' => $element['taux_assurance'] ?? null,
                 'bien' => $element['bien'] ?? null,
+                'quotite_detention' => $element['quotite_detention'] ?? null,
             ]);
         }
 

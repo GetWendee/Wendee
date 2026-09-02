@@ -139,8 +139,9 @@ return [
 
     'bien' => [
         'propre' => 'Propre',
-        'commun' => 'Commun',
+        'commun' => 'Communauté',
         'conjoint' => 'Conjoint',
+        'indivision' => 'Indivision',
     ],
 
 ];

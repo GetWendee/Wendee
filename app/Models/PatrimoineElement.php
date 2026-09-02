@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'taux_interet',
     'taux_assurance',
     'bien',
+    'quotite_detention',
 ])]
 class PatrimoineElement extends Model
 {
