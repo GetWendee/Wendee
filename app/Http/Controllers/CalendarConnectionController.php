@@ -48,9 +48,7 @@ class CalendarConnectionController extends Controller
             [
                 'access_token' => $utilisateurSocial->token,
                 'refresh_token' => $utilisateurSocial->refreshToken ?? null,
-                'token_expires_at' => $utilisateurSocial->expiresIn
-                    ? now()->addSeconds($utilisateurSocial->expiresIn)
-                    : null,
+                'token_expires_at' => now()->addSeconds($utilisateurSocial->expiresIn ?: 3600),
                 'provider_email' => $utilisateurSocial->getEmail(),
                 'calendar_id' => null,
             ]
