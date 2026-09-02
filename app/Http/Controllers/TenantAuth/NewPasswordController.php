@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\TenantAuth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\User;
+use App\Notifications\DocumentEntreeRelationNotification;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,12 +45,26 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
+                // Première activation d'un compte client : le mot de passe défini ici
+                // fait suite au mail "définissez votre mot de passe" envoyé à la création.
+                // On envoie le DER une seule fois, à ce moment précis.
+                $premiereActivation = $user->activation_pending;
+
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
+                    'activation_pending' => false,
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                if ($premiereActivation && $user->role === 'client') {
+                    $client = Client::where('user_id', $user->id)->first();
+
+                    if ($client) {
+                        $user->notify(new DocumentEntreeRelationNotification($client));
+                    }
+                }
             }
         );
 
