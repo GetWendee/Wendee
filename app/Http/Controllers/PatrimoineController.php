@@ -63,6 +63,19 @@ class PatrimoineController extends Controller
             $client->personnesACharge
         );
 
+        $normaliserAnnuel = fn ($elements) => (float) $elements->sum(
+            fn ($e) => (float) $e->montant * ($e->periodicite === 'mensuel' ? 12 : 1)
+        );
+
+        $totalRevenusAnnuel = $normaliserAnnuel($client->patrimoineElements->where('categorie', 'revenu'));
+        $totalChargesAnnuel = $normaliserAnnuel($client->patrimoineElements->where('categorie', 'charge'));
+        $totalActifs = (float) $client->patrimoineElements->whereIn('categorie', ['actif_financier', 'actif_non_financier'])->sum('montant');
+        $totalPassifs = (float) $client->patrimoineElements->where('categorie', 'passif')->sum('montant');
+
+        $effortEpargneMensuelCalcule = round(($totalRevenusAnnuel - $totalChargesAnnuel) / 12, 2);
+        $montantPatrimoineTotalCalcule = round($totalActifs - $totalPassifs, 2);
+        $montantRevenusAnnuelsCalcule = round($totalRevenusAnnuel, 2);
+
         return view('tenant.clients.patrimoine', [
             'client' => $client,
             'elements' => $elements,
@@ -70,6 +83,9 @@ class PatrimoineController extends Controller
             'objectifs' => $objectifs,
             'foyerAvecConjoint' => $foyerAvecConjoint,
             'nombreDePartsCalcule' => $nombreDePartsCalcule,
+            'effortEpargneMensuelCalcule' => $effortEpargneMensuelCalcule,
+            'montantPatrimoineTotalCalcule' => $montantPatrimoineTotalCalcule,
+            'montantRevenusAnnuelsCalcule' => $montantRevenusAnnuelsCalcule,
             'verificationRequise' => $verificationRequise,
         ]);
     }

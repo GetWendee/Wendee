@@ -663,15 +663,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6 pt-5" style="border-top:1px solid #eeeae6;">
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Effort d'épargne mensuel dédié à vos objectifs</label>
-                            <input type="number" step="0.01" name="effort_epargne_mensuel" value="{{ old('effort_epargne_mensuel', $fiscalite?->effort_epargne_mensuel ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <input type="number" step="0.01" name="effort_epargne_mensuel" value="{{ old('effort_epargne_mensuel', $fiscalite?->effort_epargne_mensuel ?? $effortEpargneMensuelCalcule) }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <p class="text-xs text-gray-400 mt-1">Calculé (revenus - charges) / 12, modifiable si besoin.</p>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Montant de votre patrimoine total (si connu)</label>
-                            <input type="number" step="0.01" name="montant_patrimoine_total" value="{{ old('montant_patrimoine_total', $fiscalite?->montant_patrimoine_total ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <input type="number" step="0.01" name="montant_patrimoine_total" value="{{ old('montant_patrimoine_total', $fiscalite?->montant_patrimoine_total ?? $montantPatrimoineTotalCalcule) }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <p class="text-xs text-gray-400 mt-1">Calculé (actifs - passifs), modifiable si besoin.</p>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Montant de vos revenus annuels (si connu)</label>
-                            <input type="number" step="0.01" name="montant_revenus_annuels" value="{{ old('montant_revenus_annuels', $fiscalite?->montant_revenus_annuels ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <input type="number" step="0.01" name="montant_revenus_annuels" value="{{ old('montant_revenus_annuels', $fiscalite?->montant_revenus_annuels ?? $montantRevenusAnnuelsCalcule) }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <p class="text-xs text-gray-400 mt-1">Calculé depuis les revenus, modifiable si besoin.</p>
                         </div>
                     </div>
                 </div>
