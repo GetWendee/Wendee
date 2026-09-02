@@ -2115,6 +2115,19 @@ html,body{
     font-size:10px;
 }
 
+[x-cloak]{display:none!important}
+
+.wd-rdv-overlay{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(21,21,21,.45);
+    color-scheme:light;
+}
+
 </style>
 <div class="wd-wrap">
 
@@ -2157,9 +2170,9 @@ Prendre rendez-vous
 >
 <template x-teleport="body">
     <div
+        class="wd-rdv-overlay"
         x-show="visible"
         x-cloak
-        style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(21,21,21,.45);color-scheme:light;"
     >
     <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:92%;max-height:86vh;overflow-y:auto;color-scheme:light;" x-on:click.outside="fermer()">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">

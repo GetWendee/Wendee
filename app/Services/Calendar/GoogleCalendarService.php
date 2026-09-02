@@ -47,6 +47,37 @@ class GoogleCalendarService
         ])->all();
     }
 
+    /**
+     * Crée un événement dans le calendrier Google du conseiller.
+     * Renvoie l'ID de l'événement créé, ou null en cas d'échec.
+     */
+    public function createEvent(CalendarConnection $connection, string $titre, Carbon $debut, Carbon $fin, ?string $description = null): ?string
+    {
+        $this->ensureFreshToken($connection);
+
+        $calendarId = $connection->calendar_id ?: 'primary';
+
+        $response = Http::withToken($connection->access_token)
+            ->post("https://www.googleapis.com/calendar/v3/calendars/{$calendarId}/events", [
+                'summary' => $titre,
+                'description' => $description,
+                'start' => ['dateTime' => $debut->toRfc3339String()],
+                'end' => ['dateTime' => $fin->toRfc3339String()],
+            ]);
+
+        if (! $response->successful()) {
+            Log::warning('Google Calendar création événement a échoué', [
+                'connection_id' => $connection->id,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return null;
+        }
+
+        return $response->json('id');
+    }
+
     protected function ensureFreshToken(CalendarConnection $connection): void
     {
         if (! $connection->isExpired() || ! $connection->refresh_token) {

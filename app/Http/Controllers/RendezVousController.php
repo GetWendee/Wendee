@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CalendarConnection;
 use App\Models\Client;
 use App\Models\RendezVous;
 use App\Services\Calendar\AvailabilityService;
+use App\Services\Calendar\GoogleCalendarService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,8 +15,10 @@ use Illuminate\Support\Facades\Auth;
 
 class RendezVousController extends Controller
 {
-    public function __construct(protected AvailabilityService $disponibilite)
-    {
+    public function __construct(
+        protected AvailabilityService $disponibilite,
+        protected GoogleCalendarService $googleCalendar,
+    ) {
     }
 
     /**
@@ -45,7 +49,7 @@ class RendezVousController extends Controller
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        RendezVous::create([
+        $rendezVous = RendezVous::create([
             'client_id' => $client->id,
             'user_id' => Auth::id(),
             'titre' => 'Rendez-vous avec '.$client->prenom.' '.$client->nom,
@@ -56,6 +60,27 @@ class RendezVousController extends Controller
             'ends_at' => $validated['ends_at'],
             'statut' => 'confirme',
         ]);
+
+        $connexionGoogle = CalendarConnection::where('user_id', Auth::id())
+            ->where('provider', 'google')
+            ->first();
+
+        if ($connexionGoogle) {
+            $googleEventId = $this->googleCalendar->createEvent(
+                $connexionGoogle,
+                $rendezVous->titre,
+                Carbon::parse($rendezVous->starts_at),
+                Carbon::parse($rendezVous->ends_at),
+                $rendezVous->notes
+            );
+
+            if ($googleEventId) {
+                $rendezVous->update([
+                    'calendar_provider' => 'google',
+                    'external_event_id' => $googleEventId,
+                ]);
+            }
+        }
 
         return back()->with('status', 'Rendez-vous enregistré.');
     }
