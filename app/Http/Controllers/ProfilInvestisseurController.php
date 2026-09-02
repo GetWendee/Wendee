@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Services\PartsFiscalesCalculator;
+use App\Services\ProfilInvestisseurPrefillService;
 use App\Services\ProfilInvestisseurScoringService;
 use App\Models\VerificationClient;
 use App\Services\VerificationCodeService;
@@ -23,7 +24,7 @@ class ProfilInvestisseurController extends Controller
             $reponses['risque_1_profil_investisseur'] = $client->date_naissance->format('Y-m-d');
         }
 
-        $client->loadMissing('kyc', 'personnesACharge', 'patrimoineObjectifs');
+        $client->loadMissing('kyc', 'personnesACharge', 'patrimoineObjectifs', 'patrimoineElements');
         $estCouple = in_array($client->kyc?->situation_familiale, ['marie', 'pacse'], true);
         $nbEnfants = $client->personnesACharge->count();
 
@@ -36,6 +37,14 @@ class ProfilInvestisseurController extends Controller
                 $client->kyc?->situation_familiale,
                 $client->personnesACharge
             );
+        }
+
+        // Radios Revenus/Épargne/Patrimoine : pré-sélectionnées depuis les données Patrimoine du client,
+        // uniquement si le conseiller n'a pas déjà répondu (mêmes garde-fous que ci-dessus).
+        foreach (ProfilInvestisseurPrefillService::calculer($client) as $champPrefill => $valeurPrefill) {
+            if (empty($reponses[$champPrefill]) && $valeurPrefill !== null) {
+                $reponses[$champPrefill] = $valeurPrefill;
+            }
         }
 
         if (! VerificationClient::where('client_id', $client->id)->where('module', 'profil_investisseur')->exists()) {
