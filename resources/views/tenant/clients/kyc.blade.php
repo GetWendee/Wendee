@@ -547,7 +547,7 @@
                         <div x-show="situationFamiliale === 'marie'" class="grid grid-cols-2 gap-4">
                             <div>
                                 <x-input-label for="date_mariage" value="Date du mariage" />
-                                <x-text-input id="date_mariage" name="date_mariage" type="date" class="block mt-1 w-full" :value="$old('date_mariage')" />
+                                <x-text-input id="date_mariage" name="date_mariage" type="date" class="block mt-1 w-full" max="{{ now()->subDay()->format('Y-m-d') }}" :value="$old('date_mariage')" />
                             </div>
                             <div>
                                 <x-input-label for="lieu_mariage" value="Lieu du mariage" />
@@ -575,7 +575,7 @@
                         <div x-show="situationFamiliale === 'pacse'" class="grid grid-cols-2 gap-4">
                             <div>
                                 <x-input-label for="date_pacs" value="Date du PACS" />
-                                <x-text-input id="date_pacs" name="date_pacs" type="date" class="block mt-1 w-full" :value="$old('date_pacs')" />
+                                <x-text-input id="date_pacs" name="date_pacs" type="date" class="block mt-1 w-full" max="{{ now()->subDay()->format('Y-m-d') }}" :value="$old('date_pacs')" />
                             </div>
                             <div>
                                 <x-input-label for="lieu_pacs" value="Lieu du PACS" />
