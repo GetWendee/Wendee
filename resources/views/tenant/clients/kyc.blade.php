@@ -694,7 +694,7 @@
                             </div>
                             <div>
                                 <x-input-label for="date_entree_entreprise" value="Dans l'entreprise depuis le" />
-                                <x-text-input id="date_entree_entreprise" name="date_entree_entreprise" type="date" class="block mt-1 w-full" :value="$old('date_entree_entreprise')" />
+                                <x-text-input id="date_entree_entreprise" name="date_entree_entreprise" type="date" class="block mt-1 w-full" max="{{ now()->format('Y-m-d') }}" :value="$old('date_entree_entreprise')" />
                             </div>
                             <div>
                                 <x-input-label for="profession_libelle" value="Profession (libellé)" />
@@ -708,11 +708,11 @@
                             </div>
                             <div>
                                 <x-input-label for="age_depart_retraite" value="Départ en retraite prévu à l'âge de" />
-                                <x-text-input id="age_depart_retraite" name="age_depart_retraite" type="number" class="block mt-1 w-full" :value="$old('age_depart_retraite')" />
+                                <x-text-input id="age_depart_retraite" name="age_depart_retraite" type="number" min="55" max="70" class="block mt-1 w-full" :value="$old('age_depart_retraite')" />
                             </div>
                             <div>
                                 <x-input-label for="siret_employeur" value="SIRET" />
-                                <x-text-input id="siret_employeur" name="siret_employeur" type="text" class="block mt-1 w-full" :value="$old('siret_employeur')" />
+                                <x-text-input id="siret_employeur" name="siret_employeur" type="text" maxlength="14" inputmode="numeric" pattern="[0-9]{14}" class="block mt-1 w-full" :value="$old('siret_employeur')" />
                             </div>
                         </div>
 
@@ -740,7 +740,7 @@
                             </div>
                             <div>
                                 <x-input-label for="conjoint_date_entree_entreprise" value="Dans l'entreprise depuis le (conjoint)" />
-                                <x-text-input id="conjoint_date_entree_entreprise" name="conjoint_date_entree_entreprise" type="date" class="block mt-1 w-full" :value="$old('conjoint_date_entree_entreprise')" />
+                                <x-text-input id="conjoint_date_entree_entreprise" name="conjoint_date_entree_entreprise" type="date" class="block mt-1 w-full" max="{{ now()->format('Y-m-d') }}" :value="$old('conjoint_date_entree_entreprise')" />
                             </div>
                             <div>
                                 <x-input-label for="conjoint_profession_libelle" value="Profession (libellé) (conjoint)" />
@@ -754,11 +754,11 @@
                             </div>
                             <div>
                                 <x-input-label for="conjoint_age_depart_retraite" value="Départ en retraite prévu à l'âge de (conjoint)" />
-                                <x-text-input id="conjoint_age_depart_retraite" name="conjoint_age_depart_retraite" type="number" class="block mt-1 w-full" :value="$old('conjoint_age_depart_retraite')" />
+                                <x-text-input id="conjoint_age_depart_retraite" name="conjoint_age_depart_retraite" type="number" min="55" max="70" class="block mt-1 w-full" :value="$old('conjoint_age_depart_retraite')" />
                             </div>
                             <div>
                                 <x-input-label for="conjoint_siret_employeur" value="SIRET (conjoint)" />
-                                <x-text-input id="conjoint_siret_employeur" name="conjoint_siret_employeur" type="text" class="block mt-1 w-full" :value="$old('conjoint_siret_employeur')" />
+                                <x-text-input id="conjoint_siret_employeur" name="conjoint_siret_employeur" type="text" maxlength="14" inputmode="numeric" pattern="[0-9]{14}" class="block mt-1 w-full" :value="$old('conjoint_siret_employeur')" />
                             </div>
                         </div>
                     </div>
