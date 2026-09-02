@@ -2156,7 +2156,7 @@ Prendre rendez-vous
     x-on:ouvrir-rdv.window="ouvrir()"
     x-show="visible"
     x-cloak
-    style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(21,21,21,.45);"
+    style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(21,21,21,.45);"
 >
     <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:92%;max-height:86vh;overflow-y:auto;" x-on:click.outside="fermer()">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
