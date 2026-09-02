@@ -86,8 +86,9 @@ html,body{
 .wd-tabs{display:flex;gap:4px;margin:16px 0 24px;padding:5px;background:#ebe8e5;border-radius:10px;}
 .wd-tabs a{padding:10px 16px;border-radius:7px;text-decoration:none;color:#77706c;font-size:11px;}
 .wd-tabs a.active{background:#fff;color:#171514;font-weight:750;}
-.wd-tabs-action{margin-left:auto;background:#fff;border:1px solid var(--pink);color:var(--pink);font-weight:750;font-size:11px;padding:0 16px;border-radius:7px;cursor:pointer;font-family:inherit;}
-.wd-tabs-action:hover{background:var(--pink);color:#fff;}
+.wd-tabs-action{margin-left:auto;}
+.wd-profile-edit{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:#fff;color:#514c48;text-decoration:none;font-size:10px;font-weight:750;cursor:pointer;font-family:inherit;}
+.wd-profile-edit:hover{border-color:var(--pink);color:var(--pink);}
 .wd-section{margin-top:22px;}
 </style>
 <div class="wd-wrap">
@@ -155,8 +156,8 @@ Plan d'action
 <a href="{{ route('tenant.clients.mission', $client) }}" class="{{ ($active ?? null) === 'mission' ? 'active' : '' }}">
 Mission
 </a>
-<button type="button" class="wd-tabs-action" data-dossier-trigger>
-{{ $dossierComplet ? 'Modifier' : 'Compléter' }}
+<button type="button" class="wd-profile-edit wd-tabs-action" data-dossier-trigger>
+{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
 </button>
 </nav>
 
@@ -165,7 +166,7 @@ Mission
 <div class="wd-newaccount-head">
 <div>
 <div class="wd-eyebrow">Dossier client</div>
-<h3>{{ $dossierComplet ? 'Modifier le dossier' : 'Compléter le dossier' }}</h3>
+<h3>{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}</h3>
 </div>
 <button type="button" class="wd-newaccount-close" data-dossier-close aria-label="Fermer">&times;</button>
 </div>

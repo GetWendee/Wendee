@@ -472,20 +472,6 @@ html,body{
 
 .wd-tabs-action{
     margin-left:auto;
-    background:#fff;
-    border:1px solid var(--pink);
-    color:var(--pink);
-    font-weight:750;
-    font-size:11px;
-    padding:0 16px;
-    border-radius:7px;
-    cursor:pointer;
-    font-family:inherit;
-}
-
-.wd-tabs-action:hover{
-    background:var(--pink);
-    color:#fff;
 }
 
 .wd-btn-outline{
@@ -2005,8 +1991,8 @@ Profil
 Analyse
 </a>
 
-<button type="button" class="wd-tabs-action" data-dossier-trigger>
-{{ $dossierComplet ? 'Modifier' : 'Compléter' }}
+<button type="button" class="wd-profile-edit wd-tabs-action" data-dossier-trigger>
+{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
 </button>
 
 </nav>
@@ -2016,7 +2002,7 @@ Analyse
 <div class="wd-newaccount-head">
 <div>
 <div class="wd-eyebrow">Dossier client</div>
-<h3>{{ $dossierComplet ? 'Modifier le dossier' : 'Compléter le dossier' }}</h3>
+<h3>{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}</h3>
 </div>
 <button type="button" class="wd-newaccount-close" data-dossier-close aria-label="Fermer">&times;</button>
 </div>
@@ -2099,6 +2085,11 @@ Voir ses données
         <div class="wd-eyebrow">Patrimoine</div>
         <h2>Vue patrimoniale</h2>
     </div>
+    <a
+    href="{{ route('tenant.clients.patrimoine.edit', $client) }}"
+    class="wd-profile-edit">
+    Modifier le patrimoine
+    </a>
 </div>
 
 <div class="wd-patrimoine-kpis">
@@ -2650,7 +2641,7 @@ Voir ses données
 <a
 href="{{ route('tenant.clients.profil.edit', $client) }}"
 class="wd-profile-edit">
-Modifier le profil
+Modifier le profil investisseur
 </a>
 
 </div>
