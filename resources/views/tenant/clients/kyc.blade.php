@@ -625,26 +625,26 @@
                         </div>
                         <div x-show="aPac" class="space-y-4">
                             <template x-for="(p, i) in pac" :key="i">
-                                <div class="grid grid-cols-7 gap-2 items-end border rounded-md p-3">
-                                    <div class="col-span-1">
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 items-end border rounded-md p-3">
+                                    <div>
                                         <label class="text-xs text-gray-500">Civilité</label>
                                         <select :name="`personnes_a_charge[${i}][civilite]`" x-model="p.civilite" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
                                             {!! $opts($listes['civilite_personne_charge'], '') !!}
                                         </select>
                                     </div>
-                                    <div class="col-span-1">
+                                    <div>
                                         <label class="text-xs text-gray-500">Prénom</label>
                                         <input type="text" :name="`personnes_a_charge[${i}][prenom]`" x-model="p.prenom" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
                                     </div>
-                                    <div class="col-span-1">
+                                    <div>
                                         <label class="text-xs text-gray-500">Nom</label>
                                         <input type="text" :name="`personnes_a_charge[${i}][nom]`" x-model="p.nom" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
                                     </div>
-                                    <div class="col-span-1">
+                                    <div>
                                         <label class="text-xs text-gray-500">Naissance</label>
-                                        <input type="date" :name="`personnes_a_charge[${i}][date_naissance]`" x-model="p.date_naissance" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
+                                        <input type="date" :name="`personnes_a_charge[${i}][date_naissance]`" x-model="p.date_naissance" max="{{ now()->format('Y-m-d') }}" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
                                     </div>
-                                    <div class="col-span-1">
+                                    <div>
                                         <label class="text-xs text-gray-500">Enfant de</label>
                                         <select :name="`personnes_a_charge[${i}][enfant_de]`" x-model="p.enfant_de" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
                                             <option value="">-</option>
@@ -653,13 +653,13 @@
                                             <option value="commun">Commun</option>
                                         </select>
                                     </div>
-                                    <div class="col-span-1">
+                                    <div>
                                         <label class="text-xs text-gray-500">Fiscalement à charge</label>
                                         <select :name="`personnes_a_charge[${i}][fiscalement_a_charge]`" x-model="p.fiscalement_a_charge" class="border-gray-300 rounded-md shadow-sm mt-1 w-full text-sm">
                                             {!! $opts($listes['oui_non'], '') !!}
                                         </select>
                                     </div>
-                                    <div class="col-span-1">
+                                    <div class="col-span-2 md:col-span-3 flex justify-end">
                                         <button type="button" @click="pac.splice(i, 1)" class="text-red-600 text-sm underline">Retirer</button>
                                     </div>
                                 </div>
