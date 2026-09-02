@@ -40,6 +40,10 @@
         ->latest('completed_at')
         ->first();
     $planActionDisponible = (bool) $derniereRecommandation;
+    $dossierStatus = $client->completionStatus();
+    $dossierComplet = $dossierStatus['items']['kyc']['done']
+        && $dossierStatus['items']['pat']['done']
+        && $dossierStatus['items']['inv']['done'];
 @endphp
 <style>
 body > div > nav,
@@ -82,6 +86,8 @@ html,body{
 .wd-tabs{display:flex;gap:4px;margin:16px 0 24px;padding:5px;background:#ebe8e5;border-radius:10px;}
 .wd-tabs a{padding:10px 16px;border-radius:7px;text-decoration:none;color:#77706c;font-size:11px;}
 .wd-tabs a.active{background:#fff;color:#171514;font-weight:750;}
+.wd-tabs-action{margin-left:auto;background:#fff;border:1px solid var(--pink);color:var(--pink);font-weight:750;font-size:11px;padding:0 16px;border-radius:7px;cursor:pointer;font-family:inherit;}
+.wd-tabs-action:hover{background:var(--pink);color:#fff;}
 .wd-section{margin-top:22px;}
 </style>
 <div class="wd-wrap">
@@ -124,10 +130,6 @@ Modifier
 </div>
 @endif
 <div>
-<span>Dossier KYC</span>
-<strong>{{ $kycCompletion }} % complété</strong>
-</div>
-<div>
 <span>Dernière mise à jour</span>
 <strong>{{ $client->updated_at?->translatedFormat('d F Y') }}</strong>
 </div>
@@ -135,16 +137,7 @@ Modifier
 </section>
 <nav class="wd-tabs">
 <a href="{{ route('tenant.clients.show', $client) }}" class="{{ ($active ?? null) === 'vue' ? 'active' : '' }}">
-Vue d'ensemble
-</a>
-<a href="{{ route('tenant.clients.kyc.edit', $client) }}" class="{{ ($active ?? null) === 'kyc' ? 'active' : '' }}">
-KYC
-</a>
-<a href="{{ route('tenant.clients.patrimoine.edit', $client) }}" class="{{ ($active ?? null) === 'patrimoine' ? 'active' : '' }}">
-Patrimoine
-</a>
-<a href="{{ route('tenant.clients.profil.edit', $client) }}" class="{{ ($active ?? null) === 'profil' ? 'active' : '' }}">
-Profil investisseur
+Profil
 </a>
 <a href="{{ route('tenant.clients.aide-decision', $client) }}" class="{{ ($active ?? null) === 'analyse' ? 'active' : '' }}">
 Analyse
@@ -162,4 +155,47 @@ Plan d'action
 <a href="{{ route('tenant.clients.mission', $client) }}" class="{{ ($active ?? null) === 'mission' ? 'active' : '' }}">
 Mission
 </a>
+<button type="button" class="wd-tabs-action" data-dossier-trigger>
+{{ $dossierComplet ? 'Modifier' : 'Compléter' }}
+</button>
 </nav>
+
+<div class="wd-newaccount-overlay" data-dossier-modal hidden>
+<div class="wd-newaccount-modal">
+<div class="wd-newaccount-head">
+<div>
+<div class="wd-eyebrow">Dossier client</div>
+<h3>{{ $dossierComplet ? 'Modifier le dossier' : 'Compléter le dossier' }}</h3>
+</div>
+<button type="button" class="wd-newaccount-close" data-dossier-close aria-label="Fermer">&times;</button>
+</div>
+<div class="wd-newaccount-choices">
+<a href="{{ route('tenant.clients.kyc.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">KYC</span>
+<span class="wd-newaccount-choice-desc">Recueil de connaissance client.</span>
+</a>
+<a href="{{ route('tenant.clients.patrimoine.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">Patrimoine</span>
+<span class="wd-newaccount-choice-desc">Analyse patrimoniale du client.</span>
+</a>
+<a href="{{ route('tenant.clients.profil.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">Profil investisseur</span>
+<span class="wd-newaccount-choice-desc">Profil de risque et objectifs.</span>
+</a>
+</div>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var overlay = document.querySelector('[data-dossier-modal]');
+    var triggers = document.querySelectorAll('[data-dossier-trigger]');
+    var closeBtn = document.querySelector('[data-dossier-close]');
+    if (!overlay || !triggers.length) { return; }
+    triggers.forEach(function (trigger) {
+        trigger.addEventListener('click', function () { overlay.hidden = false; });
+    });
+    if (closeBtn) { closeBtn.addEventListener('click', function () { overlay.hidden = true; }); }
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) { overlay.hidden = true; } });
+});
+</script>

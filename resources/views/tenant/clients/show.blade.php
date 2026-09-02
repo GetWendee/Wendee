@@ -63,6 +63,91 @@
 
     /*
     |--------------------------------------------------------------------------
+    | Dossier complet (KYC + Patrimoine + Profil investisseur)
+    |--------------------------------------------------------------------------
+    */
+
+    $dossierStatus = $client->completionStatus();
+    $dossierComplet = $dossierStatus['items']['kyc']['done']
+        && $dossierStatus['items']['pat']['done']
+        && $dossierStatus['items']['inv']['done'];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Données du client (modal "Voir ses données")
+    |--------------------------------------------------------------------------
+    */
+
+    $kyc = $client->kyc;
+
+    $labelListe = fn($liste, $valeur) => $valeur
+        ? (config("listes.$liste")[$valeur] ?? $valeur)
+        : null;
+
+    $formatDateKyc = fn($date) => $date ? $date->translatedFormat('d F Y') : null;
+
+    $nbEnfantsCharge = $client->personnesACharge()->count();
+
+    $donneesClient = [
+        'Naissance' => array_filter([
+            $client->date_naissance ? 'Le : ' . $formatDateKyc($client->date_naissance) : null,
+            $kyc?->commune_naissance ? 'à : ' . $kyc->commune_naissance : null,
+            $kyc?->code_postal_naissance,
+            $kyc?->francais === 'oui'
+                ? 'Nationalité française'
+                : ($kyc?->autre_nationalite ? 'Nationalité ' . $labelListe('nationalites', $kyc->autre_nationalite) : null),
+        ]),
+        'Juridique' => array_filter([
+            $labelListe('classification_mif', $kyc?->classification_mif),
+            $labelListe('capacite_juridique', $kyc?->capacite_juridique),
+        ]),
+        'Familial' => array_filter([
+            $labelListe('situation_familiale', $kyc?->situation_familiale),
+            $nbEnfantsCharge > 0 ? $nbEnfantsCharge . ' enfant(s) à charge' : 'Aucun enfant à charge',
+        ]),
+        'Matrimonial' => array_filter([
+            $labelListe('regime_matrimonial', $kyc?->regime_matrimonial),
+        ]),
+        'Conjoint' => array_filter([
+            $kyc?->conjoint_date_naissance ? 'Né le : ' . $formatDateKyc($kyc->conjoint_date_naissance) : null,
+        ]),
+        'Professionnel (' . trim($client->prenom . ' ' . $client->nom) . ')' => array_filter([
+            $kyc?->profession_libelle ? 'Profession : ' . $kyc->profession_libelle : null,
+            $kyc?->csp ? 'CSP : ' . $labelListe('csp', $kyc->csp) : null,
+            $kyc?->societe_employeur ? 'Employeur : ' . $kyc->societe_employeur : null,
+            $kyc?->date_entree_entreprise ? 'Depuis le : ' . $formatDateKyc($kyc->date_entree_entreprise) : null,
+            $kyc?->age_depart_retraite ? 'Départ retraite prévu : ' . $kyc->age_depart_retraite . ' ans' : null,
+        ]),
+        'Professionnel (conjoint)' => array_filter([
+            $kyc?->conjoint_profession_libelle ? 'Profession : ' . $kyc->conjoint_profession_libelle : null,
+            $kyc?->conjoint_age_depart_retraite ? 'Départ retraite prévu : ' . $kyc->conjoint_age_depart_retraite . ' ans' : null,
+        ]),
+        'Donation' => array_filter([
+            $kyc?->donation_dernier_vivant_profit === 'oui' ? 'Donation au dernier vivant à votre profit' : null,
+            $kyc?->donation_dernier_vivant_conjoint === 'oui' ? 'Donation au dernier vivant au profit de votre conjoint' : null,
+        ]),
+        'Résidence' => array_filter([
+            $client->adresse,
+            $client->code_postal,
+            $client->ville,
+            $client->pays ? $labelListe('pays', $client->pays) : null,
+        ]),
+        'Exposition' => array_filter([
+            $kyc?->est_ppe
+                ? ($kyc->est_ppe === 'oui_ppe' ? 'Est une personne politiquement exposée' : "N'est pas une personne politiquement exposée")
+                : null,
+            $kyc?->proche_ppe
+                ? ($kyc->proche_ppe === 'oui_proche_ppe' ? "Est proche d'une personne politiquement exposée" : "N'est pas proche d'une personne politiquement exposée")
+                : null,
+        ]),
+    ];
+
+    $donneesClient = array_filter($donneesClient);
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Téléphone
     |--------------------------------------------------------------------------
     */
@@ -383,6 +468,108 @@ html,body{
     background:#fff;
     color:#171514;
     font-weight:750;
+}
+
+.wd-tabs-action{
+    margin-left:auto;
+    background:#fff;
+    border:1px solid var(--pink);
+    color:var(--pink);
+    font-weight:750;
+    font-size:11px;
+    padding:0 16px;
+    border-radius:7px;
+    cursor:pointer;
+    font-family:inherit;
+}
+
+.wd-tabs-action:hover{
+    background:var(--pink);
+    color:#fff;
+}
+
+.wd-btn-outline{
+    background:#fff;
+    border:1px solid var(--line);
+    color:#171514;
+    font-size:11px;
+    font-weight:700;
+    padding:0 16px;
+    height:38px;
+    border-radius:8px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    font-family:inherit;
+}
+
+.wd-btn-outline:hover{
+    border-color:var(--pink);
+    color:var(--pink);
+}
+
+.wd-kyc-progress{
+    padding:20px 24px;
+}
+
+.wd-donnees-modal{
+    max-width:920px;
+}
+
+.wd-donnees-grid{
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:16px;
+    max-height:65vh;
+    overflow-y:auto;
+}
+
+.wd-donnees-card{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+}
+
+.wd-donnees-card h4{
+    margin:0 0 10px;
+    font-size:12px;
+    font-weight:800;
+}
+
+.wd-donnees-pills{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.wd-donnees-pill{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:6px 10px;
+    background:#faf9f7;
+    font-size:11px;
+    text-align:left;
+    cursor:pointer;
+    color:inherit;
+    font-family:inherit;
+}
+
+.wd-donnees-pill:hover{
+    border-color:var(--pink);
+}
+
+.wd-donnees-pill svg{
+    flex:0 0 auto;
+    color:#918984;
+}
+
+.wd-donnees-pill.copied svg{
+    color:var(--green);
 }
 
 .wd-section{
@@ -1799,11 +1986,6 @@ Modifier
 @endif
 
 <div>
-<span>Dossier KYC</span>
-<strong>{{ $kycCompletion }} % complété</strong>
-</div>
-
-<div>
 <span>Dernière mise à jour</span>
 <strong>{{ $client->updated_at?->translatedFormat('d F Y') }}</strong>
 </div>
@@ -1816,30 +1998,99 @@ Modifier
 
 <a href="{{ route('tenant.clients.show', $client) }}"
 class="active">
-Vue d'ensemble
-</a>
-
-<a href="{{ route('tenant.clients.kyc.edit', $client) }}">
-KYC
-</a>
-
-<a href="{{ route('tenant.clients.patrimoine.edit', $client) }}">
-Patrimoine
-</a>
-
-<a href="{{ route('tenant.clients.profil.edit', $client) }}">
-Profil investisseur
+Profil
 </a>
 
 <a href="{{ route('tenant.clients.aide-decision', $client) }}">
 Analyse
 </a>
 
+<button type="button" class="wd-tabs-action" data-dossier-trigger>
+{{ $dossierComplet ? 'Modifier' : 'Compléter' }}
+</button>
+
 </nav>
 
+<div class="wd-newaccount-overlay" data-dossier-modal hidden>
+<div class="wd-newaccount-modal">
+<div class="wd-newaccount-head">
+<div>
+<div class="wd-eyebrow">Dossier client</div>
+<h3>{{ $dossierComplet ? 'Modifier le dossier' : 'Compléter le dossier' }}</h3>
+</div>
+<button type="button" class="wd-newaccount-close" data-dossier-close aria-label="Fermer">&times;</button>
+</div>
+<div class="wd-newaccount-choices">
+<a href="{{ route('tenant.clients.kyc.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">KYC</span>
+<span class="wd-newaccount-choice-desc">Recueil de connaissance client.</span>
+</a>
+<a href="{{ route('tenant.clients.patrimoine.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">Patrimoine</span>
+<span class="wd-newaccount-choice-desc">Analyse patrimoniale du client.</span>
+</a>
+<a href="{{ route('tenant.clients.profil.edit', $client) }}" class="wd-newaccount-choice">
+<span class="wd-newaccount-choice-title">Profil investisseur</span>
+<span class="wd-newaccount-choice-desc">Profil de risque et objectifs.</span>
+</a>
+</div>
+</div>
+</div>
 
 
 
+
+
+<section class="wd-section wd-kyc-section">
+
+<div class="wd-section-head">
+<div>
+<div class="wd-eyebrow">KYC</div>
+<h2>Recueil de connaissance</h2>
+</div>
+<button type="button" class="wd-btn-outline" data-donnees-trigger>
+Voir ses données
+</button>
+</div>
+
+<div class="wd-panel wd-kyc-progress">
+<div class="wd-bar-row">
+<div class="wd-bar-label">Complétion du dossier</div>
+<div class="wd-bar-track"><div class="wd-bar-fill" style="width: {{ $kycCompletion }}%"></div></div>
+<div class="wd-bar-value">{{ $kycCompletion }} %</div>
+</div>
+</div>
+
+</section>
+
+<div class="wd-newaccount-overlay" data-donnees-modal hidden>
+<div class="wd-newaccount-modal wd-donnees-modal">
+<div class="wd-newaccount-head">
+<div>
+<div class="wd-eyebrow">KYC</div>
+<h3>Données du client</h3>
+</div>
+<button type="button" class="wd-newaccount-close" data-donnees-close aria-label="Fermer">&times;</button>
+</div>
+
+<div class="wd-donnees-grid">
+@foreach($donneesClient as $categorie => $lignes)
+<div class="wd-donnees-card">
+<h4>{{ $categorie }}</h4>
+<div class="wd-donnees-pills">
+@foreach($lignes as $ligne)
+<button type="button" class="wd-donnees-pill" data-copy="{{ $ligne }}">
+<span>{{ $ligne }}</span>
+<svg viewBox="0 0 24 24" width="12" height="12"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" fill="none" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+</button>
+@endforeach
+</div>
+</div>
+@endforeach
+</div>
+
+</div>
+</div>
 
 <section class="wd-section wd-patrimoine-premium">
 
@@ -2567,7 +2818,6 @@ Le profil investisseur n'a pas encore été renseigné.
 <div class="wd-section-head">
 
 <div>
-<div class="wd-eyebrow">Compatibilité</div>
 <h2>
 Compatibilité des placements</h2>
 </div>
@@ -2939,6 +3189,55 @@ document.addEventListener('DOMContentLoaded', function () {
         bar.addEventListener('mousemove', moveTooltip);
         bar.addEventListener('mouseleave', hideTooltip);
 
+    });
+
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    var dossierOverlay = document.querySelector('[data-dossier-modal]');
+    var dossierTriggers = document.querySelectorAll('[data-dossier-trigger]');
+    var dossierClose = document.querySelector('[data-dossier-close]');
+
+    if (dossierOverlay && dossierTriggers.length) {
+        dossierTriggers.forEach(function (trigger) {
+            trigger.addEventListener('click', function () { dossierOverlay.hidden = false; });
+        });
+        if (dossierClose) {
+            dossierClose.addEventListener('click', function () { dossierOverlay.hidden = true; });
+        }
+        dossierOverlay.addEventListener('click', function (e) {
+            if (e.target === dossierOverlay) { dossierOverlay.hidden = true; }
+        });
+    }
+
+    var donneesOverlay = document.querySelector('[data-donnees-modal]');
+    var donneesTriggers = document.querySelectorAll('[data-donnees-trigger]');
+    var donneesClose = document.querySelector('[data-donnees-close]');
+
+    if (donneesOverlay && donneesTriggers.length) {
+        donneesTriggers.forEach(function (trigger) {
+            trigger.addEventListener('click', function () { donneesOverlay.hidden = false; });
+        });
+        if (donneesClose) {
+            donneesClose.addEventListener('click', function () { donneesOverlay.hidden = true; });
+        }
+        donneesOverlay.addEventListener('click', function (e) {
+            if (e.target === donneesOverlay) { donneesOverlay.hidden = true; }
+        });
+    }
+
+    document.querySelectorAll('[data-copy]').forEach(function (pill) {
+        pill.addEventListener('click', function () {
+            var texte = pill.getAttribute('data-copy');
+            if (!texte || !navigator.clipboard) { return; }
+            navigator.clipboard.writeText(texte).then(function () {
+                pill.classList.add('copied');
+                setTimeout(function () { pill.classList.remove('copied'); }, 1200);
+            });
+        });
     });
 
 });
