@@ -148,6 +148,86 @@
 
     /*
     |--------------------------------------------------------------------------
+    | Données du patrimoine (modal "Voir ses données")
+    |--------------------------------------------------------------------------
+    */
+
+    $fiscalite = $client->patrimoineFiscalite;
+
+    $donneesPatrimoine = [
+        'Fiscalité (IR)' => array_filter([
+            $fiscalite?->resident_fiscal_francais === 'non' ? "N'est pas résident fiscal français" : ($fiscalite?->resident_fiscal_francais === 'oui' ? 'Résident fiscal français' : null),
+            $fiscalite?->irpp_montant !== null ? 'IR : ' . $formatEuro($fiscalite->irpp_montant) : null,
+            $fiscalite?->tmi_ir !== null ? 'TMI IR : ' . $fiscalite->tmi_ir . ' %' : null,
+            $fiscalite?->contributions_sociales !== null ? 'Contributions sociales : ' . $formatEuro($fiscalite->contributions_sociales) : null,
+            $fiscalite?->reductions_credits_impots !== null ? "Réductions / crédits d'impôt : " . $formatEuro($fiscalite->reductions_credits_impots) : null,
+        ]),
+        'IFI' => array_filter([
+            $fiscalite?->impose_ifi === 'non' ? "N'est pas imposable à l'IFI" : ($fiscalite?->impose_ifi === 'oui' ? "Imposable à l'IFI" : null),
+            $fiscalite?->base_imposable_ifi !== null ? 'Base imposable : ' . $formatEuro($fiscalite->base_imposable_ifi) : null,
+            $fiscalite?->tmi_ifi !== null ? 'TMI IFI : ' . $fiscalite->tmi_ifi . ' %' : null,
+            $fiscalite?->ifi_net_a_payer !== null ? 'IFI net à payer : ' . $formatEuro($fiscalite->ifi_net_a_payer) : null,
+        ]),
+        'États-Unis' => array_filter([
+            $fiscalite?->us_person === 'non' ? "N'est pas US person" : ($fiscalite?->us_person === 'oui' ? 'Est US person' : null),
+            $fiscalite?->us_citoyen === 'non' ? 'Non citoyen des États-Unis' : null,
+            $fiscalite?->us_resident === 'non' ? "N'est pas résident des États-Unis" : null,
+            $fiscalite?->us_carte_verte === 'non' ? 'Ne possède pas de carte verte' : null,
+            $fiscalite?->us_sejour === 'non' ? "N'a pas séjourné aux États-Unis" : null,
+        ]),
+        'Patrimoine' => array_filter([
+            'Actifs financiers : ' . $formatEuro($actifsFinanciers),
+            'Actifs non financiers : ' . $formatEuro($actifsNonFinanciers),
+            'Passifs : ' . $formatEuro($passifs),
+            'Patrimoine net : ' . $formatEuro($patrimoineNet),
+            'Solde annuel : ' . $formatEuro($soldeAnnuel),
+        ]),
+        'Épargne' => array_filter([
+            $fiscalite?->effort_epargne_mensuel !== null ? "Effort d'épargne : " . $formatEuro($fiscalite->effort_epargne_mensuel) : null,
+            $fiscalite?->montant_patrimoine_total !== null ? 'Montant patrimoine déclaré : ' . $formatEuro($fiscalite->montant_patrimoine_total) : null,
+            $fiscalite?->montant_revenus_annuels !== null ? 'Montant revenus annuels : ' . $formatEuro($fiscalite->montant_revenus_annuels) : null,
+        ]),
+        'Objectifs' => $client->patrimoineObjectifs->map(function ($o) {
+            $label = config('patrimoine.objectifs')[$o->objectif] ?? $o->objectif;
+            return $o->horizon ? $label . ' (horizon : ' . $o->horizon . ' ans)' : $label;
+        })->filter()->values()->all(),
+    ];
+
+    $donneesPatrimoine = array_filter($donneesPatrimoine);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Données du profil investisseur (modal "Voir ses données")
+    |--------------------------------------------------------------------------
+    */
+
+    $donneesInvestisseur = [
+        'Profil de risque' => array_filter([
+            'Profil final : ' . $profilFinal,
+            'Tolérance au risque : ' . $tolerance,
+            'Capacité financière : ' . $capacite,
+            'Expérience : ' . $experience,
+            'Connaissance : ' . $connaissance,
+            $profil?->score_capacite_subir_pertes_echelle ? 'Capacité à subir des pertes : ' . $profil->score_capacite_subir_pertes_echelle : null,
+        ]),
+        'Extra-financier' => array_filter([
+            $profil?->engagement_extra_financier_echelle ? 'Engagement extra-financier : ' . $profil->engagement_extra_financier_echelle : null,
+            $profil?->orientation_extra_financier_echelle ? 'Orientation : ' . $profil->orientation_extra_financier_echelle : null,
+            $profil?->thematiques_esg_echelle ? 'Thématiques ESG : ' . $profil->thematiques_esg_echelle : null,
+        ]),
+        'Objectifs' => array_filter([
+            ! empty($profil?->reponses['profil_investisseur_objetifs'] ?? null)
+                ? (config('patrimoine.objectifs')[$profil->reponses['profil_investisseur_objetifs']] ?? $profil->reponses['profil_investisseur_objetifs'])
+                : null,
+        ]),
+    ];
+
+    $donneesInvestisseur = array_filter($donneesInvestisseur);
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Téléphone
     |--------------------------------------------------------------------------
     */
@@ -563,6 +643,69 @@ html,body{
 
 .wd-donnees-modal{
     max-width:920px;
+}
+
+.wd-donnees-head-dark{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#242424;
+    color:#fff;
+    padding:18px 26px;
+    margin:-26px -26px 20px;
+    border-radius:14px 14px 0 0;
+}
+
+.wd-donnees-head-dark-icon{
+    width:34px;
+    height:34px;
+    flex:0 0 34px;
+    border-radius:8px;
+    background:rgba(255,255,255,.08);
+    display:grid;
+    place-items:center;
+}
+
+.wd-donnees-head-dark-icon svg{
+    width:18px;
+    height:18px;
+    stroke:var(--pink);
+    fill:none;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.wd-donnees-head-dark-text{
+    flex:1;
+}
+
+.wd-donnees-head-dark-text h3{
+    margin:0;
+    font-size:15px;
+    font-weight:800;
+    color:#fff;
+}
+
+.wd-donnees-head-dark-text p{
+    margin:2px 0 0;
+    font-size:11px;
+    color:#b9b2ad;
+}
+
+.wd-donnees-close-dark{
+    background:none;
+    border:0;
+    color:#fff;
+    font-size:22px;
+    line-height:1;
+    cursor:pointer;
+    padding:0 4px;
+    flex:0 0 auto;
+}
+
+.wd-donnees-close-dark:hover{
+    color:var(--pink);
 }
 
 .wd-donnees-grid{
@@ -2130,16 +2273,77 @@ Voir ses données
 
 <div class="wd-newaccount-overlay" data-donnees-modal hidden>
 <div class="wd-newaccount-modal wd-donnees-modal">
-<div class="wd-newaccount-head">
-<div>
-<div class="wd-eyebrow">KYC</div>
-<h3>Données du client</h3>
+<div class="wd-donnees-head-dark">
+<div class="wd-donnees-head-dark-icon"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg></div>
+<div class="wd-donnees-head-dark-text">
+<h3>KYC</h3>
+<p>Toutes les données KYC</p>
 </div>
-<button type="button" class="wd-newaccount-close" data-donnees-close aria-label="Fermer">&times;</button>
+<button type="button" class="wd-donnees-close-dark" data-donnees-close aria-label="Fermer">&times;</button>
 </div>
 
 <div class="wd-donnees-grid">
 @foreach($donneesClient as $categorie => $lignes)
+<div class="wd-donnees-card">
+<h4>{{ $categorie }}</h4>
+<div class="wd-donnees-pills">
+@foreach($lignes as $ligne)
+<button type="button" class="wd-donnees-pill" data-copy="{{ $ligne }}">
+<span>{{ $ligne }}</span>
+<svg viewBox="0 0 24 24" width="12" height="12"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" fill="none" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+</button>
+@endforeach
+</div>
+</div>
+@endforeach
+</div>
+
+</div>
+</div>
+
+<div class="wd-newaccount-overlay" data-patrimoine-donnees-modal hidden>
+<div class="wd-newaccount-modal wd-donnees-modal">
+<div class="wd-donnees-head-dark">
+<div class="wd-donnees-head-dark-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1.1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"/></svg></div>
+<div class="wd-donnees-head-dark-text">
+<h3>Patrimoine</h3>
+<p>Toutes les données patrimoine</p>
+</div>
+<button type="button" class="wd-donnees-close-dark" data-patrimoine-donnees-close aria-label="Fermer">&times;</button>
+</div>
+
+<div class="wd-donnees-grid">
+@foreach($donneesPatrimoine as $categorie => $lignes)
+<div class="wd-donnees-card">
+<h4>{{ $categorie }}</h4>
+<div class="wd-donnees-pills">
+@foreach($lignes as $ligne)
+<button type="button" class="wd-donnees-pill" data-copy="{{ $ligne }}">
+<span>{{ $ligne }}</span>
+<svg viewBox="0 0 24 24" width="12" height="12"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" fill="none" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+</button>
+@endforeach
+</div>
+</div>
+@endforeach
+</div>
+
+</div>
+</div>
+
+<div class="wd-newaccount-overlay" data-investisseur-donnees-modal hidden>
+<div class="wd-newaccount-modal wd-donnees-modal">
+<div class="wd-donnees-head-dark">
+<div class="wd-donnees-head-dark-icon"><svg viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></div>
+<div class="wd-donnees-head-dark-text">
+<h3>Investisseur</h3>
+<p>Toutes les données profil investisseur</p>
+</div>
+<button type="button" class="wd-donnees-close-dark" data-investisseur-donnees-close aria-label="Fermer">&times;</button>
+</div>
+
+<div class="wd-donnees-grid">
+@foreach($donneesInvestisseur as $categorie => $lignes)
 <div class="wd-donnees-card">
 <h4>{{ $categorie }}</h4>
 <div class="wd-donnees-pills">
@@ -2164,11 +2368,16 @@ Voir ses données
         <div class="wd-eyebrow">Patrimoine</div>
         <h2>Vue patrimoniale</h2>
     </div>
+    <div style="display:flex;gap:10px;">
+    <button type="button" class="wd-btn-dark" data-patrimoine-donnees-trigger>
+    Voir ses données
+    </button>
     <a
     href="{{ route('tenant.clients.patrimoine.edit', $client) }}"
     class="wd-btn-dark">
     Modifier le patrimoine
     </a>
+    </div>
 </div>
 
 <div class="wd-patrimoine-kpis">
@@ -2717,11 +2926,16 @@ Voir ses données
 <h2>Adéquation et profil de risque</h2>
 </div>
 
+<div style="display:flex;gap:10px;">
+<button type="button" class="wd-btn-dark" data-investisseur-donnees-trigger>
+Voir ses données
+</button>
 <a
 href="{{ route('tenant.clients.profil.edit', $client) }}"
 class="wd-btn-dark">
 Modifier le profil investisseur
 </a>
+</div>
 
 </div>
 
@@ -3298,6 +3512,25 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.target === donneesOverlay) { donneesOverlay.hidden = true; }
         });
     }
+
+    [
+        ['data-patrimoine-donnees-modal', 'data-patrimoine-donnees-trigger', 'data-patrimoine-donnees-close'],
+        ['data-investisseur-donnees-modal', 'data-investisseur-donnees-trigger', 'data-investisseur-donnees-close']
+    ].forEach(function (attrs) {
+        var overlay = document.querySelector('[' + attrs[0] + ']');
+        var triggers = document.querySelectorAll('[' + attrs[1] + ']');
+        var closeBtn = document.querySelector('[' + attrs[2] + ']');
+        if (!overlay || !triggers.length) { return; }
+        triggers.forEach(function (trigger) {
+            trigger.addEventListener('click', function () { overlay.hidden = false; });
+        });
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () { overlay.hidden = true; });
+        }
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) { overlay.hidden = true; }
+        });
+    });
 
     document.querySelectorAll('[data-copy]').forEach(function (pill) {
         pill.addEventListener('click', function () {
