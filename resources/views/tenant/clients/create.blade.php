@@ -18,8 +18,8 @@
 }
 .wd-cabinet-information-grid{
     display:grid;
-    grid-template-columns:1fr;
-    gap:0;
+    grid-template-columns:repeat(6, 1fr);
+    column-gap:20px;
     margin-top:6px;
     border-top:1px solid #eeeae7;
 }
@@ -27,7 +27,11 @@
     position:relative;
     padding:16px 0 14px 0;
     border-bottom:1px solid #eeeae7;
+    grid-column:span 6;
 }
+.wd-cabinet-field.wd-c2{grid-column:span 2}
+.wd-cabinet-field.wd-c3{grid-column:span 3}
+.wd-cabinet-field.wd-c4{grid-column:span 4}
 .wd-cabinet-field label{
     display:block;
     color:#9a928d;
@@ -116,7 +120,7 @@
         <form method="POST" action="{{ route('tenant.clients.store') }}">
             @csrf
             <div class="wd-cabinet-information-grid">
-                <div class="wd-cabinet-field">
+                <div class="wd-cabinet-field wd-c2">
                     <label>Civilité</label>
                     <select name="civilite" data-civilite>
                         <option value="">-</option>
@@ -127,6 +131,27 @@
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="wd-cabinet-field wd-c4">
+                    <label>Date de naissance</label>
+                    <input type="date" name="date_naissance" value="{{ old('date_naissance') }}" max="{{ now()->subYears(18)->format('Y-m-d') }}">
+                    @error('date_naissance')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field wd-c3">
+                    <label>Prénom</label>
+                    <input type="text" name="prenom" value="{{ old('prenom') }}" required autofocus>
+                    @error('prenom')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field wd-c3">
+                    <label>Nom</label>
+                    <input type="text" name="nom" value="{{ old('nom') }}" required>
+                    @error('nom')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
                 <div class="wd-cabinet-field" data-nom-jeune-fille-field hidden>
                     <label>Nom de jeune fille</label>
                     <input type="text" name="nom_jeune_fille" value="{{ old('nom_jeune_fille') }}">
@@ -134,35 +159,14 @@
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="wd-cabinet-field">
-                    <label>Date de naissance</label>
-                    <input type="date" name="date_naissance" value="{{ old('date_naissance') }}" max="{{ now()->subYears(18)->format('Y-m-d') }}">
-                    @error('date_naissance')
-                    <div class="wd-field-error">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="wd-cabinet-field">
-                    <label>Prénom</label>
-                    <input type="text" name="prenom" value="{{ old('prenom') }}" required autofocus>
-                    @error('prenom')
-                    <div class="wd-field-error">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="wd-cabinet-field">
-                    <label>Nom</label>
-                    <input type="text" name="nom" value="{{ old('nom') }}" required>
-                    @error('nom')
-                    <div class="wd-field-error">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="wd-cabinet-field">
+                <div class="wd-cabinet-field wd-c3">
                     <label>Téléphone mobile</label>
                     <input type="text" name="telephone_mobile" value="{{ old('telephone_mobile') }}" maxlength="10" inputmode="numeric" pattern="[0-9]{10}">
                     @error('telephone_mobile')
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="wd-cabinet-field">
+                <div class="wd-cabinet-field wd-c3">
                     <label>Téléphone domicile</label>
                     <input type="text" name="telephone_domicile" value="{{ old('telephone_domicile') }}" maxlength="10" inputmode="numeric" pattern="[0-9]{10}">
                     @error('telephone_domicile')
@@ -192,14 +196,14 @@
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="wd-cabinet-field">
+                <div class="wd-cabinet-field wd-c2">
                     <label>Code postal</label>
                     <input type="text" name="code_postal" value="{{ old('code_postal') }}">
                     @error('code_postal')
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="wd-cabinet-field">
+                <div class="wd-cabinet-field wd-c4">
                     <label>Ville</label>
                     <input type="text" name="ville" value="{{ old('ville') }}">
                     @error('ville')
