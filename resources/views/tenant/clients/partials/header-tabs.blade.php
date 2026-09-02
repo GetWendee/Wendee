@@ -75,12 +75,14 @@ html,body{
 .wd-avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;font-size:18px;font-weight:800;}
 .wd-eyebrow{font-size:10px;color:var(--pink);font-weight:850;letter-spacing:.19em;text-transform:uppercase;}
 .wd-hero .wd-eyebrow{color:#c9c2be}
+.wd-hero-non-conforme .wd-eyebrow{color:#fff}
 .wd-hero h1{margin:6px 0 4px;font-size:34px;letter-spacing:-.045em;}
 .wd-hero-meta{color:#aaa29e;font-size:12px;}
+.wd-hero-non-conforme .wd-hero-meta{color:#fff}
 .wd-actions{display:flex;justify-content:flex-end;gap:9px;align-items:flex-start;}
 .wd-btn{min-height:40px;padding:0 14px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:white;display:inline-flex;align-items:center;text-decoration:none;font-size:11px;font-weight:700;}
 .wd-btn.primary{background:#fff;color:#242424;}
-.wd-hero-foot{display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));border-top:1px solid rgba(255,255,255,.10);}
+.wd-hero-foot{display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));border-top:1px solid rgba(255,255,255,.10);background:#242424;}
 .wd-hero-foot>div{padding:16px 20px;border-right:1px solid rgba(255,255,255,.10);}
 .wd-hero-foot>div:last-child{border-right:0;}
 .wd-hero-foot span{display:block;color:#8f8883;font-size:9px;text-transform:uppercase;letter-spacing:.11em;font-weight:800;}

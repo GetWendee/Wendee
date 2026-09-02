@@ -386,6 +386,8 @@ html,body{
 
 .wd-hero .wd-eyebrow{color:#c9c2be}
 
+.wd-hero-non-conforme .wd-eyebrow{color:#fff}
+
 .wd-hero h1{
     margin:6px 0 4px;
     font-size:34px;
@@ -395,6 +397,10 @@ html,body{
 .wd-hero-meta{
     color:#aaa29e;
     font-size:12px;
+}
+
+.wd-hero-non-conforme .wd-hero-meta{
+    color:#fff;
 }
 
 .wd-actions{
@@ -427,6 +433,7 @@ html,body{
     display:grid;
     grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
     border-top:1px solid rgba(255,255,255,.10);
+    background:#242424;
 }
 
 .wd-hero-foot>div{
