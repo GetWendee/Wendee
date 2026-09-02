@@ -1569,26 +1569,7 @@
     <script type="application/json" id="reponses-initiales">{!! json_encode($reponses, JSON_HEX_TAG) !!}</script>
 
     <script>
-        function villeAutocomplete(initial) {
-            return {
-                query: initial,
-                suggestions: [],
-                search() {
-                    if (this.query.length < 2) {
-                        this.suggestions = [];
-                        return;
-                    }
-                    fetch('https://geo.api.gouv.fr/communes?nom=' + encodeURIComponent(this.query) + '&fields=nom,code&boost=population&limit=8')
-                        .then(function (r) { return r.json(); })
-                        .then((data) => { this.suggestions = Array.isArray(data) ? data : []; })
-                        .catch(() => { this.suggestions = []; });
-                },
-                select(s) {
-                    this.query = s.nom;
-                    this.suggestions = [];
-                },
-            };
-        }
+        // villeAutocomplete est défini globalement dans resources/js/app.js (window.villeAutocomplete)
 
         function objectifsPatrimoineField(patrimoineLabels, savedValue) {
             const saved = Array.isArray(savedValue) ? savedValue : null;

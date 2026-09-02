@@ -34,6 +34,27 @@ window.addressAutocomplete = function (type, initial = '') {
     };
 };
 
+window.villeAutocomplete = function (initial) {
+    return {
+        query: initial,
+        suggestions: [],
+        search() {
+            if (this.query.length < 2) {
+                this.suggestions = [];
+                return;
+            }
+            fetch('https://geo.api.gouv.fr/communes?nom=' + encodeURIComponent(this.query) + '&fields=nom,code&boost=population&limit=8')
+                .then(function (r) { return r.json(); })
+                .then((data) => { this.suggestions = Array.isArray(data) ? data : []; })
+                .catch(() => { this.suggestions = []; });
+        },
+        select(s) {
+            this.query = s.nom;
+            this.suggestions = [];
+        },
+    };
+};
+
 window.patrimoineForm = function (elements) {
     return {
         blocks: elements,

@@ -551,7 +551,34 @@
                             </div>
                             <div>
                                 <x-input-label for="lieu_mariage" value="Lieu du mariage" />
-                                <x-text-input id="lieu_mariage" name="lieu_mariage" type="text" class="block mt-1 w-full" :value="$old('lieu_mariage')" />
+                                <div
+                                    x-data="villeAutocomplete(@js($old('lieu_mariage', '')))"
+                                    class="relative"
+                                >
+                                    <input
+                                        id="lieu_mariage"
+                                        type="text"
+                                        name="lieu_mariage"
+                                        x-model="query"
+                                        @input.debounce.300ms="search()"
+                                        @focus="search()"
+                                        @click.outside="suggestions = []"
+                                        autocomplete="off"
+                                        class="border-gray-300 rounded-md shadow-sm mt-1 w-full"
+                                    >
+                                    <ul
+                                        x-show="suggestions.length > 0"
+                                        class="absolute z-20 bg-white border rounded w-full mt-1 max-h-48 overflow-auto shadow"
+                                    >
+                                        <template x-for="s in suggestions" :key="s.code">
+                                            <li
+                                                @click="select(s)"
+                                                class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                                                x-text="s.nom"
+                                            ></li>
+                                        </template>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="col-span-2">
                                 <x-input-label value="Régime matrimonial" />
