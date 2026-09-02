@@ -166,8 +166,8 @@
                                data-portfolio-card
                                data-role="conseiller"
                                data-name="{{ strtolower($conseiller->name) }}"
-                               class="group relative block rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-                                <div class="flex items-start justify-between gap-3">
+                               class="group relative block overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+                                <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="w-12 h-12 rounded-2xl bg-[#232323] text-white flex items-center justify-center text-base font-semibold shrink-0">
                                             {{ strtoupper(substr($conseiller->name, 0, 1)) }}
@@ -177,20 +177,20 @@
                                             <p class="font-semibold text-gray-900 truncate group-hover:text-[#ff008a] transition">
                                                 {{ $conseiller->name }}
                                             </p>
-                                            <span class="mt-1 inline-flex rounded-full bg-[#fff0f7] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#ff008a]">
+                                            <span class="mt-1 inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#ff008a]">
                                                 {{ $conseiller->role === 'courtier' ? 'Courtier' : 'Conseiller' }}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div class="w-9 h-9 rounded-xl bg-[#fff0f7] text-[#ff008a] flex items-center justify-center shrink-0">
+                                    <div class="w-9 h-9 rounded-xl bg-white text-[#ff008a] flex items-center justify-center shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                                         </svg>
                                     </div>
                                 </div>
 
-                                <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between gap-3">
+                                <div class="bg-white px-6 pt-4 pb-6 flex items-center justify-between gap-3">
                                     <p class="truncate text-sm text-gray-500">{{ $conseiller->email }}</p>
                                     <span class="inline-flex items-center gap-1 text-xs font-semibold text-gray-300 group-hover:text-[#ff008a] transition shrink-0">
                                         Voir la fiche
@@ -206,8 +206,8 @@
                             <div data-portfolio-card
                                  data-role="apporteur"
                                  data-name="{{ strtolower($apporteur->name) }}"
-                                 class="relative rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
-                                <div class="flex items-start justify-between gap-3">
+                                 class="relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+                                <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="w-12 h-12 rounded-2xl bg-[#fff0f7] text-[#ff008a] flex items-center justify-center text-base font-semibold shrink-0">
                                             {{ strtoupper(substr($apporteur->name, 0, 1)) }}
@@ -215,20 +215,20 @@
 
                                         <div class="min-w-0">
                                             <p class="font-semibold text-gray-900 truncate">{{ $apporteur->name }}</p>
-                                            <span class="mt-1 inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
+                                            <span class="mt-1 inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
                                                 Apporteur
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div class="w-9 h-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center shrink-0">
+                                    <div class="w-9 h-9 rounded-xl bg-white text-gray-500 flex items-center justify-center shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M18 20a6 6 0 0 0-12 0M12 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7-1a3 3 0 1 0-2.83-4M5 13a3 3 0 1 1 2.83-4"/>
                                         </svg>
                                     </div>
                                 </div>
 
-                                <div class="mt-4 pt-4 border-t border-gray-100 space-y-1">
+                                <div class="bg-white px-6 pt-4 pb-6 space-y-1">
                                     @if ($apporteur->parent)
                                         <p class="truncate text-xs text-gray-400">Rattaché à {{ $apporteur->parent->name }}</p>
                                     @endif
@@ -243,10 +243,10 @@
                                data-portfolio-card
                                data-role="client"
                                data-name="{{ strtolower($client->prenom.' '.$client->nom) }}"
-                               class="group relative block rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-                                <div class="flex items-start justify-between gap-3">
+                               class="group relative block overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+                                <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
                                     <div class="flex items-center gap-3 min-w-0">
-                                        <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-base font-semibold shrink-0">
+                                        <div class="w-12 h-12 rounded-2xl bg-white text-gray-600 flex items-center justify-center text-base font-semibold shrink-0">
                                             {{ strtoupper(substr($client->prenom, 0, 1).substr($client->nom, 0, 1)) }}
                                         </div>
 
@@ -254,20 +254,20 @@
                                             <p class="font-semibold text-gray-900 truncate group-hover:text-[#ff008a] transition">
                                                 {{ $client->prenom }} {{ $client->nom }}
                                             </p>
-                                            <span class="mt-1 inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
+                                            <span class="mt-1 inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
                                                 Client
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div class="w-9 h-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center shrink-0">
+                                    <div class="w-9 h-9 rounded-xl bg-white text-gray-500 flex items-center justify-center shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                                         </svg>
                                     </div>
                                 </div>
 
-                                <div class="mt-4 space-y-1 text-sm text-gray-500">
+                                <div class="bg-white px-6 pt-4 space-y-1 text-sm text-gray-500">
                                     <p class="truncate">{{ $client->conseiller?->name ?? '-' }}</p>
                                     @if ($client->apporteur)
                                         <p class="truncate text-xs text-gray-400">Apporteur : {{ $client->apporteur->name }}</p>
@@ -275,7 +275,7 @@
                                     <p class="truncate text-xs text-gray-400">{{ $client->email }}</p>
                                 </div>
 
-                                <div class="mt-4 pt-4 border-t border-gray-100">
+                                <div class="bg-white px-6 pt-4 pb-6">
                                     @if ($status['a_jour'])
                                         <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-600">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
