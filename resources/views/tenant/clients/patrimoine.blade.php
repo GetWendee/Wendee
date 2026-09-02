@@ -474,7 +474,7 @@
                 <x-patrimoine-bloc categorie="actif_non_financier" label="Actifs non financiers" :mode-detention="true" :type-detention="true" />
                 <x-patrimoine-bloc categorie="passif" label="Passifs" :foyer-avec-conjoint="$foyerAvecConjoint" />
                 <x-patrimoine-bloc categorie="revenu" label="Revenus" :type-detention="true" detention-label="Origine du revenu" detention-propre-label="Vous" :periodicite-montant="true" />
-                <x-patrimoine-bloc categorie="charge" label="Charges" :foyer-avec-conjoint="$foyerAvecConjoint" />
+                <x-patrimoine-bloc categorie="charge" label="Charges" :type-detention="true" detention-label="Origine de la charge" detention-propre-label="Vous" :periodicite-montant="true" />
 
                 <div class="bg-white shadow-sm sm:rounded-lg mb-6 p-6"
                      x-data="{
