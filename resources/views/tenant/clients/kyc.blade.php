@@ -614,7 +614,7 @@
                             </div>
                             <div>
                                 <x-input-label for="conjoint_date_naissance" value="Date de naissance (conjoint)" />
-                                <x-text-input id="conjoint_date_naissance" name="conjoint_date_naissance" type="date" class="block mt-1 w-full" :value="$old('conjoint_date_naissance')" />
+                                <x-text-input id="conjoint_date_naissance" name="conjoint_date_naissance" type="date" class="block mt-1 w-full" max="{{ now()->subYears(18)->format('Y-m-d') }}" :value="$old('conjoint_date_naissance')" />
                             </div>
                         </div>
 

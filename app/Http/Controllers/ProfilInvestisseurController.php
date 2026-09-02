@@ -22,6 +22,20 @@ class ProfilInvestisseurController extends Controller
             $reponses['risque_1_profil_investisseur'] = $client->date_naissance->format('Y-m-d');
         }
 
+        $client->loadMissing('kyc', 'personnesACharge');
+        $estCouple = in_array($client->kyc?->situation_familiale, ['marie', 'pacse'], true);
+        $nbEnfants = $client->personnesACharge->count();
+
+        if (empty($reponses['risque_2_profil_investisseur'])) {
+            $reponses['risque_2_profil_investisseur'] = 1 + ($estCouple ? 1 : 0) + $nbEnfants;
+        }
+
+        if (empty($reponses['risque_3_profil_investisseur'])) {
+            $partsBase = $estCouple ? 2.0 : 1.0;
+            $partsEnfants = min($nbEnfants, 2) * 0.5 + max($nbEnfants - 2, 0) * 1.0;
+            $reponses['risque_3_profil_investisseur'] = $partsBase + $partsEnfants;
+        }
+
         if (! VerificationClient::where('client_id', $client->id)->where('module', 'profil_investisseur')->exists()) {
             $verification->enregistrerModification($client, 'profil_investisseur');
         }

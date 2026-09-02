@@ -34,7 +34,7 @@
                         </div>
                         <div class="col-span-2">
                             <x-input-label for="date_naissance" value="Date de naissance" />
-                            <x-text-input id="date_naissance" name="date_naissance" type="date" class="block mt-1 w-full" :value="old('date_naissance', optional($client->date_naissance)->format('Y-m-d'))" />
+                            <x-text-input id="date_naissance" name="date_naissance" type="date" class="block mt-1 w-full" max="{{ now()->subYears(18)->format('Y-m-d') }}" :value="old('date_naissance', optional($client->date_naissance)->format('Y-m-d'))" />
                         </div>
                     </div>
 

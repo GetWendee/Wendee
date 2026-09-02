@@ -998,6 +998,17 @@ return [
                 'type' => 'select-field',
                 'name' => 'profil_investisseur_objetifs',
                 'label' => 'Quels sont vos objectifs ?',
+                'options' => [
+                    ['label' => 'Optimiser la rentabilité de ses placements', 'value' => 'optimiser_rentabilite_placements'],
+                    ['label' => 'Préparer sa retraite', 'value' => 'preparer_retraite'],
+                    ['label' => 'Réduire sa fiscalité', 'value' => 'reduire_fiscalite'],
+                    ['label' => 'Préparer la transmission de son patrimoine', 'value' => 'preparer_transmission'],
+                    ['label' => 'Générer des revenus complémentaires', 'value' => 'generer_revenus_complementaires'],
+                    ['label' => 'Se constituer une épargne de précaution', 'value' => 'constituer_epargne_precaution'],
+                    ['label' => 'Financer un projet', 'value' => 'financer_projet'],
+                    ['label' => 'Protéger sa famille', 'value' => 'proteger_famille'],
+                    ['label' => 'Autre', 'value' => 'autre'],
+                ],
             ],
             [
                 'type' => 'radio-field',

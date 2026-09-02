@@ -1364,6 +1364,7 @@
                                         type="date"
                                         name="reponses[{{ $nom }}]"
                                         x-model="reponses['{{ $nom }}']"
+                                        max="{{ now()->subYears(18)->format('Y-m-d') }}"
                                         class="border rounded px-3 py-2 w-full"
                                     >
                                     @break
@@ -1378,13 +1379,26 @@
                                     @break
 
                                 @case('select-field')
-                                    {{-- Options non disponibles (glossaire JetEngine non exporté) : champ texte temporaire --}}
-                                    <input
-                                        type="text"
-                                        name="reponses[{{ $nom }}]"
-                                        x-model="reponses['{{ $nom }}']"
-                                        class="border rounded px-3 py-2 w-full"
-                                    >
+                                    @if (! empty($champ['options']))
+                                        <select
+                                            name="reponses[{{ $nom }}]"
+                                            x-model="reponses['{{ $nom }}']"
+                                            class="border rounded px-3 py-2 w-full"
+                                        >
+                                            <option value="">Choisir</option>
+                                            @foreach ($champ['options'] as $opt)
+                                                <option value="{{ $opt['value'] }}">{{ $opt['label'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    @else
+                                        {{-- Options non disponibles (glossaire JetEngine non exporté) : champ texte temporaire --}}
+                                        <input
+                                            type="text"
+                                            name="reponses[{{ $nom }}]"
+                                            x-model="reponses['{{ $nom }}']"
+                                            class="border rounded px-3 py-2 w-full"
+                                        >
+                                    @endif
                                     @break
 
                                 @case('text-field')
