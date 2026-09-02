@@ -6,6 +6,7 @@ use App\Models\CalendarConnection;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class GoogleCalendarService
 {
@@ -51,19 +52,31 @@ class GoogleCalendarService
      * Crée un événement dans le calendrier Google du conseiller.
      * Renvoie l'ID de l'événement créé, ou null en cas d'échec.
      */
-    public function createEvent(CalendarConnection $connection, string $titre, Carbon $debut, Carbon $fin, ?string $description = null): ?string
+    public function createEvent(CalendarConnection $connection, string $titre, Carbon $debut, Carbon $fin, ?string $description = null, ?string $emailInvite = null): ?string
     {
         $this->ensureFreshToken($connection);
 
         $calendarId = $connection->calendar_id ?: 'primary';
 
+        $payload = [
+            'summary' => $titre,
+            'description' => $description,
+            'start' => ['dateTime' => $debut->toRfc3339String()],
+            'end' => ['dateTime' => $fin->toRfc3339String()],
+            'conferenceData' => [
+                'createRequest' => [
+                    'requestId' => (string) Str::uuid(),
+                    'conferenceSolutionKey' => ['type' => 'hangoutsMeet'],
+                ],
+            ],
+        ];
+
+        if ($emailInvite) {
+            $payload['attendees'] = [['email' => $emailInvite]];
+        }
+
         $response = Http::withToken($connection->access_token)
-            ->post("https://www.googleapis.com/calendar/v3/calendars/{$calendarId}/events", [
-                'summary' => $titre,
-                'description' => $description,
-                'start' => ['dateTime' => $debut->toRfc3339String()],
-                'end' => ['dateTime' => $fin->toRfc3339String()],
-            ]);
+            ->post("https://www.googleapis.com/calendar/v3/calendars/{$calendarId}/events?conferenceDataVersion=1&sendUpdates=all", $payload);
 
         if (! $response->successful()) {
             Log::warning('Google Calendar création événement a échoué', [

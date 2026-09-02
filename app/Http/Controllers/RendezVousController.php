@@ -71,7 +71,8 @@ class RendezVousController extends Controller
                 $rendezVous->titre,
                 Carbon::parse($rendezVous->starts_at),
                 Carbon::parse($rendezVous->ends_at),
-                $rendezVous->notes
+                $rendezVous->notes,
+                $client->email
             );
 
             if ($googleEventId) {
