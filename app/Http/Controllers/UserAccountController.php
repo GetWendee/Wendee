@@ -46,8 +46,10 @@ class UserAccountController extends Controller
 
         $validated = $request->validate([
             'role' => ['required', 'string', 'in:conseiller,apporteur'],
-            'name' => ['required', 'string', 'max:255'],
+            'prenom' => ['required', 'string', 'max:255'],
+            'nom' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'telephone' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
             'perimetres' => ['nullable', 'array'],
             'perimetres.*' => ['string', 'in:Assurance,Banque,Finance,Immobilier'],
             'habilitations' => ['nullable', 'array'],
@@ -98,8 +100,9 @@ class UserAccountController extends Controller
         $isApporteur = $validated['role'] === 'apporteur';
 
         $newUser = User::create([
-            'name' => $validated['name'],
+            'name' => trim($validated['prenom'].' '.$validated['nom']),
             'email' => $validated['email'],
+            'telephone' => $validated['telephone'] ?? null,
             'password' => Str::random(40),
             'role' => $validated['role'],
             'parent_id' => $creator->id,

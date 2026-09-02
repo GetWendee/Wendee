@@ -81,6 +81,9 @@ backdrop-filter:blur(10px)
     padding:16px 0 14px 0;
     border-bottom:1px solid #eeeae7;
 }
+.wd-cabinet-information-grid{grid-template-columns:repeat(6, 1fr);column-gap:20px;}
+.wd-cabinet-field{grid-column:span 6;}
+.wd-cabinet-field.wd-c3{grid-column:span 3}
 .wd-cabinet-field label{
     display:block;
     color:#9a928d;
@@ -181,17 +184,6 @@ backdrop-filter:blur(10px)
     color:#242424;
     background:#f3f1ee;
 }
-.wd-cabinet-locked-role{
-    display:inline-flex;
-    align-items:center;
-    padding:9px 14px;
-    border:1px solid #f40087;
-    border-radius:7px;
-    font-size:11px;
-    font-weight:700;
-    color:#f40087;
-    background:#fdf2f8;
-}
 .wd-cabinet-field select,
 .wd-cabinet-field input[type=date]{
     width:100%;
@@ -209,6 +201,14 @@ backdrop-filter:blur(10px)
     border-color:#f40087;
 }
 </style>
+@php
+$selectedRole = old('role') ?: request('role', $roles[0] ?? null);
+$roleTitres = ['conseiller' => 'Nouveau conseiller.', 'apporteur' => 'Nouvel apporteur.'];
+$roleSousTitres = [
+    'conseiller' => "Créez un compte conseiller. Il recevra un email pour définir son mot de passe.",
+    'apporteur' => "Créez un compte apporteur. Il recevra un email pour définir son mot de passe.",
+];
+@endphp
 <div class="wd-wrap">
     @if(session('user_created'))
     <section class="wd-user-success">
@@ -218,38 +218,42 @@ backdrop-filter:blur(10px)
     <section class="wd-head">
         <div>
             <div class="wd-eyebrow">Équipe</div>
-            <h1>Créer un utilisateur.</h1>
+            <h1>{{ $roleTitres[$selectedRole] ?? 'Nouvel utilisateur.' }}</h1>
             <p>
-                Créez un compte conseiller ou apporteur. Il recevra un email pour définir son mot de passe.
+                {{ $roleSousTitres[$selectedRole] ?? "Il recevra un email pour définir son mot de passe." }}
             </p>
         </div>
     </section>
     <section class="wd-user-form">
         <form method="POST" action="{{ route('tenant.users.store') }}">
             @csrf
+            <input type="hidden" name="role" value="{{ $selectedRole }}">
             <div class="wd-cabinet-information-grid">
-                <div class="wd-cabinet-field">
-                    <label>Rôle</label>
-                    @php
-                    $selectedRole = old('role') ?: request('role', $roles[0] ?? null);
-                    @endphp
-                    <div class="wd-cabinet-locked-role">{{ ucfirst($selectedRole) }}</div>
-                    <input type="hidden" name="role" value="{{ $selectedRole }}">
-                    @error('role')
+                <div class="wd-cabinet-field wd-c3">
+                    <label>Prénom</label>
+                    <input type="text" name="prenom" value="{{ old('prenom') }}">
+                    @error('prenom')
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="wd-cabinet-field">
-                    <label>Nom complet</label>
-                    <input type="text" name="name" value="{{ old('name') }}">
-                    @error('name')
+                <div class="wd-cabinet-field wd-c3">
+                    <label>Nom</label>
+                    <input type="text" name="nom" value="{{ old('nom') }}">
+                    @error('nom')
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="wd-cabinet-field">
+                <div class="wd-cabinet-field wd-c3">
                     <label>Email</label>
                     <input type="email" name="email" value="{{ old('email') }}">
                     @error('email')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field wd-c3">
+                    <label>Téléphone</label>
+                    <input type="text" name="telephone" value="{{ old('telephone') }}" maxlength="10" inputmode="numeric" pattern="[0-9]{10}">
+                    @error('telephone')
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
