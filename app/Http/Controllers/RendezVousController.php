@@ -40,6 +40,8 @@ class RendezVousController extends Controller
         $validated = $request->validate([
             'starts_at' => ['required', 'date', 'after:now'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
+            'format' => ['nullable', 'string', 'in:visioconference,telephone,agence,domicile'],
+            'sujet' => ['nullable', 'string', 'in:point_etape,bilan_patrimonial,signature_document,suivi_portefeuille,autre'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
@@ -47,6 +49,8 @@ class RendezVousController extends Controller
             'client_id' => $client->id,
             'user_id' => Auth::id(),
             'titre' => 'Rendez-vous avec '.$client->prenom.' '.$client->nom,
+            'format' => $validated['format'] ?? null,
+            'sujet' => $validated['sujet'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'starts_at' => $validated['starts_at'],
             'ends_at' => $validated['ends_at'],

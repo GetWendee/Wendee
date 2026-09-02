@@ -2188,6 +2188,25 @@ Prendre rendez-vous
         </div>
 
         <form x-on:submit.prevent="reserver()">
+            <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Format</label>
+            <select x-model="format" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;background:#fff;">
+                <option value="">Choisir</option>
+                <option value="visioconference">Visioconférence</option>
+                <option value="telephone">Téléphone</option>
+                <option value="agence">Agence</option>
+                <option value="domicile">Domicile</option>
+            </select>
+
+            <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Votre demande</label>
+            <select x-model="sujet" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;background:#fff;">
+                <option value="">Choisir</option>
+                <option value="point_etape">Point d'étape</option>
+                <option value="bilan_patrimonial">Bilan patrimonial</option>
+                <option value="signature_document">Signature de document</option>
+                <option value="suivi_portefeuille">Suivi de portefeuille</option>
+                <option value="autre">Autre</option>
+            </select>
+
             <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Notes (optionnel)</label>
             <textarea x-model="notes" rows="2" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;resize:vertical;"></textarea>
 
@@ -2205,6 +2224,8 @@ function rdvPopup(urlDisponibilites, urlStore) {
         date: '',
         creneaux: [],
         creneauChoisi: null,
+        format: '',
+        sujet: '',
         notes: '',
         chargement: false,
         ouvrir() {
@@ -2235,6 +2256,8 @@ function rdvPopup(urlDisponibilites, urlStore) {
                 body: JSON.stringify({
                     starts_at: this.creneauChoisi.start,
                     ends_at: this.creneauChoisi.end,
+                    format: this.format,
+                    sujet: this.sujet,
                     notes: this.notes,
                 }),
             }).then(() => {

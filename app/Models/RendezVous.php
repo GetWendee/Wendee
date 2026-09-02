@@ -16,6 +16,8 @@ class RendezVous extends Model
         'client_id',
         'user_id',
         'titre',
+        'format',
+        'sujet',
         'notes',
         'starts_at',
         'ends_at',
