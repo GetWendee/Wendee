@@ -2154,18 +2154,21 @@ Prendre rendez-vous
 <div
     x-data="rdvPopup(@js(route('tenant.rendez-vous.disponibilites')), @js(route('tenant.clients.rendez-vous.store', $client)))"
     x-on:ouvrir-rdv.window="ouvrir()"
-    x-show="visible"
-    x-cloak
-    style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(21,21,21,.45);"
 >
-    <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:92%;max-height:86vh;overflow-y:auto;" x-on:click.outside="fermer()">
+<template x-teleport="body">
+    <div
+        x-show="visible"
+        x-cloak
+        style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(21,21,21,.45);color-scheme:light;"
+    >
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:92%;max-height:86vh;overflow-y:auto;color-scheme:light;" x-on:click.outside="fermer()">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
             <h2 style="font-size:17px;font-weight:800;color:#151515;">Prendre rendez-vous</h2>
             <button type="button" x-on:click="fermer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#817b76;">&times;</button>
         </div>
 
         <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Date</label>
-        <input type="date" x-model="date" x-on:change="chargerCreneaux()" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;">
+        <input type="date" x-model="date" x-on:change="chargerCreneaux()" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;color:#151515;color-scheme:light;background:#fff;">
 
         <template x-if="chargement">
             <p style="font-size:12.5px;color:#817b76;">Chargement des créneaux…</p>
@@ -2189,7 +2192,7 @@ Prendre rendez-vous
 
         <form x-on:submit.prevent="reserver()">
             <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Format</label>
-            <select x-model="format" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;background:#fff;">
+            <select x-model="format" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;background:#fff;color:#151515;color-scheme:light;">
                 <option value="">Choisir</option>
                 <option value="visioconference">Visioconférence</option>
                 <option value="telephone">Téléphone</option>
@@ -2198,7 +2201,7 @@ Prendre rendez-vous
             </select>
 
             <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Votre demande</label>
-            <select x-model="sujet" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;background:#fff;">
+            <select x-model="sujet" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;background:#fff;color:#151515;color-scheme:light;">
                 <option value="">Choisir</option>
                 <option value="point_etape">Point d'étape</option>
                 <option value="bilan_patrimonial">Bilan patrimonial</option>
@@ -2208,13 +2211,15 @@ Prendre rendez-vous
             </select>
 
             <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Notes (optionnel)</label>
-            <textarea x-model="notes" rows="2" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;resize:vertical;"></textarea>
+            <textarea x-model="notes" rows="2" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;resize:vertical;color:#151515;color-scheme:light;background:#fff;"></textarea>
 
             <button type="submit" :disabled="!creneauChoisi" style="width:100%;background:#1b1716;color:#fff;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;opacity:1;" x-bind:style="!creneauChoisi ? 'width:100%;background:#ded9d4;color:#817b76;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:not-allowed;' : 'width:100%;background:#1b1716;color:#fff;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;'">
                 Confirmer le rendez-vous
             </button>
         </form>
     </div>
+    </div>
+</template>
 </div>
 
 <script>
