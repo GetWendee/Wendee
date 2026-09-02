@@ -31,7 +31,7 @@ class AvailabilityService
      *
      * @return array<int, array{start: string, end: string}>
      */
-    public function creneauxDisponibles(User $conseiller, Carbon $jour, int $dureeMinutes = 30): array
+    public function creneauxDisponibles(User $conseiller, Carbon $jour, int $dureeMinutes = 30, ?int $exclureRendezVousId = null): array
     {
         $debutJournee = $jour->copy()->setTime($this->heureDebut, 0);
         $finJournee = $jour->copy()->setTime($this->heureFin, 0);
@@ -40,7 +40,7 @@ class AvailabilityService
             return [];
         }
 
-        $plagesOccupees = $this->plagesOccupees($conseiller, $debutJournee, $finJournee);
+        $plagesOccupees = $this->plagesOccupees($conseiller, $debutJournee, $finJournee, $exclureRendezVousId);
 
         $seuilMinimum = now()->addMinutes($this->delaiMinimumMinutes);
 
@@ -69,7 +69,7 @@ class AvailabilityService
     /**
      * @return array<int, array{start: Carbon, end: Carbon}>
      */
-    protected function plagesOccupees(User $conseiller, Carbon $from, Carbon $to): array
+    protected function plagesOccupees(User $conseiller, Carbon $from, Carbon $to, ?int $exclureRendezVousId = null): array
     {
         $plages = [];
 
@@ -86,6 +86,7 @@ class AvailabilityService
         $rdvExistants = RendezVous::where('user_id', $conseiller->id)
             ->where('statut', 'confirme')
             ->whereBetween('starts_at', [$from, $to])
+            ->when($exclureRendezVousId, fn ($q) => $q->where('id', '!=', $exclureRendezVousId))
             ->get();
 
         foreach ($rdvExistants as $rdv) {

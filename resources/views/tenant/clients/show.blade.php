@@ -2240,6 +2240,68 @@ Mes rendez-vous
 </div>
 
 <script>
+function rdvLigne(data, urlDisponibilites, urlDecaler) {
+    return {
+        ...data,
+        open: false,
+        decalage: false,
+        nouvelleDate: '',
+        creneaux: [],
+        creneauChoisi: null,
+        chargement: false,
+        toggle() {
+            this.open = !this.open;
+        },
+        formatLabel() {
+            const labels = {
+                visioconference: 'Visioconférence',
+                telephone: 'Téléphone',
+                agence: 'Agence',
+                domicile: 'Domicile',
+            };
+            return labels[this.format] || null;
+        },
+        sujetLabel() {
+            const labels = {
+                point_etape: "Point d'étape",
+                bilan_patrimonial: 'Bilan patrimonial',
+                signature_document: 'Signature de document',
+                suivi_portefeuille: 'Suivi de portefeuille',
+                autre: 'Autre',
+            };
+            return labels[this.sujet] || null;
+        },
+        ouvrirDecalage() {
+            this.decalage = true;
+            this.nouvelleDate = new Date().toISOString().slice(0, 10);
+            this.chargerCreneaux();
+        },
+        chargerCreneaux() {
+            if (!this.nouvelleDate) return;
+            this.chargement = true;
+            this.creneauChoisi = null;
+            fetch(urlDisponibilites + '?date=' + this.nouvelleDate + '&duree=' + this.dureeMinutes + '&exclure=' + this.id)
+                .then(r => r.json())
+                .then(d => { this.creneaux = d.creneaux || []; })
+                .finally(() => { this.chargement = false; });
+        },
+        confirmerDecalage() {
+            if (!this.creneauChoisi) return;
+            fetch(urlDecaler, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({
+                    starts_at: this.creneauChoisi.start,
+                    ends_at: this.creneauChoisi.end,
+                }),
+            }).then(() => { window.location.reload(); });
+        },
+    };
+}
+
 function rdvPopup(urlDisponibilites, urlStore) {
     return {
         visible: false,
@@ -2338,17 +2400,73 @@ function rdvPopup(urlDisponibilites, urlStore) {
             </div>
 
             @forelse($rendezVousAVenir as $rdv)
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;{{ !$loop->last ? 'border-bottom:1px solid #ded9d4;' : '' }}">
-                <div>
-                    <strong style="font-size:13.5px;color:#151515;">{{ $rdv->starts_at->translatedFormat('d F Y') }} à {{ $rdv->starts_at->format('H:i') }}</strong>
-                    @if($rdv->format)
-                    <span style="display:block;font-size:12px;color:#817b76;margin-top:2px;">{{ ucfirst(str_replace('_', ' ', $rdv->format)) }}</span>
-                    @endif
+            <div
+                x-data="rdvLigne(@js([
+                    'id' => $rdv->id,
+                    'format' => $rdv->format,
+                    'sujet' => $rdv->sujet,
+                    'notes' => $rdv->notes,
+                    'dureeMinutes' => $rdv->starts_at->diffInMinutes($rdv->ends_at),
+                ]), @js(route('tenant.rendez-vous.disponibilites')), @js(route('tenant.rendez-vous.decaler', $rdv)))"
+                style="padding:12px 0;{{ !$loop->last ? 'border-bottom:1px solid #ded9d4;' : '' }}"
+            >
+                <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" x-on:click="toggle()">
+                    <div>
+                        <strong style="font-size:13.5px;color:#151515;">{{ $rdv->titre }}</strong>
+                        <span style="display:block;font-size:12px;color:#817b76;margin-top:2px;">{{ $rdv->starts_at->translatedFormat('d F Y') }} à {{ $rdv->starts_at->format('H:i') }}<template x-if="sujetLabel()"><span x-text="' · ' + sujetLabel()"></span></template></span>
+                    </div>
+                    <span style="font-size:11px;color:#9a928d;" x-text="open ? '▲' : '▼'"></span>
                 </div>
-                <form method="POST" action="{{ route('tenant.rendez-vous.annuler', $rdv) }}" onsubmit="return confirm('Annuler ce rendez-vous ?');">
-                    @csrf
-                    <button type="submit" style="background:none;border:1px solid #ded9d4;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;color:#b94d4d;cursor:pointer;">Annuler</button>
-                </form>
+
+                <div x-show="open" x-cloak style="margin-top:12px;padding:14px;background:#f7f5f3;border-radius:10px;">
+                    <template x-if="formatLabel()">
+                        <p style="font-size:12.5px;color:#151515;margin:0 0 6px;"><strong>Format :</strong> <span x-text="formatLabel()"></span></p>
+                    </template>
+                    <template x-if="notes">
+                        <p style="font-size:12.5px;color:#151515;margin:0 0 12px;"><strong>Notes :</strong> <span x-text="notes"></span></p>
+                    </template>
+
+                    <template x-if="!decalage">
+                        <div style="display:flex;gap:8px;">
+                            <button type="button" x-on:click="ouvrirDecalage()" style="background:none;border:1px solid #ded9d4;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;color:#151515;cursor:pointer;">Décaler</button>
+                            <form method="POST" action="{{ route('tenant.rendez-vous.annuler', $rdv) }}" onsubmit="return confirm('Annuler ce rendez-vous ?');">
+                                @csrf
+                                <button type="submit" style="background:none;border:1px solid #ded9d4;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;color:#b94d4d;cursor:pointer;">Annuler</button>
+                            </form>
+                        </div>
+                    </template>
+
+                    <template x-if="decalage">
+                        <div>
+                            <label style="display:block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9a928d;margin-bottom:6px;">Nouvelle date</label>
+                            <input type="date" x-model="nouvelleDate" x-on:change="chargerCreneaux()" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:8px 10px;font-size:13px;margin-bottom:10px;color:#151515;color-scheme:light;background:#fff;">
+
+                            <template x-if="chargement">
+                                <p style="font-size:12px;color:#817b76;">Chargement…</p>
+                            </template>
+                            <template x-if="!chargement && nouvelleDate && creneaux.length === 0">
+                                <p style="font-size:12px;color:#817b76;">Aucun créneau disponible ce jour-là.</p>
+                            </template>
+
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
+                                <template x-for="c in creneaux" :key="c.start">
+                                    <button
+                                        type="button"
+                                        x-on:click="creneauChoisi = c"
+                                        :style="creneauChoisi && creneauChoisi.start === c.start ? 'background:#f40087;color:#fff;border-color:#f40087;' : 'background:#fff;color:#151515;border-color:#ded9d4;'"
+                                        style="border:1px solid #ded9d4;border-radius:7px;padding:6px 4px;font-size:12px;font-weight:600;cursor:pointer;"
+                                        x-text="new Date(c.start).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})"
+                                    ></button>
+                                </template>
+                            </div>
+
+                            <div style="display:flex;gap:8px;">
+                                <button type="button" x-on:click="confirmerDecalage()" :disabled="!creneauChoisi" style="background:#1b1716;color:#fff;border:none;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;">Confirmer le décalage</button>
+                                <button type="button" x-on:click="decalage = false" style="background:none;border:1px solid #ded9d4;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:600;color:#817b76;cursor:pointer;">Annuler le décalage</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
             @empty
             <p style="font-size:12.5px;color:#817b76;">Aucun rendez-vous à venir.</p>

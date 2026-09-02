@@ -29,12 +29,13 @@ class RendezVousController extends Controller
         $validated = $request->validate([
             'date' => ['required', 'date'],
             'duree' => ['nullable', 'integer', 'min:15', 'max:180'],
+            'exclure' => ['nullable', 'integer'],
         ]);
 
         $jour = Carbon::parse($validated['date']);
         $duree = $validated['duree'] ?? 30;
 
-        $creneaux = $this->disponibilite->creneauxDisponibles(Auth::user(), $jour, $duree);
+        $creneaux = $this->disponibilite->creneauxDisponibles(Auth::user(), $jour, $duree, $validated['exclure'] ?? null);
 
         return response()->json(['creneaux' => $creneaux]);
     }
@@ -103,5 +104,37 @@ class RendezVousController extends Controller
         $rendezVous->update(['statut' => 'annule']);
 
         return back()->with('status', 'Rendez-vous annulé.');
+    }
+
+    public function decaler(Request $request, RendezVous $rendezVous): RedirectResponse
+    {
+        abort_unless($rendezVous->user_id === Auth::id(), 403);
+
+        $validated = $request->validate([
+            'starts_at' => ['required', 'date', 'after:now'],
+            'ends_at' => ['required', 'date', 'after:starts_at'],
+        ]);
+
+        $rendezVous->update([
+            'starts_at' => $validated['starts_at'],
+            'ends_at' => $validated['ends_at'],
+        ]);
+
+        if ($rendezVous->calendar_provider === 'google' && $rendezVous->external_event_id) {
+            $connexionGoogle = CalendarConnection::where('user_id', Auth::id())
+                ->where('provider', 'google')
+                ->first();
+
+            if ($connexionGoogle) {
+                $this->googleCalendar->updateEvent(
+                    $connexionGoogle,
+                    $rendezVous->external_event_id,
+                    Carbon::parse($validated['starts_at']),
+                    Carbon::parse($validated['ends_at'])
+                );
+            }
+        }
+
+        return back()->with('status', 'Rendez-vous décalé.');
     }
 }

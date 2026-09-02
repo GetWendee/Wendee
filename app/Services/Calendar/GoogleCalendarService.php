@@ -117,6 +117,34 @@ class GoogleCalendarService
         return true;
     }
 
+    /**
+     * Met à jour les horaires d'un événement existant (décalage de RDV).
+     */
+    public function updateEvent(CalendarConnection $connection, string $eventId, Carbon $debut, Carbon $fin): bool
+    {
+        $this->ensureFreshToken($connection);
+
+        $calendarId = $connection->calendar_id ?: 'primary';
+
+        $response = Http::withToken($connection->access_token)
+            ->patch("https://www.googleapis.com/calendar/v3/calendars/{$calendarId}/events/{$eventId}?sendUpdates=all", [
+                'start' => ['dateTime' => $debut->toRfc3339String()],
+                'end' => ['dateTime' => $fin->toRfc3339String()],
+            ]);
+
+        if (! $response->successful()) {
+            Log::warning('Google Calendar mise à jour événement a échoué', [
+                'connection_id' => $connection->id,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
     protected function ensureFreshToken(CalendarConnection $connection): void
     {
         if (! $connection->isExpired() || ! $connection->refresh_token) {
