@@ -60,6 +60,17 @@ class Client extends Model
         return $this->hasMany(ClientPersonneACharge::class);
     }
 
+    public function patrimoineFiscalite(): HasOne
+    {
+        return $this->hasOne(PatrimoineFiscalite::class);
+    }
+
+    public function patrimoineObjectifs(): HasMany
+    {
+        return $this->hasMany(PatrimoineObjectif::class);
+    }
+
+
     public function analyses(): HasMany
     {
         return $this->hasMany(ClientAnalysis::class);

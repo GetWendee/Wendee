@@ -300,7 +300,7 @@
                 width: 100% !important;
             }
         }
-    
+
 
 /* ============================================================
    RADIOS PATRIMOINE
@@ -360,6 +360,19 @@
 
 .wd-patrimoine-radio:hover input[type="radio"]{
     border-color:#F40087;
+}
+
+.wd-patrimoine-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #242424;
+    margin-bottom: 4px;
+}
+
+.wd-patrimoine-section-intro {
+    font-size: 12px;
+    color: #6f6964;
+    margin-bottom: 18px;
 }
 
 </style>
@@ -457,11 +470,212 @@
                     </dl>
                 </div>
 
-                <x-patrimoine-bloc categorie="actif_financier" label="Actifs financiers" :mode-detention="true" />
-                <x-patrimoine-bloc categorie="actif_non_financier" label="Actifs non financiers" :mode-detention="true" />
-                <x-patrimoine-bloc categorie="passif" label="Passifs" />
-                <x-patrimoine-bloc categorie="revenu" label="Revenus" />
-                <x-patrimoine-bloc categorie="charge" label="Charges" />
+                <x-patrimoine-bloc categorie="actif_financier" label="Actifs financiers" :mode-detention="true" :foyer-avec-conjoint="$foyerAvecConjoint" />
+                <x-patrimoine-bloc categorie="actif_non_financier" label="Actifs non financiers" :mode-detention="true" :foyer-avec-conjoint="$foyerAvecConjoint" />
+                <x-patrimoine-bloc categorie="passif" label="Passifs" :foyer-avec-conjoint="$foyerAvecConjoint" />
+                <x-patrimoine-bloc categorie="revenu" label="Revenus" :foyer-avec-conjoint="$foyerAvecConjoint" />
+                <x-patrimoine-bloc categorie="charge" label="Charges" :foyer-avec-conjoint="$foyerAvecConjoint" />
+
+                <div class="bg-white shadow-sm sm:rounded-lg mb-6 p-6"
+                     x-data="{
+                        residentFiscal: '{{ old('resident_fiscal_francais', $fiscalite?->resident_fiscal_francais ?? '') }}',
+                        connaitTmiIr: '{{ old('connait_tmi_ir', $fiscalite?->connait_tmi_ir ?? '') }}',
+                        imposeIfi: '{{ old('impose_ifi', $fiscalite?->impose_ifi ?? '') }}',
+                        connaitTmiIfi: '{{ old('connait_tmi_ifi', $fiscalite?->connait_tmi_ifi ?? '') }}'
+                     }">
+                    <div class="wd-patrimoine-section-title">Fiscalité</div>
+                    <div class="wd-patrimoine-section-intro">Remplissez les éléments-clés de votre environnement fiscal.</div>
+
+                    <div class="mb-5">
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Êtes-vous résident fiscal français ?</label>
+                        <div class="wd-patrimoine-radios">
+                            <label class="wd-patrimoine-radio"><input type="radio" name="resident_fiscal_francais" value="oui" x-model="residentFiscal"><span>Oui</span></label>
+                            <label class="wd-patrimoine-radio"><input type="radio" name="resident_fiscal_francais" value="non" x-model="residentFiscal"><span>Non</span></label>
+                        </div>
+                    </div>
+
+                    <div class="text-xs font-semibold text-gray-600 mb-3">Impôt sur le revenu (IRPP)</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Impôt sur le revenu (IRPP)</label>
+                            <input type="number" step="0.01" name="irpp_montant" value="{{ old('irpp_montant', $fiscalite?->irpp_montant ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Nombre de parts</label>
+                            <input type="number" step="0.25" name="irpp_nombre_parts" value="{{ old('irpp_nombre_parts', $fiscalite?->irpp_nombre_parts ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Connaissez-vous votre TMI (IR) ?</label>
+                            <div class="wd-patrimoine-radios">
+                                <label class="wd-patrimoine-radio"><input type="radio" name="connait_tmi_ir" value="oui" x-model="connaitTmiIr"><span>Oui</span></label>
+                                <label class="wd-patrimoine-radio"><input type="radio" name="connait_tmi_ir" value="non" x-model="connaitTmiIr"><span>Non</span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-5" x-show="connaitTmiIr === 'oui'">
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Taux Marginal d'Imposition (TMI)</label>
+                        <select name="tmi_ir" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                            <option value="">Choisir</option>
+                            @foreach(['0' => '0 %', '11' => '11 %', '30' => '30 %', '41' => '41 %', '45' => '45 %'] as $valeur => $label)
+                                <option value="{{ $valeur }}" {{ old('tmi_ir', $fiscalite?->tmi_ir ?? '') === $valeur ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Réductions et crédits d'impôts</label>
+                            <input type="number" step="0.01" name="reductions_credits_impots" value="{{ old('reductions_credits_impots', $fiscalite?->reductions_credits_impots ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Impôt net à payer</label>
+                            <input type="number" step="0.01" name="impot_net_a_payer" value="{{ old('impot_net_a_payer', $fiscalite?->impot_net_a_payer ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Contributions sociales</label>
+                            <input type="number" step="0.01" name="contributions_sociales" value="{{ old('contributions_sociales', $fiscalite?->contributions_sociales ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-5" style="border-top:1px solid #eeeae6;">
+                        <div class="text-xs font-semibold text-gray-600 mb-3">Impôt sur la fortune immobilière (IFI)</div>
+                        <div class="mb-5">
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Êtes-vous imposé à l'IFI ?</label>
+                            <div class="wd-patrimoine-radios">
+                                <label class="wd-patrimoine-radio"><input type="radio" name="impose_ifi" value="oui" x-model="imposeIfi"><span>Oui</span></label>
+                                <label class="wd-patrimoine-radio"><input type="radio" name="impose_ifi" value="non" x-model="imposeIfi"><span>Non</span></label>
+                            </div>
+                        </div>
+
+                        <div x-show="imposeIfi === 'oui'">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Base imposable</label>
+                                    <input type="number" step="0.01" name="base_imposable_ifi" value="{{ old('base_imposable_ifi', $fiscalite?->base_imposable_ifi ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Connaissez-vous votre TMI (IFI) ?</label>
+                                    <div class="wd-patrimoine-radios">
+                                        <label class="wd-patrimoine-radio"><input type="radio" name="connait_tmi_ifi" value="oui" x-model="connaitTmiIfi"><span>Oui</span></label>
+                                        <label class="wd-patrimoine-radio"><input type="radio" name="connait_tmi_ifi" value="non" x-model="connaitTmiIfi"><span>Non</span></label>
+                                    </div>
+                                </div>
+                                <div x-show="connaitTmiIfi === 'oui'">
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Taux Marginal d'Imposition (IFI)</label>
+                                    <select name="tmi_ifi" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                                        <option value="">Choisir</option>
+                                        @foreach(['0' => '0,00 %', '0.5' => '0,50 %', '0.7' => '0,70 %', '1' => '1,00 %', '1.25' => '1,25 %', '1.5' => '1,50 %'] as $valeur => $label)
+                                            <option value="{{ $valeur }}" {{ old('tmi_ifi', $fiscalite?->tmi_ifi ?? '') === $valeur ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Réductions d'IFI</label>
+                                    <input type="number" step="0.01" name="reductions_ifi" value="{{ old('reductions_ifi', $fiscalite?->reductions_ifi ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">IFI net à payer</label>
+                                    <input type="number" step="0.01" name="ifi_net_a_payer" value="{{ old('ifi_net_a_payer', $fiscalite?->ifi_net_a_payer ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-sm sm:rounded-lg mb-6 p-6"
+                     x-data="{ usPerson: '{{ old('us_person', $fiscalite?->us_person ?? '') }}' }">
+                    <div class="wd-patrimoine-section-title">Résident U.S.</div>
+                    <div class="wd-patrimoine-section-intro">
+                        Si vous êtes susceptible d'avoir le statut de contribuable américain, veuillez répondre "oui". Vous pourrez alors préciser le critère qui vous définit en tant que "US Person".
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Êtes-vous une US Person ?</label>
+                        <div class="wd-patrimoine-radios">
+                            <label class="wd-patrimoine-radio"><input type="radio" name="us_person" value="oui" x-model="usPerson"><span>Oui</span></label>
+                            <label class="wd-patrimoine-radio"><input type="radio" name="us_person" value="non" x-model="usPerson"><span>Non</span></label>
+                        </div>
+                    </div>
+
+                    <div x-show="usPerson === 'oui'" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        @php
+                            $criteresUs = [
+                                'us_citoyen' => 'Citoyen des États-Unis',
+                                'us_resident' => 'Résident des États-Unis',
+                                'us_carte_verte' => 'Possède une carte verte',
+                                'us_sejour' => 'A séjourné aux États-Unis',
+                                'us_entite' => "US Person par possession d'une entité",
+                                'us_autre_raison' => "US Person pour d'autres raisons",
+                                'us_tin' => "En possession d'un numéro fiscal (US TIN)",
+                            ];
+                        @endphp
+                        @foreach($criteresUs as $champ => $labelCritere)
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-2">{{ $labelCritere }}</label>
+                                <div class="wd-patrimoine-radios">
+                                    <label class="wd-patrimoine-radio"><input type="radio" name="{{ $champ }}" value="oui" {{ old($champ, $fiscalite?->$champ ?? '') === 'oui' ? 'checked' : '' }}><span>Oui</span></label>
+                                    <label class="wd-patrimoine-radio"><input type="radio" name="{{ $champ }}" value="non" {{ old($champ, $fiscalite?->$champ ?? '') === 'non' ? 'checked' : '' }}><span>Non</span></label>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <script type="application/json" id="objectifs-data">{!! json_encode($objectifs, JSON_HEX_TAG) !!}</script>
+                <div class="bg-white shadow-sm sm:rounded-lg mb-6 p-6"
+                     x-data="{
+                        objectifs: JSON.parse(document.getElementById('objectifs-data').textContent).length
+                            ? JSON.parse(document.getElementById('objectifs-data').textContent)
+                            : [{ objectif: '', horizon: '' }]
+                     }">
+                    <div class="wd-patrimoine-section-title">Objectifs</div>
+                    <div class="wd-patrimoine-section-intro">Définissez vos objectifs (préparer la retraite, réduire la fiscalité, transmettre, générer des revenus...).</div>
+
+                    <template x-for="(o, i) in objectifs" :key="i">
+                        <div class="border border-gray-200 rounded-xl px-5 py-5 mb-3">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Quels sont vos objectifs ?</label>
+                                    <select :name="`objectifs[${i}][objectif]`" x-model="o.objectif" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                                        <option value="">Choisir</option>
+                                        @foreach(config('patrimoine.objectifs', []) as $valeur => $label)
+                                            <option value="{{ $valeur }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Horizon (années)</label>
+                                    <input type="number" :name="`objectifs[${i}][horizon]`" x-model.number="o.horizon" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                                </div>
+                            </div>
+                            <div class="flex justify-end mt-3">
+                                <button type="button" @click="objectifs.splice(i, 1)" class="text-xs font-semibold text-red-600">Retirer</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <button type="button" @click="objectifs.push({ objectif: '', horizon: '' })" class="text-sm font-semibold text-gray-800 mt-2">
+                        + Ajouter un objectif
+                    </button>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6 pt-5" style="border-top:1px solid #eeeae6;">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Effort d'épargne mensuel dédié à vos objectifs</label>
+                            <input type="number" step="0.01" name="effort_epargne_mensuel" value="{{ old('effort_epargne_mensuel', $fiscalite?->effort_epargne_mensuel ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Montant de votre patrimoine total (si connu)</label>
+                            <input type="number" step="0.01" name="montant_patrimoine_total" value="{{ old('montant_patrimoine_total', $fiscalite?->montant_patrimoine_total ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Montant de vos revenus annuels (si connu)</label>
+                            <input type="number" step="0.01" name="montant_revenus_annuels" value="{{ old('montant_revenus_annuels', $fiscalite?->montant_revenus_annuels ?? '') }}" class="border-gray-300 rounded-md shadow-sm w-full text-sm">
+                        </div>
+                    </div>
+                </div>
 
                 @if ($verificationRequise)
                     <div class="bg-white shadow-sm sm:rounded-lg mb-6 p-6">

@@ -74,10 +74,73 @@ return [
 
         'passif' => [
             'emprunt_sur_residence_principale' => 'Emprunt sur résidence principale',
+            'emprunt_sur_residence_secondaire' => 'Emprunt sur résidence secondaire',
+            'emprunt_immobilier_locatif' => 'Emprunt immobilier locatif',
             'credit_a_la_consommation' => 'Crédit à la consommation',
+            'credit_auto' => 'Crédit auto',
+            'credit_renouvelable' => 'Crédit renouvelable (revolving)',
+            'pret_personnel' => 'Prêt personnel',
+            'pret_etudiant' => 'Prêt étudiant',
+            'decouvert_bancaire' => 'Découvert bancaire',
+            'dette_fiscale' => 'Dette fiscale (IR, IFI)',
+            'caution_garantie_donnee' => 'Caution / garantie donnée',
             'autres_dettes_diverses' => 'Autres dettes diverses',
         ],
 
+        'revenu' => [
+            'salaires_traitements' => 'Salaires et traitements',
+            'revenus_bic' => 'Revenus industriels et commerciaux (BIC)',
+            'revenus_bnc' => 'Revenus non commerciaux (BNC)',
+            'revenus_ba' => 'Revenus agricoles (BA)',
+            'revenus_fonciers' => 'Revenus fonciers',
+            'pensions_retraites' => 'Pensions et retraites',
+            'rentes_viageres' => 'Rentes viagères',
+            'revenus_capitaux_mobiliers' => 'Revenus de capitaux mobiliers (dividendes, intérêts)',
+            'allocations' => 'Allocations (chômage, familiales, etc.)',
+            'autres_revenus' => 'Autres revenus',
+        ],
+
+        'charge' => [
+            'loyer_verse' => 'Loyer versé',
+            'mensualites_credits' => 'Mensualités de crédits',
+            'impot_revenu' => 'Impôt sur le revenu',
+            'ifi' => 'Impôt sur la fortune immobilière (IFI)',
+            'taxe_fonciere' => 'Taxe foncière',
+            'charges_copropriete' => 'Charges de copropriété',
+            'pension_alimentaire_versee' => 'Pension alimentaire versée',
+            'cotisations_sociales_retraite' => 'Cotisations sociales et retraite complémentaire',
+            'assurances' => 'Assurances (habitation, prévoyance, santé...)',
+            'frais_scolarite_garde' => 'Frais de scolarité et garde d’enfants',
+            'autres_charges' => 'Autres charges courantes',
+        ],
+
+    ],
+
+    'types_pret' => [
+        'amortissable' => 'Amortissable',
+        'in_fine' => 'In fine',
+        'pret_relais' => 'Prêt relais',
+        'pret_taux_zero' => 'Prêt à taux zéro (PTZ)',
+        'pret_conventionne' => 'Prêt conventionné',
+        'autre' => 'Autre',
+    ],
+
+    'objectifs' => [
+        'optimiser_rentabilite_placements' => 'Optimiser la rentabilité de ses placements',
+        'preparer_retraite' => 'Préparer sa retraite',
+        'reduire_fiscalite' => 'Réduire sa fiscalité',
+        'preparer_transmission' => 'Préparer la transmission de son patrimoine',
+        'generer_revenus_complementaires' => 'Générer des revenus complémentaires',
+        'constituer_epargne_precaution' => 'Se constituer une épargne de précaution',
+        'financer_projet' => 'Financer un projet',
+        'proteger_famille' => 'Protéger sa famille',
+        'autre' => 'Autre',
+    ],
+
+    'bien' => [
+        'propre' => 'Propre',
+        'commun' => 'Commun',
+        'conjoint' => 'Conjoint',
     ],
 
 ];
