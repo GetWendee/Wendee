@@ -145,6 +145,8 @@ class PatrimoineController extends Controller
             'montant_patrimoine_total' => ['nullable', 'numeric'],
             'montant_revenus_annuels' => ['nullable', 'numeric'],
 
+            'lieu_signature' => ['nullable', 'string', 'max:255'],
+            'accepte_cgu' => ['nullable', 'boolean'],
             'code_de_verification_client' => ['nullable', 'string', 'max:10'],
         ], [], [
             'elements.*.categorie' => 'catégorie',
@@ -153,6 +155,12 @@ class PatrimoineController extends Controller
             'elements.*.montant' => 'montant',
             'elements.*.mode_detention' => 'mode de détention',
         ]);
+
+        $validated['accepte_cgu'] = $request->boolean('accepte_cgu');
+
+        if ($validated['accepte_cgu'] && ! $client->patrimoineFiscalite?->signe_le) {
+            $validated['signe_le'] = now();
+        }
 
         $codeSaisi = $validated['code_de_verification_client'] ?? null;
         $codeValide = false;
@@ -227,6 +235,9 @@ class PatrimoineController extends Controller
                 'effort_epargne_mensuel' => $validated['effort_epargne_mensuel'] ?? null,
                 'montant_patrimoine_total' => $validated['montant_patrimoine_total'] ?? null,
                 'montant_revenus_annuels' => $validated['montant_revenus_annuels'] ?? null,
+                'lieu_signature' => $validated['lieu_signature'] ?? null,
+                'accepte_cgu' => $validated['accepte_cgu'],
+                'signe_le' => $validated['signe_le'] ?? $client->patrimoineFiscalite?->signe_le,
             ]
         );
 

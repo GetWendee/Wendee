@@ -679,15 +679,30 @@
                     </div>
                 </div>
 
-                @if ($verificationRequise)
-                    <div class="bg-white shadow-sm sm:rounded-lg mb-6 p-6">
-                        <x-input-label for="code_de_verification_client" value="Code de vérification client" />
-                        <x-text-input id="code_de_verification_client" name="code_de_verification_client" type="text" class="block mt-1 w-full" :value="old('code_de_verification_client')" />
-                        <p class="text-sm text-gray-500 mt-2">
-                            Un code de vérification a été envoyé au client pour valider ce premier recueil.
-                        </p>
+                <div class="bg-white shadow-sm sm:rounded-lg mb-6 p-6 space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Signature</h3>
+
+                    <div>
+                        <x-input-label for="lieu_signature" value="Fait à" />
+                        <x-text-input id="lieu_signature" name="lieu_signature" type="text" class="block mt-1 w-full" :value="old('lieu_signature', $fiscalite?->lieu_signature)" />
                     </div>
-                @endif
+
+                    @if ($verificationRequise)
+                        <div>
+                            <x-input-label for="code_de_verification_client" value="Code de vérification client" />
+                            <x-text-input id="code_de_verification_client" name="code_de_verification_client" type="text" class="block mt-1 w-full" :value="old('code_de_verification_client')" />
+                            <p class="text-sm text-gray-500 mt-2">
+                                Un code de vérification a été envoyé au client pour valider ce premier recueil.
+                            </p>
+                        </div>
+                    @endif
+
+                    <div class="flex items-center">
+                        <input type="hidden" name="accepte_cgu" value="0">
+                        <input type="checkbox" id="accepte_cgu" name="accepte_cgu" value="1" {{ old('accepte_cgu', $fiscalite?->accepte_cgu) ? 'checked' : '' }} class="rounded border-gray-300">
+                        <label for="accepte_cgu" class="ms-2 text-sm text-gray-700">Le client accepte les conditions générales d'utilisation et la politique de confidentialité.</label>
+                    </div>
+                </div>
 
                 <div class="flex justify-end mt-6">
                     <x-primary-button>

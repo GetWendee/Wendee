@@ -36,6 +36,9 @@ class PatrimoineFiscalite extends Model
         'effort_epargne_mensuel',
         'montant_patrimoine_total',
         'montant_revenus_annuels',
+        'lieu_signature',
+        'accepte_cgu',
+        'signe_le',
     ];
 
     protected function casts(): array
@@ -52,6 +55,8 @@ class PatrimoineFiscalite extends Model
             'effort_epargne_mensuel' => 'decimal:2',
             'montant_patrimoine_total' => 'decimal:2',
             'montant_revenus_annuels' => 'decimal:2',
+            'accepte_cgu' => 'boolean',
+            'signe_le' => 'datetime',
         ];
     }
 
