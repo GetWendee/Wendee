@@ -20,7 +20,7 @@ class CalendarConnectionController extends Controller
     {
         abort_unless(in_array($provider, ['google', 'microsoft'], true), 404);
 
-        $driver = Socialite::driver($provider)->stateless(false);
+        $driver = Socialite::driver($provider)->stateless();
 
         if ($provider === 'google') {
             $driver->scopes(['https://www.googleapis.com/auth/calendar.readonly'])
@@ -41,7 +41,7 @@ class CalendarConnectionController extends Controller
     {
         abort_unless(in_array($provider, ['google', 'microsoft'], true), 404);
 
-        $utilisateurSocial = Socialite::driver($provider)->user();
+        $utilisateurSocial = Socialite::driver($provider)->stateless()->user();
 
         CalendarConnection::updateOrCreate(
             ['user_id' => Auth::id(), 'provider' => $provider],
