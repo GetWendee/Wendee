@@ -571,29 +571,50 @@ html,body{
 .wd-subtabs{
     display:flex;
     align-items:center;
-    gap:8px;
-    margin:-14px 0 24px;
+    gap:22px;
+    margin:0 0 28px;
+    padding:16px 0 16px;
+    border-bottom:1px solid var(--line);
+}
+
+.wd-subtabs-links{
+    display:flex;
+    align-items:center;
+    gap:26px;
+    padding-left:22px;
+    border-left:1px solid var(--line);
 }
 
 .wd-subtabs a{
-    flex:0 0 auto;
-    min-width:220px;
-    min-height:40px;
-    padding:0 20px;
-    border-radius:8px;
-    background:#ebe8e5;
-    color:#77706c;
-    font-size:11px;
-    font-weight:750;
+    position:relative;
+    padding-bottom:5px;
+    color:#817b76;
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
     text-decoration:none;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
+}
+
+.wd-subtabs a::after{
+    content:'';
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:2px;
+    background:var(--pink);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .18s ease;
 }
 
 .wd-subtabs a:hover{
-    background:#ded9d4;
-    color:#171514;
+    color:#151515;
+}
+
+.wd-subtabs a:hover::after{
+    transform:scaleX(1);
 }
 
 .wd-btn-dark{
@@ -2627,11 +2648,15 @@ Archives
 {{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
 </button>
 
+<div class="wd-subtabs-links">
+
 <a href="#kyc">KYC</a>
 
 <a href="#patrimoine">Patrimoine</a>
 
 <a href="#investisseur">Investisseur</a>
+
+</div>
 
 </nav>
 
