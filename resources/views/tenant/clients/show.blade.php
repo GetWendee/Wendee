@@ -568,6 +568,32 @@ html,body{
     margin-left:auto;
 }
 
+.wd-subtabs{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:-14px 0 24px;
+}
+
+.wd-subtabs a{
+    padding:8px 14px;
+    border-radius:7px;
+    background:#ebe8e5;
+    color:#77706c;
+    font-size:11px;
+    font-weight:750;
+    text-decoration:none;
+}
+
+.wd-subtabs a:hover{
+    background:#ded9d4;
+    color:#171514;
+}
+
+.wd-subtabs-action{
+    margin-left:auto;
+}
+
 .wd-btn-dark{
     flex:0 0 auto;
     min-width:220px;
@@ -2503,7 +2529,17 @@ Contrat
 Archives
 </a>
 
-<button type="button" class="wd-btn-dark wd-tabs-action" data-dossier-trigger>
+</nav>
+
+<nav class="wd-subtabs">
+
+<a href="#kyc">KYC</a>
+
+<a href="#patrimoine">Patrimoine</a>
+
+<a href="#investisseur">Investisseur</a>
+
+<button type="button" class="wd-btn-dark wd-subtabs-action" data-dossier-trigger>
 {{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
 </button>
 
@@ -2539,16 +2575,13 @@ Archives
 
 
 
-<section class="wd-section wd-kyc-section">
+<section class="wd-section wd-kyc-section" id="kyc">
 
 <div class="wd-section-head">
 <div>
 <div class="wd-eyebrow">KYC</div>
 <h2>Recueil de connaissance</h2>
 </div>
-<button type="button" class="wd-btn-dark" data-donnees-trigger>
-Voir ses données
-</button>
 </div>
 
 <div class="wd-panel wd-kyc-progress">
@@ -2651,7 +2684,7 @@ Voir ses données
 </div>
 </div>
 
-<section class="wd-section wd-patrimoine-premium">
+<section class="wd-section wd-patrimoine-premium" id="patrimoine">
 
 <div class="wd-section-head">
     <div>
@@ -2659,9 +2692,6 @@ Voir ses données
         <h2>Vue patrimoniale</h2>
     </div>
     <div style="display:flex;gap:10px;">
-    <button type="button" class="wd-btn-dark" data-patrimoine-donnees-trigger>
-    Voir ses données
-    </button>
     <a
     href="{{ route('tenant.clients.patrimoine.edit', $client) }}"
     class="wd-btn-dark">
@@ -3207,7 +3237,7 @@ Voir ses données
 </section>
 
 
-<section class="wd-section wd-investor-profile">
+<section class="wd-section wd-investor-profile" id="investisseur">
 
 <div class="wd-section-head">
 
@@ -3217,9 +3247,6 @@ Voir ses données
 </div>
 
 <div style="display:flex;gap:10px;">
-<button type="button" class="wd-btn-dark" data-investisseur-donnees-trigger>
-Voir ses données
-</button>
 <a
 href="{{ route('tenant.clients.profil.edit', $client) }}"
 class="wd-btn-dark">
