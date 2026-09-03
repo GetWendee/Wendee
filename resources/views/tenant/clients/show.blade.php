@@ -91,54 +91,54 @@
 
     $donneesClient = [
         'Naissance' => array_filter([
-            $client->date_naissance ? 'Le : ' . $formatDateKyc($client->date_naissance) : null,
-            $kyc?->commune_naissance ? 'à : ' . $kyc->commune_naissance : null,
-            $kyc?->code_postal_naissance ? 'Code postal de naissance : ' . $kyc->code_postal_naissance : null,
+            $client->date_naissance ? ['label' => 'Date de naissance', 'value' => $formatDateKyc($client->date_naissance)] : null,
+            $kyc?->commune_naissance ? ['label' => 'Commune de naissance', 'value' => $kyc->commune_naissance] : null,
+            $kyc?->code_postal_naissance ? ['label' => 'Code postal de naissance', 'value' => $kyc->code_postal_naissance] : null,
             $kyc?->francais === 'oui'
-                ? 'Nationalité française'
-                : ($kyc?->autre_nationalite ? 'Nationalité ' . $labelListe('nationalites', $kyc->autre_nationalite) : null),
+                ? ['label' => 'Nationalité', 'value' => 'Française']
+                : ($kyc?->autre_nationalite ? ['label' => 'Nationalité', 'value' => $labelListe('nationalites', $kyc->autre_nationalite)] : null),
         ]),
         'Juridique' => array_filter([
-            $labelListe('classification_mif', $kyc?->classification_mif) ? 'Classification MIF : ' . $labelListe('classification_mif', $kyc?->classification_mif) : null,
-            $labelListe('capacite_juridique', $kyc?->capacite_juridique) ? 'Capacité juridique : ' . $labelListe('capacite_juridique', $kyc?->capacite_juridique) : null,
+            $labelListe('classification_mif', $kyc?->classification_mif) ? ['label' => 'Classification MIF', 'value' => $labelListe('classification_mif', $kyc?->classification_mif)] : null,
+            $labelListe('capacite_juridique', $kyc?->capacite_juridique) ? ['label' => 'Capacité juridique', 'value' => $labelListe('capacite_juridique', $kyc?->capacite_juridique)] : null,
         ]),
         'Familial' => array_filter([
-            $labelListe('situation_familiale', $kyc?->situation_familiale) ? 'Situation familiale : ' . $labelListe('situation_familiale', $kyc?->situation_familiale) : null,
-            $nbEnfantsCharge > 0 ? $nbEnfantsCharge . ' enfant(s) à charge' : 'Aucun enfant à charge',
+            $labelListe('situation_familiale', $kyc?->situation_familiale) ? ['label' => 'Situation familiale', 'value' => $labelListe('situation_familiale', $kyc?->situation_familiale)] : null,
+            ['label' => 'Enfants à charge', 'value' => $nbEnfantsCharge > 0 ? (string) $nbEnfantsCharge : 'Aucun'],
         ]),
         'Matrimonial' => array_filter([
-            $labelListe('regime_matrimonial', $kyc?->regime_matrimonial) ? 'Régime matrimonial : ' . $labelListe('regime_matrimonial', $kyc?->regime_matrimonial) : null,
+            $labelListe('regime_matrimonial', $kyc?->regime_matrimonial) ? ['label' => 'Régime matrimonial', 'value' => $labelListe('regime_matrimonial', $kyc?->regime_matrimonial)] : null,
         ]),
         'Conjoint' => array_filter([
-            $kyc?->conjoint_date_naissance ? 'Né le : ' . $formatDateKyc($kyc->conjoint_date_naissance) : null,
+            $kyc?->conjoint_date_naissance ? ['label' => 'Date de naissance', 'value' => $formatDateKyc($kyc->conjoint_date_naissance)] : null,
         ]),
         'Professionnel (' . trim($client->prenom . ' ' . $client->nom) . ')' => array_filter([
-            $kyc?->profession_libelle ? 'Profession : ' . $kyc->profession_libelle : null,
-            $kyc?->csp ? 'CSP : ' . $labelListe('csp', $kyc->csp) : null,
-            $kyc?->societe_employeur ? 'Employeur : ' . $kyc->societe_employeur : null,
-            $kyc?->date_entree_entreprise ? 'Depuis le : ' . $formatDateKyc($kyc->date_entree_entreprise) : null,
-            $kyc?->age_depart_retraite ? 'Départ retraite prévu : ' . $kyc->age_depart_retraite . ' ans' : null,
+            $kyc?->profession_libelle ? ['label' => 'Profession', 'value' => $kyc->profession_libelle] : null,
+            $kyc?->csp ? ['label' => 'CSP', 'value' => $labelListe('csp', $kyc->csp)] : null,
+            $kyc?->societe_employeur ? ['label' => 'Employeur', 'value' => $kyc->societe_employeur] : null,
+            $kyc?->date_entree_entreprise ? ['label' => 'Depuis le', 'value' => $formatDateKyc($kyc->date_entree_entreprise)] : null,
+            $kyc?->age_depart_retraite ? ['label' => 'Départ retraite prévu', 'value' => $kyc->age_depart_retraite . ' ans'] : null,
         ]),
         'Professionnel (conjoint)' => array_filter([
-            $kyc?->conjoint_profession_libelle ? 'Profession : ' . $kyc->conjoint_profession_libelle : null,
-            $kyc?->conjoint_age_depart_retraite ? 'Départ retraite prévu : ' . $kyc->conjoint_age_depart_retraite . ' ans' : null,
+            $kyc?->conjoint_profession_libelle ? ['label' => 'Profession', 'value' => $kyc->conjoint_profession_libelle] : null,
+            $kyc?->conjoint_age_depart_retraite ? ['label' => 'Départ retraite prévu', 'value' => $kyc->conjoint_age_depart_retraite . ' ans'] : null,
         ]),
         'Donation' => array_filter([
-            $kyc?->donation_dernier_vivant_profit === 'oui' ? 'Donation au dernier vivant à votre profit' : null,
-            $kyc?->donation_dernier_vivant_conjoint === 'oui' ? 'Donation au dernier vivant au profit de votre conjoint' : null,
+            $kyc?->donation_dernier_vivant_profit === 'oui' ? ['label' => 'Donation au dernier vivant (vous)', 'value' => 'Oui'] : null,
+            $kyc?->donation_dernier_vivant_conjoint === 'oui' ? ['label' => 'Donation au dernier vivant (conjoint)', 'value' => 'Oui'] : null,
         ]),
         'Résidence' => array_filter([
-            $client->adresse ? 'Adresse : ' . $client->adresse : null,
-            $client->code_postal ? 'Code postal : ' . $client->code_postal : null,
-            $client->ville ? 'Ville : ' . $client->ville : null,
-            $client->pays ? 'Pays : ' . $labelListe('pays', $client->pays) : null,
+            $client->adresse ? ['label' => 'Adresse', 'value' => $client->adresse] : null,
+            $client->code_postal ? ['label' => 'Code postal', 'value' => $client->code_postal] : null,
+            $client->ville ? ['label' => 'Ville', 'value' => $client->ville] : null,
+            $client->pays ? ['label' => 'Pays', 'value' => $labelListe('pays', $client->pays)] : null,
         ]),
         'Exposition' => array_filter([
             $kyc?->est_ppe
-                ? ($kyc->est_ppe === 'oui_ppe' ? 'Est une personne politiquement exposée' : "N'est pas une personne politiquement exposée")
+                ? ['label' => 'Personne politiquement exposée', 'value' => $kyc->est_ppe === 'oui_ppe' ? 'Oui' : 'Non']
                 : null,
             $kyc?->proche_ppe
-                ? ($kyc->proche_ppe === 'oui_proche_ppe' ? "Est proche d'une personne politiquement exposée" : "N'est pas proche d'une personne politiquement exposée")
+                ? ['label' => "Proche d'une PPE", 'value' => $kyc->proche_ppe === 'oui_proche_ppe' ? 'Oui' : 'Non']
                 : null,
         ]),
     ];
@@ -743,17 +743,80 @@ html,body{
     overflow-y:auto;
 }
 
-.wd-donnees-grid-inline{
-    margin-top:16px;
-    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-    max-height:none;
-    overflow:visible;
-}
-
 .wd-donnees-empty{
     margin-top:16px;
     font-size:12.5px;
     color:#817b76;
+}
+
+.wd-kyc-data{
+    margin-top:16px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:24px;
+}
+
+.wd-kyc-data-group h4{
+    margin:0 0 8px;
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--pink);
+}
+
+.wd-kyc-data-rows{
+    display:flex;
+    flex-direction:column;
+}
+
+.wd-kyc-data-row{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    width:100%;
+    padding:7px 0;
+    border:0;
+    border-bottom:1px solid var(--line);
+    background:none;
+    text-align:left;
+    cursor:pointer;
+    font-family:inherit;
+    color:inherit;
+}
+
+.wd-kyc-data-row:last-child{
+    border-bottom:0;
+}
+
+.wd-kyc-data-label{
+    flex:0 0 auto;
+    font-size:11px;
+    color:#817b76;
+}
+
+.wd-kyc-data-value{
+    flex:1;
+    text-align:right;
+    font-size:12.5px;
+    font-weight:650;
+    color:#151515;
+}
+
+.wd-kyc-data-copy{
+    flex:0 0 auto;
+    color:#c9c2bd;
+    opacity:0;
+    transition:opacity .15s ease;
+}
+
+.wd-kyc-data-row:hover .wd-kyc-data-copy{
+    opacity:1;
+}
+
+.wd-kyc-data-row.copied .wd-kyc-data-copy{
+    color:var(--green);
+    opacity:1;
 }
 
 .wd-donnees-card{
@@ -2606,15 +2669,16 @@ Archives
 </div>
 
 @if(!empty($donneesClient))
-<div class="wd-donnees-grid wd-donnees-grid-inline">
-@foreach($donneesClient as $categorie => $lignes)
-<div class="wd-donnees-card">
+<div class="wd-kyc-data">
+@foreach($donneesClient as $categorie => $items)
+<div class="wd-kyc-data-group">
 <h4>{{ $categorie }}</h4>
-<div class="wd-donnees-pills">
-@foreach($lignes as $ligne)
-<button type="button" class="wd-donnees-pill" data-copy="{{ $ligne }}">
-<span>{{ $ligne }}</span>
-<svg viewBox="0 0 24 24" width="12" height="12"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" fill="none" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+<div class="wd-kyc-data-rows">
+@foreach($items as $item)
+<button type="button" class="wd-kyc-data-row" data-copy="{{ $item['value'] }}">
+<span class="wd-kyc-data-label">{{ $item['label'] }}</span>
+<span class="wd-kyc-data-value">{{ $item['value'] }}</span>
+<svg class="wd-kyc-data-copy" viewBox="0 0 24 24" width="12" height="12"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" fill="none" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" fill="none" stroke-width="2"/></svg>
 </button>
 @endforeach
 </div>
@@ -2626,36 +2690,6 @@ Archives
 @endif
 
 </section>
-
-<div class="wd-newaccount-overlay" data-donnees-modal hidden>
-<div class="wd-newaccount-modal wd-donnees-modal">
-<div class="wd-donnees-head-dark">
-<div class="wd-donnees-head-dark-icon"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg></div>
-<div class="wd-donnees-head-dark-text">
-<h3>KYC</h3>
-<p>Toutes les données KYC</p>
-</div>
-<button type="button" class="wd-donnees-close-dark" data-donnees-close aria-label="Fermer">&times;</button>
-</div>
-
-<div class="wd-donnees-grid">
-@foreach($donneesClient as $categorie => $lignes)
-<div class="wd-donnees-card">
-<h4>{{ $categorie }}</h4>
-<div class="wd-donnees-pills">
-@foreach($lignes as $ligne)
-<button type="button" class="wd-donnees-pill" data-copy="{{ $ligne }}">
-<span>{{ $ligne }}</span>
-<svg viewBox="0 0 24 24" width="12" height="12"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" fill="none" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" fill="none" stroke-width="2"/></svg>
-</button>
-@endforeach
-</div>
-</div>
-@endforeach
-</div>
-
-</div>
-</div>
 
 <div class="wd-newaccount-overlay" data-patrimoine-donnees-modal hidden>
 <div class="wd-newaccount-modal wd-donnees-modal">
