@@ -834,7 +834,12 @@ html,body{
     margin-top:16px;
     display:grid;
     grid-template-columns:repeat(4, 1fr);
+    grid-auto-flow:dense;
     gap:24px;
+}
+
+.wd-kyc-data-group-wide{
+    grid-column:span 2;
 }
 
 .wd-kyc-data-group{
@@ -872,6 +877,18 @@ html,body{
 
 .wd-kyc-data-row:last-child{
     border-bottom:0;
+}
+
+.wd-kyc-data-row-long{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+}
+
+.wd-kyc-data-row-long .wd-kyc-data-value{
+    flex:1 1 100%;
+    text-align:left;
+    line-height:1.5;
 }
 
 .wd-kyc-data-label{
@@ -1981,6 +1998,10 @@ html,body{
     .wd-kyc-data{
         grid-template-columns:1fr;
     }
+
+    .wd-kyc-data-group-wide{
+        grid-column:auto;
+    }
 }
 
 
@@ -2773,11 +2794,17 @@ Modifier le KYC
 @if(!empty($donneesClient))
 <div class="wd-kyc-data">
 @foreach($donneesClient as $categorie => $items)
-<div class="wd-panel wd-kyc-data-group">
+@php
+    $categorieLongue = collect($items)->contains(fn($item) => mb_strlen($item['value']) > 60);
+@endphp
+<div class="wd-panel wd-kyc-data-group @if($categorieLongue) wd-kyc-data-group-wide @endif">
 <h4>{{ $categorie }}</h4>
 <div class="wd-kyc-data-rows">
 @foreach($items as $item)
-<button type="button" class="wd-kyc-data-row" data-copy="{{ $item['value'] }}">
+@php
+    $ligneLongue = mb_strlen($item['value']) > 60;
+@endphp
+<button type="button" class="wd-kyc-data-row @if($ligneLongue) wd-kyc-data-row-long @endif" data-copy="{{ $item['value'] }}">
 <span class="wd-kyc-data-label">{{ $item['label'] }}</span>
 <span class="wd-kyc-data-value">{{ $item['value'] }}</span>
 <svg class="wd-kyc-data-copy" viewBox="0 0 24 24" width="12" height="12"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" fill="none" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" fill="none" stroke-width="2"/></svg>
