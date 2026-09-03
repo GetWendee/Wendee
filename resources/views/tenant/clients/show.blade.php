@@ -743,6 +743,19 @@ html,body{
     overflow-y:auto;
 }
 
+.wd-donnees-grid-inline{
+    margin-top:16px;
+    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    max-height:none;
+    overflow:visible;
+}
+
+.wd-donnees-empty{
+    margin-top:16px;
+    font-size:12.5px;
+    color:#817b76;
+}
+
 .wd-donnees-card{
     border:1px solid var(--line);
     border-radius:10px;
@@ -2591,6 +2604,26 @@ Archives
 <div class="wd-bar-value">{{ $kycCompletion }} %</div>
 </div>
 </div>
+
+@if(!empty($donneesClient))
+<div class="wd-donnees-grid wd-donnees-grid-inline">
+@foreach($donneesClient as $categorie => $lignes)
+<div class="wd-donnees-card">
+<h4>{{ $categorie }}</h4>
+<div class="wd-donnees-pills">
+@foreach($lignes as $ligne)
+<button type="button" class="wd-donnees-pill" data-copy="{{ $ligne }}">
+<span>{{ $ligne }}</span>
+<svg viewBox="0 0 24 24" width="12" height="12"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" fill="none" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+</button>
+@endforeach
+</div>
+</div>
+@endforeach
+</div>
+@else
+<p class="wd-donnees-empty">Aucune donnée KYC renseignée pour le moment.</p>
+@endif
 
 </section>
 
