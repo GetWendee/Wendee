@@ -93,21 +93,21 @@
         'Naissance' => array_filter([
             $client->date_naissance ? 'Le : ' . $formatDateKyc($client->date_naissance) : null,
             $kyc?->commune_naissance ? 'à : ' . $kyc->commune_naissance : null,
-            $kyc?->code_postal_naissance,
+            $kyc?->code_postal_naissance ? 'Code postal de naissance : ' . $kyc->code_postal_naissance : null,
             $kyc?->francais === 'oui'
                 ? 'Nationalité française'
                 : ($kyc?->autre_nationalite ? 'Nationalité ' . $labelListe('nationalites', $kyc->autre_nationalite) : null),
         ]),
         'Juridique' => array_filter([
-            $labelListe('classification_mif', $kyc?->classification_mif),
-            $labelListe('capacite_juridique', $kyc?->capacite_juridique),
+            $labelListe('classification_mif', $kyc?->classification_mif) ? 'Classification MIF : ' . $labelListe('classification_mif', $kyc?->classification_mif) : null,
+            $labelListe('capacite_juridique', $kyc?->capacite_juridique) ? 'Capacité juridique : ' . $labelListe('capacite_juridique', $kyc?->capacite_juridique) : null,
         ]),
         'Familial' => array_filter([
-            $labelListe('situation_familiale', $kyc?->situation_familiale),
+            $labelListe('situation_familiale', $kyc?->situation_familiale) ? 'Situation familiale : ' . $labelListe('situation_familiale', $kyc?->situation_familiale) : null,
             $nbEnfantsCharge > 0 ? $nbEnfantsCharge . ' enfant(s) à charge' : 'Aucun enfant à charge',
         ]),
         'Matrimonial' => array_filter([
-            $labelListe('regime_matrimonial', $kyc?->regime_matrimonial),
+            $labelListe('regime_matrimonial', $kyc?->regime_matrimonial) ? 'Régime matrimonial : ' . $labelListe('regime_matrimonial', $kyc?->regime_matrimonial) : null,
         ]),
         'Conjoint' => array_filter([
             $kyc?->conjoint_date_naissance ? 'Né le : ' . $formatDateKyc($kyc->conjoint_date_naissance) : null,
@@ -128,10 +128,10 @@
             $kyc?->donation_dernier_vivant_conjoint === 'oui' ? 'Donation au dernier vivant au profit de votre conjoint' : null,
         ]),
         'Résidence' => array_filter([
-            $client->adresse,
-            $client->code_postal,
-            $client->ville,
-            $client->pays ? $labelListe('pays', $client->pays) : null,
+            $client->adresse ? 'Adresse : ' . $client->adresse : null,
+            $client->code_postal ? 'Code postal : ' . $client->code_postal : null,
+            $client->ville ? 'Ville : ' . $client->ville : null,
+            $client->pays ? 'Pays : ' . $labelListe('pays', $client->pays) : null,
         ]),
         'Exposition' => array_filter([
             $kyc?->est_ppe
