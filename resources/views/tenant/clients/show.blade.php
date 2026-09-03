@@ -576,22 +576,24 @@ html,body{
 }
 
 .wd-subtabs a{
-    padding:8px 14px;
-    border-radius:7px;
+    flex:0 0 auto;
+    min-width:220px;
+    min-height:40px;
+    padding:0 20px;
+    border-radius:8px;
     background:#ebe8e5;
     color:#77706c;
     font-size:11px;
     font-weight:750;
     text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .wd-subtabs a:hover{
     background:#ded9d4;
     color:#171514;
-}
-
-.wd-subtabs-action{
-    margin-left:auto;
 }
 
 .wd-btn-dark{
@@ -2617,6 +2619,10 @@ Contrat
 Archives
 </a>
 
+<button type="button" class="wd-btn-dark wd-tabs-action" data-dossier-trigger>
+{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
+</button>
+
 </nav>
 
 <nav class="wd-subtabs">
@@ -2626,10 +2632,6 @@ Archives
 <a href="#patrimoine">Patrimoine</a>
 
 <a href="#investisseur">Investisseur</a>
-
-<button type="button" class="wd-btn-dark wd-subtabs-action" data-dossier-trigger>
-{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
-</button>
 
 </nav>
 
@@ -2670,6 +2672,11 @@ Archives
 <div class="wd-eyebrow">KYC</div>
 <h2>Recueil de connaissance</h2>
 </div>
+<a
+href="{{ route('tenant.clients.kyc.edit', $client) }}"
+class="wd-btn-dark">
+Modifier le KYC
+</a>
 </div>
 
 <div class="wd-panel wd-kyc-progress">
