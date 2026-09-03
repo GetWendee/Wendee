@@ -756,6 +756,10 @@ html,body{
     gap:24px;
 }
 
+.wd-kyc-data-group{
+    padding:18px 20px;
+}
+
 .wd-kyc-data-group h4{
     margin:0 0 8px;
     font-size:10.5px;
@@ -2651,7 +2655,7 @@ Archives
 
 
 
-<section class="wd-section wd-kyc-section" id="kyc">
+<section class="wd-section wd-kyc-section" id="kyc" style="scroll-margin-top:88px;">
 
 <div class="wd-section-head">
 <div>
@@ -2671,7 +2675,7 @@ Archives
 @if(!empty($donneesClient))
 <div class="wd-kyc-data">
 @foreach($donneesClient as $categorie => $items)
-<div class="wd-kyc-data-group">
+<div class="wd-panel wd-kyc-data-group">
 <h4>{{ $categorie }}</h4>
 <div class="wd-kyc-data-rows">
 @foreach($items as $item)
@@ -2751,7 +2755,7 @@ Archives
 </div>
 </div>
 
-<section class="wd-section wd-patrimoine-premium" id="patrimoine">
+<section class="wd-section wd-patrimoine-premium" id="patrimoine" style="scroll-margin-top:88px;">
 
 <div class="wd-section-head">
     <div>
@@ -3304,7 +3308,7 @@ Archives
 </section>
 
 
-<section class="wd-section wd-investor-profile" id="investisseur">
+<section class="wd-section wd-investor-profile" id="investisseur" style="scroll-margin-top:88px;">
 
 <div class="wd-section-head">
 
