@@ -87,13 +87,23 @@
 
     $formatDateKyc = fn($date) => $date ? $date->translatedFormat('d F Y') : null;
 
-    $nbEnfantsCharge = $client->personnesACharge()->count();
+    $personnesACharge = $client->personnesACharge()->get();
+    $nbEnfantsCharge = $personnesACharge->count();
+
+    $enfantDeLabel = fn($valeur) => match ($valeur) {
+        'client' => 'Client',
+        'conjoint' => 'Conjoint',
+        'commun' => 'Commun',
+        default => null,
+    };
 
     $donneesClient = [
         'Naissance' => array_filter([
+            $labelListe('oui_non', $kyc?->ne_en_france) ? ['label' => 'Né en France', 'value' => $labelListe('oui_non', $kyc->ne_en_france)] : null,
             $client->date_naissance ? ['label' => 'Date de naissance', 'value' => $formatDateKyc($client->date_naissance)] : null,
             $kyc?->commune_naissance ? ['label' => 'Commune de naissance', 'value' => $kyc->commune_naissance] : null,
             $kyc?->code_postal_naissance ? ['label' => 'Code postal de naissance', 'value' => $kyc->code_postal_naissance] : null,
+            $labelListe('pays_hors_france', $kyc?->pays_naissance) ? ['label' => 'Pays de naissance', 'value' => $labelListe('pays_hors_france', $kyc->pays_naissance)] : null,
             $kyc?->francais === 'oui'
                 ? ['label' => 'Nationalité', 'value' => 'Française']
                 : ($kyc?->autre_nationalite ? ['label' => 'Nationalité', 'value' => $labelListe('nationalites', $kyc->autre_nationalite)] : null),
@@ -104,44 +114,92 @@
         ]),
         'Familial' => array_filter([
             $labelListe('situation_familiale', $kyc?->situation_familiale) ? ['label' => 'Situation familiale', 'value' => $labelListe('situation_familiale', $kyc?->situation_familiale)] : null,
+            $kyc?->date_mariage ? ['label' => 'Date de mariage', 'value' => $formatDateKyc($kyc->date_mariage)] : null,
+            $kyc?->lieu_mariage ? ['label' => 'Lieu de mariage', 'value' => $kyc->lieu_mariage] : null,
+            $kyc?->date_pacs ? ['label' => 'Date du PACS', 'value' => $formatDateKyc($kyc->date_pacs)] : null,
+            $kyc?->lieu_pacs ? ['label' => 'Lieu du PACS', 'value' => $kyc->lieu_pacs] : null,
+            $labelListe('convention_pacs', $kyc?->convention_pacs) ? ['label' => 'Convention de PACS', 'value' => $labelListe('convention_pacs', $kyc->convention_pacs)] : null,
             ['label' => 'Enfants à charge', 'value' => $nbEnfantsCharge > 0 ? (string) $nbEnfantsCharge : 'Aucun'],
         ]),
         'Matrimonial' => array_filter([
             $labelListe('regime_matrimonial', $kyc?->regime_matrimonial) ? ['label' => 'Régime matrimonial', 'value' => $labelListe('regime_matrimonial', $kyc?->regime_matrimonial)] : null,
+            $labelListe('oui_non_nsp', $kyc?->donation_dernier_vivant_profit) ? ['label' => 'Donation au dernier vivant (vous)', 'value' => $labelListe('oui_non_nsp', $kyc->donation_dernier_vivant_profit)] : null,
+            $labelListe('oui_non_nsp', $kyc?->donation_dernier_vivant_conjoint) ? ['label' => 'Donation au dernier vivant (conjoint)', 'value' => $labelListe('oui_non_nsp', $kyc->donation_dernier_vivant_conjoint)] : null,
         ]),
         'Conjoint' => array_filter([
+            $labelListe('civilite_conjoint', $kyc?->conjoint_civilite) ? ['label' => 'Civilité', 'value' => $labelListe('civilite_conjoint', $kyc->conjoint_civilite)] : null,
+            $kyc?->conjoint_prenom ? ['label' => 'Prénom', 'value' => $kyc->conjoint_prenom] : null,
+            $kyc?->conjoint_nom ? ['label' => 'Nom', 'value' => $kyc->conjoint_nom] : null,
+            $kyc?->conjoint_nom_naissance ? ['label' => 'Nom de naissance', 'value' => $kyc->conjoint_nom_naissance] : null,
             $kyc?->conjoint_date_naissance ? ['label' => 'Date de naissance', 'value' => $formatDateKyc($kyc->conjoint_date_naissance)] : null,
         ]),
         'Professionnel (' . trim($client->prenom . ' ' . $client->nom) . ')' => array_filter([
+            $labelListe('statut_professionnel', $kyc?->statut_professionnel) ? ['label' => 'Statut professionnel', 'value' => $labelListe('statut_professionnel', $kyc->statut_professionnel)] : null,
             $kyc?->profession_libelle ? ['label' => 'Profession', 'value' => $kyc->profession_libelle] : null,
             $kyc?->csp ? ['label' => 'CSP', 'value' => $labelListe('csp', $kyc->csp)] : null,
             $kyc?->societe_employeur ? ['label' => 'Employeur', 'value' => $kyc->societe_employeur] : null,
+            $kyc?->siret_employeur ? ['label' => 'SIRET employeur', 'value' => $kyc->siret_employeur] : null,
+            $labelListe('code_naf', $kyc?->code_naf) ? ['label' => 'Code NAF', 'value' => $labelListe('code_naf', $kyc->code_naf)] : null,
             $kyc?->date_entree_entreprise ? ['label' => 'Depuis le', 'value' => $formatDateKyc($kyc->date_entree_entreprise)] : null,
             $kyc?->age_depart_retraite ? ['label' => 'Départ retraite prévu', 'value' => $kyc->age_depart_retraite . ' ans'] : null,
         ]),
         'Professionnel (conjoint)' => array_filter([
+            $labelListe('statut_professionnel', $kyc?->conjoint_statut_professionnel) ? ['label' => 'Statut professionnel', 'value' => $labelListe('statut_professionnel', $kyc->conjoint_statut_professionnel)] : null,
             $kyc?->conjoint_profession_libelle ? ['label' => 'Profession', 'value' => $kyc->conjoint_profession_libelle] : null,
+            $kyc?->conjoint_csp ? ['label' => 'CSP', 'value' => $labelListe('csp', $kyc->conjoint_csp)] : null,
+            $kyc?->conjoint_societe_employeur ? ['label' => 'Employeur', 'value' => $kyc->conjoint_societe_employeur] : null,
+            $kyc?->conjoint_siret_employeur ? ['label' => 'SIRET employeur', 'value' => $kyc->conjoint_siret_employeur] : null,
+            $labelListe('code_naf', $kyc?->conjoint_code_naf) ? ['label' => 'Code NAF', 'value' => $labelListe('code_naf', $kyc->conjoint_code_naf)] : null,
+            $kyc?->conjoint_date_entree_entreprise ? ['label' => 'Depuis le', 'value' => $formatDateKyc($kyc->conjoint_date_entree_entreprise)] : null,
             $kyc?->conjoint_age_depart_retraite ? ['label' => 'Départ retraite prévu', 'value' => $kyc->conjoint_age_depart_retraite . ' ans'] : null,
-        ]),
-        'Donation' => array_filter([
-            $kyc?->donation_dernier_vivant_profit === 'oui' ? ['label' => 'Donation au dernier vivant (vous)', 'value' => 'Oui'] : null,
-            $kyc?->donation_dernier_vivant_conjoint === 'oui' ? ['label' => 'Donation au dernier vivant (conjoint)', 'value' => 'Oui'] : null,
         ]),
         'Résidence' => array_filter([
             $client->adresse ? ['label' => 'Adresse', 'value' => $client->adresse] : null,
             $client->code_postal ? ['label' => 'Code postal', 'value' => $client->code_postal] : null,
             $client->ville ? ['label' => 'Ville', 'value' => $client->ville] : null,
             $client->pays ? ['label' => 'Pays', 'value' => $labelListe('pays', $client->pays)] : null,
+            $labelListe('oui_non', $kyc?->residence_fiscale_identique) ? ['label' => 'Résidence fiscale identique', 'value' => $labelListe('oui_non', $kyc->residence_fiscale_identique)] : null,
+            $labelListe('pays_hors_france', $kyc?->autre_pays_residence_fiscale) ? ['label' => 'Autre pays de résidence fiscale', 'value' => $labelListe('pays_hors_france', $kyc->autre_pays_residence_fiscale)] : null,
+            $labelListe('oui_non_bis', $kyc?->heberge_par_tiers) ? ['label' => 'Hébergé par un tiers', 'value' => $labelListe('oui_non_bis', $kyc->heberge_par_tiers)] : null,
         ]),
         'Exposition' => array_filter([
             $kyc?->est_ppe
                 ? ['label' => 'Personne politiquement exposée', 'value' => $kyc->est_ppe === 'oui_ppe' ? 'Oui' : 'Non']
                 : null,
+            $labelListe('en_activite_ppe', $kyc?->ppe_exercice_12_mois) ? ['label' => 'Fonction exercée depuis 12 mois', 'value' => $labelListe('en_activite_ppe', $kyc->ppe_exercice_12_mois)] : null,
+            $labelListe('exercice_ppe', $kyc?->ppe_fonction) ? ['label' => 'Fonction', 'value' => $labelListe('exercice_ppe', $kyc->ppe_fonction)] : null,
+            $kyc?->ppe_date_debut ? ['label' => 'Fonction depuis le', 'value' => $formatDateKyc($kyc->ppe_date_debut)] : null,
+            $kyc?->ppe_date_fin ? ['label' => "Fonction jusqu'au", 'value' => $formatDateKyc($kyc->ppe_date_fin)] : null,
+            $labelListe('pays', $kyc?->ppe_pays) ? ['label' => 'Pays de la fonction', 'value' => $labelListe('pays', $kyc->ppe_pays)] : null,
             $kyc?->proche_ppe
                 ? ['label' => "Proche d'une PPE", 'value' => $kyc->proche_ppe === 'oui_proche_ppe' ? 'Oui' : 'Non']
                 : null,
+            $labelListe('en_activite_proche_ppe', $kyc?->proche_ppe_exercice_12_mois) ? ['label' => 'Fonction du proche depuis 12 mois', 'value' => $labelListe('en_activite_proche_ppe', $kyc->proche_ppe_exercice_12_mois)] : null,
+            $labelListe('exercice_ppe', $kyc?->proche_ppe_fonction) ? ['label' => 'Fonction du proche', 'value' => $labelListe('exercice_ppe', $kyc->proche_ppe_fonction)] : null,
+            $kyc?->proche_ppe_nom ? ['label' => 'Nom du proche', 'value' => $kyc->proche_ppe_nom] : null,
+            $kyc?->proche_ppe_prenom ? ['label' => 'Prénom du proche', 'value' => $kyc->proche_ppe_prenom] : null,
+            $labelListe('nature_du_lien', $kyc?->proche_ppe_nature_lien) ? ['label' => 'Nature du lien', 'value' => $labelListe('nature_du_lien', $kyc->proche_ppe_nature_lien)] : null,
+            $kyc?->proche_ppe_date_debut ? ['label' => 'Fonction du proche depuis le', 'value' => $formatDateKyc($kyc->proche_ppe_date_debut)] : null,
+            $kyc?->proche_ppe_date_fin ? ['label' => "Fonction du proche jusqu'au", 'value' => $formatDateKyc($kyc->proche_ppe_date_fin)] : null,
+            $labelListe('pays', $kyc?->proche_ppe_pays) ? ['label' => 'Pays de la fonction du proche', 'value' => $labelListe('pays', $kyc->proche_ppe_pays)] : null,
+        ]),
+        'Signature' => array_filter([
+            $kyc?->lieu_signature ? ['label' => 'Lieu de signature', 'value' => $kyc->lieu_signature] : null,
+            $kyc?->accepte_cgu ? ['label' => 'CGU acceptées', 'value' => 'Oui'] : null,
+            $kyc?->signe_le ? ['label' => 'Signé le', 'value' => $kyc->signe_le->translatedFormat('d F Y à H:i')] : null,
         ]),
     ];
+
+    foreach ($personnesACharge as $enfant) {
+        $donneesClient['Enfant à charge (' . trim($enfant->prenom . ' ' . $enfant->nom) . ')'] = array_filter([
+            $labelListe('civilite_personne_charge', $enfant->civilite) ? ['label' => 'Civilité', 'value' => $labelListe('civilite_personne_charge', $enfant->civilite)] : null,
+            $enfant->date_naissance ? ['label' => 'Date de naissance', 'value' => $formatDateKyc($enfant->date_naissance)] : null,
+            $enfantDeLabel($enfant->enfant_de) ? ['label' => 'Enfant de', 'value' => $enfantDeLabel($enfant->enfant_de)] : null,
+            $labelListe('oui_non', $enfant->fiscalement_a_charge) ? ['label' => 'Fiscalement à charge', 'value' => $labelListe('oui_non', $enfant->fiscalement_a_charge)] : null,
+            $labelListe('oui_non', $enfant->garde_alternee) ? ['label' => 'Garde alternée', 'value' => $labelListe('oui_non', $enfant->garde_alternee)] : null,
+            $labelListe('oui_non', $enfant->invalidite) ? ['label' => 'Invalidité', 'value' => $labelListe('oui_non', $enfant->invalidite)] : null,
+        ]);
+    }
 
     $donneesClient = array_filter($donneesClient);
 
