@@ -752,7 +752,7 @@ html,body{
 .wd-kyc-data{
     margin-top:16px;
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns:repeat(4, 1fr);
     gap:24px;
 }
 
@@ -1872,6 +1872,10 @@ html,body{
     .wd-patrimoine-main-grid{
         grid-template-columns:1fr;
     }
+
+    .wd-kyc-data{
+        grid-template-columns:1fr 1fr;
+    }
 }
 
 @media(max-width:650px){
@@ -1891,6 +1895,10 @@ html,body{
     .wd-patrimoine-structure{
         grid-template-columns:1fr;
         justify-items:center;
+    }
+
+    .wd-kyc-data{
+        grid-template-columns:1fr;
     }
 }
 
