@@ -97,6 +97,18 @@
         default => null,
     };
 
+    $enfantsCards = [];
+    foreach ($personnesACharge as $enfant) {
+        $enfantsCards['Enfant à charge (' . trim($enfant->prenom . ' ' . $enfant->nom) . ')'] = array_filter([
+            $labelListe('civilite_personne_charge', $enfant->civilite) ? ['label' => 'Civilité', 'value' => $labelListe('civilite_personne_charge', $enfant->civilite)] : null,
+            $enfant->date_naissance ? ['label' => 'Date de naissance', 'value' => $formatDateKyc($enfant->date_naissance)] : null,
+            $enfantDeLabel($enfant->enfant_de) ? ['label' => 'Enfant de', 'value' => $enfantDeLabel($enfant->enfant_de)] : null,
+            $labelListe('oui_non', $enfant->fiscalement_a_charge) ? ['label' => 'Fiscalement à charge', 'value' => $labelListe('oui_non', $enfant->fiscalement_a_charge)] : null,
+            $labelListe('oui_non', $enfant->garde_alternee) ? ['label' => 'Garde alternée', 'value' => $labelListe('oui_non', $enfant->garde_alternee)] : null,
+            $labelListe('oui_non', $enfant->invalidite) ? ['label' => 'Invalidité', 'value' => $labelListe('oui_non', $enfant->invalidite)] : null,
+        ]);
+    }
+
     $donneesClient = [
         'Naissance' => array_filter([
             $labelListe('oui_non', $kyc?->ne_en_france) ? ['label' => 'Né en France', 'value' => $labelListe('oui_non', $kyc->ne_en_france)] : null,
@@ -133,6 +145,7 @@
             $kyc?->conjoint_nom_naissance ? ['label' => 'Nom de naissance', 'value' => $kyc->conjoint_nom_naissance] : null,
             $kyc?->conjoint_date_naissance ? ['label' => 'Date de naissance', 'value' => $formatDateKyc($kyc->conjoint_date_naissance)] : null,
         ]),
+        ...$enfantsCards,
         'Professionnel (' . trim($client->prenom . ' ' . $client->nom) . ')' => array_filter([
             $labelListe('statut_professionnel', $kyc?->statut_professionnel) ? ['label' => 'Statut professionnel', 'value' => $labelListe('statut_professionnel', $kyc->statut_professionnel)] : null,
             $kyc?->profession_libelle ? ['label' => 'Profession', 'value' => $kyc->profession_libelle] : null,
@@ -189,17 +202,6 @@
             $kyc?->signe_le ? ['label' => 'Signé le', 'value' => $kyc->signe_le->translatedFormat('d F Y à H:i')] : null,
         ]),
     ];
-
-    foreach ($personnesACharge as $enfant) {
-        $donneesClient['Enfant à charge (' . trim($enfant->prenom . ' ' . $enfant->nom) . ')'] = array_filter([
-            $labelListe('civilite_personne_charge', $enfant->civilite) ? ['label' => 'Civilité', 'value' => $labelListe('civilite_personne_charge', $enfant->civilite)] : null,
-            $enfant->date_naissance ? ['label' => 'Date de naissance', 'value' => $formatDateKyc($enfant->date_naissance)] : null,
-            $enfantDeLabel($enfant->enfant_de) ? ['label' => 'Enfant de', 'value' => $enfantDeLabel($enfant->enfant_de)] : null,
-            $labelListe('oui_non', $enfant->fiscalement_a_charge) ? ['label' => 'Fiscalement à charge', 'value' => $labelListe('oui_non', $enfant->fiscalement_a_charge)] : null,
-            $labelListe('oui_non', $enfant->garde_alternee) ? ['label' => 'Garde alternée', 'value' => $labelListe('oui_non', $enfant->garde_alternee)] : null,
-            $labelListe('oui_non', $enfant->invalidite) ? ['label' => 'Invalidité', 'value' => $labelListe('oui_non', $enfant->invalidite)] : null,
-        ]);
-    }
 
     $donneesClient = array_filter($donneesClient);
 
