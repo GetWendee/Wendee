@@ -2619,13 +2619,13 @@ Contrat
 Archives
 </a>
 
-<button type="button" class="wd-btn-dark wd-tabs-action" data-dossier-trigger>
-{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
-</button>
-
 </nav>
 
 <nav class="wd-subtabs">
+
+<button type="button" class="wd-btn-dark" data-dossier-trigger>
+{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
+</button>
 
 <a href="#kyc">KYC</a>
 
