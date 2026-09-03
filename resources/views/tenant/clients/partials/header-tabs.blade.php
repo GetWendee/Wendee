@@ -44,6 +44,21 @@
     $dossierComplet = $dossierStatus['items']['kyc']['done']
         && $dossierStatus['items']['pat']['done']
         && $dossierStatus['items']['inv']['done'];
+    $analyseLocked = ! $dossierComplet;
+    $analyseTooltip = 'Complétez le KYC, le Patrimoine et le Profil investisseur pour débloquer l\'Analyse.';
+    $missionLocked = ! ($recommandationDisponible && $planActionDisponible);
+    $missionTooltip = 'Complétez la Suggestion et la Recommandation pour débloquer la Mission.';
+    $contratsMandatsTypes = [
+        'mandat_assurance_vie', 'mandat_assurance_deces', 'mandat_assurance_emprunteur',
+        'mandat_assurance_habitation', 'mandat_assurance_obseques', 'mandat_complementaire_sante',
+        'mandat_contrat_capitalisation', 'mandat_garantie_accident_vie', 'mandat_assurance_vehicule',
+        'mandat_plan_epargne_retraite',
+    ];
+    $contratLocked = ! $client->analyses()
+        ->whereIn('type', $contratsMandatsTypes)
+        ->where('status', 'completed')
+        ->exists();
+    $contratTooltip = 'Générez au moins un contrat pour débloquer cet onglet.';
 @endphp
 <style>
 body > div > nav,
@@ -140,6 +155,7 @@ html,body{
     justify-content:center;
 }
 .wd-section{margin-top:22px;}
+.wd-tabs span.locked{flex:1;text-align:center;padding:10px 16px;border-radius:7px;color:#b7b2ad;font-size:11px;cursor:not-allowed;}
 </style>
 <div class="wd-wrap">
 <section class="wd-hero {{ $dossierStatus['a_jour'] ? 'wd-hero-conforme' : 'wd-hero-non-conforme' }}">
@@ -193,15 +209,27 @@ Tableau de bord
 <a href="{{ route('tenant.clients.show', $client) }}" class="{{ ($active ?? null) === 'vue' ? 'active' : '' }}">
 Profil
 </a>
+@if($analyseLocked)
+<span class="locked" title="{{ $analyseTooltip }}">Analyse</span>
+@else
 <a href="{{ route('tenant.clients.aide-decision', $client) }}" class="{{ ($active ?? null) === 'analyse' ? 'active' : '' }}">
 Analyse
 </a>
+@endif
+@if($missionLocked)
+<span class="locked" title="{{ $missionTooltip }}">Mission</span>
+@else
 <a href="{{ route('tenant.clients.mission', $client) }}" class="{{ ($active ?? null) === 'mission' ? 'active' : '' }}">
 Mission
 </a>
+@endif
+@if($contratLocked)
+<span class="locked" title="{{ $contratTooltip }}">Contrat</span>
+@else
 <a href="{{ route('tenant.clients.contrats-clients', $client) }}" class="{{ ($active ?? null) === 'contrats' ? 'active' : '' }}">
 Contrat
 </a>
+@endif
 <a href="{{ route('tenant.clients.conformites-clients', $client) }}" class="{{ ($active ?? null) === 'archives' ? 'active' : '' }}">
 Archives
 </a>
