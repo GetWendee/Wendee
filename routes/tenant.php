@@ -77,6 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/mission/{client}', [ClientController::class, 'mission'])->name('clients.mission');
         Route::get('/contrats-clients/{client}', [ClientController::class, 'contratsClients'])->name('clients.contrats-clients');
         Route::get('/conformites-clients/{client}', [ClientController::class, 'conformitesClients'])->name('clients.conformites-clients');
+        Route::get('/conformites-clients/{client}/bibliotheque/recherche', [ClientController::class, 'rechercherDocumentsBibliotheque'])->name('clients.documents-bibliotheque.recherche');
         Route::post('/conformites-clients/{client}/documents', [ClientDocumentController::class, 'store'])->name('clients.documents.store');
         Route::get('/conformites-clients/{client}/documents/{type}/telecharger', [ClientDocumentController::class, 'download'])->name('clients.documents.download');
         Route::delete('/conformites-clients/{client}/documents/{type}', [ClientDocumentController::class, 'destroy'])->name('clients.documents.destroy');

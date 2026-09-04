@@ -453,11 +453,9 @@ class ClientController extends Controller
         ]);
     }
 
-    public function conformitesClients(
-        Client $client
-    ): \Illuminate\View\View
+    private function typesBibliotheque(): array
     {
-        $types = [
+        return [
             'recommandation' => ['label' => 'Recommandation patrimoniale', 'categorie' => 'recommandations', 'categorie_label' => 'Recommandation', 'route' => 'tenant.clients.recommandation-patrimoniale.pdf'],
             'plan_action' => ['label' => "Plan d'action", 'categorie' => 'plans-actions', 'categorie_label' => "Plan d'action", 'route' => 'tenant.clients.plan-action.pdf'],
             'lettre_mission_scpi' => ['label' => 'Lettre de mission SCPI', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.lettre-mission-scpi.pdf'],
@@ -472,8 +470,11 @@ class ClientController extends Controller
             'mandat_assurance_vehicule' => ['label' => 'Mandat assurance véhicule', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-vehicule.pdf'],
             'mandat_plan_epargne_retraite' => ["label" => "Mandat plan d'épargne retraite", 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-plan-epargne-retraite.pdf'],
         ];
+    }
 
-        $documents = collect($types)->map(function ($meta, $type) use ($client) {
+    private function documentsBibliotheque(Client $client): \Illuminate\Support\Collection
+    {
+        return collect($this->typesBibliotheque())->map(function ($meta, $type) use ($client) {
             $analyse = $client->analyses()
                 ->where('type', $type)
                 ->where('status', 'completed')
@@ -492,14 +493,62 @@ class ClientController extends Controller
                 'url' => route($meta['route'], $client),
             ];
         })->filter()->sortByDesc('date')->values();
+    }
+
+    public function conformitesClients(
+        Client $client
+    ): \Illuminate\View\View
+    {
+        $documents = $this->documentsBibliotheque($client);
 
         $fichiersPersonnels = $client->documents()->get()->keyBy('type');
 
         return view('tenant.clients.conformites-clients', [
             'client' => $client,
-            'documents' => $documents,
+            'documents' => $documents->take(10)->values(),
+            'documentsTotal' => $documents->count(),
             'fichiersPersonnels' => $fichiersPersonnels,
             'typesDocumentsPersonnels' => \App\Http\Controllers\ClientDocumentController::TYPES,
+        ]);
+    }
+
+    public function rechercherDocumentsBibliotheque(
+        \Illuminate\Http\Request $request,
+        Client $client
+    ): \Illuminate\Http\JsonResponse
+    {
+        $documents = $this->documentsBibliotheque($client);
+
+        $categorie = $request->query('categorie', 'tous');
+        if ($categorie !== 'tous') {
+            $documents = $documents->where('categorie', $categorie)->values();
+        }
+
+        $q = trim((string) $request->query('q', ''));
+        if ($q !== '') {
+            $documents = $documents->filter(
+                fn ($document) => str_contains(mb_strtolower($document['label']), mb_strtolower($q))
+            )->values();
+        }
+
+        $total = $documents->count();
+        $parPage = 10;
+        $dernierePage = max(1, (int) ceil($total / $parPage));
+        $page = max(1, min((int) $request->query('page', 1), $dernierePage));
+
+        $rows = $documents->forPage($page, $parPage)->values()->map(fn ($document) => [
+            'label' => $document['label'],
+            'categorie' => $document['categorie'],
+            'categorie_label' => $document['categorie_label'],
+            'date' => $document['date']->translatedFormat('d M. Y'),
+            'url' => $document['url'],
+        ]);
+
+        return response()->json([
+            'rows' => $rows,
+            'page' => $page,
+            'derniere_page' => $dernierePage,
+            'total' => $total,
         ]);
     }
 

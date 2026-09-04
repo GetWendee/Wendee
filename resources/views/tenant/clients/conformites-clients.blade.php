@@ -13,11 +13,53 @@
 .wd-section-head h2{margin:4px 0 0;font-size:21px;letter-spacing:-.03em;}
 .wd-panel{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(21,21,21,.04);}
 
+.wd-archives-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+}
 .wd-archives-pills{
     display:flex;
     flex-wrap:wrap;
     gap:8px;
-    margin-bottom:16px;
+}
+.wd-archives-search{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 13px;
+    font-size:13px;
+    font-family:inherit;
+    min-width:220px;
+}
+.wd-archives-search:focus{outline:none;border-color:var(--pink);}
+.wd-pagination{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    margin-top:16px;
+    font-size:12px;
+    color:var(--muted);
+    font-weight:600;
+}
+.wd-pagination button{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;
+    height:30px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+}
+.wd-pagination button:disabled{
+    opacity:.35;
+    cursor:default;
 }
 .wd-archives-pill{
     border:1px solid var(--line);
@@ -334,45 +376,91 @@
         </div>
     </div>
 
-    <div x-data="{ filtre: 'tous' }">
-        <div class="wd-archives-pills">
-            <button type="button" class="wd-archives-pill" :class="{ active: filtre === 'tous' }" @click="filtre = 'tous'">Tous</button>
-            <button type="button" class="wd-archives-pill" :class="{ active: filtre === 'mandats' }" @click="filtre = 'mandats'">Mandats</button>
-            <button type="button" class="wd-archives-pill" :class="{ active: filtre === 'recommandations' }" @click="filtre = 'recommandations'">Recommandations</button>
-            <button type="button" class="wd-archives-pill" :class="{ active: filtre === 'plans-actions' }" @click="filtre = 'plans-actions'">Plans actions</button>
+    <div x-data="bibliothequeArchives({
+        rows: {{ \Illuminate\Support\Js::from($documents->map(fn ($d) => ['label' => $d['label'], 'categorie' => $d['categorie'], 'categorie_label' => $d['categorie_label'], 'date' => $d['date']->translatedFormat('d M. Y'), 'url' => $d['url']])) }},
+        total: {{ $documentsTotal }},
+        url: '{{ route('tenant.clients.documents-bibliotheque.recherche', $client) }}'
+    })">
+        <div class="wd-archives-toolbar">
+            <div class="wd-archives-pills">
+                <button type="button" class="wd-archives-pill" :class="{ active: categorie === 'tous' }" @click="filtrerCategorie('tous')">Tous</button>
+                <button type="button" class="wd-archives-pill" :class="{ active: categorie === 'mandats' }" @click="filtrerCategorie('mandats')">Mandats</button>
+                <button type="button" class="wd-archives-pill" :class="{ active: categorie === 'recommandations' }" @click="filtrerCategorie('recommandations')">Recommandations</button>
+                <button type="button" class="wd-archives-pill" :class="{ active: categorie === 'plans-actions' }" @click="filtrerCategorie('plans-actions')">Plans actions</button>
+            </div>
+            <input type="text" class="wd-archives-search" placeholder="Rechercher un document..." x-model="q" @input.debounce.400ms="rechercher(1)">
         </div>
 
         <div class="wd-panel">
-            @if ($documents->isEmpty())
-                <div class="wd-archives-empty">Aucun document généré pour ce client pour le moment.</div>
-            @else
-                <table class="wd-archives-table">
-                    <thead>
+            <div class="wd-archives-empty" x-show="rows.length === 0">Aucun document trouvé.</div>
+            <table class="wd-archives-table" x-show="rows.length > 0">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Date de modification</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="doc in rows" :key="doc.label + doc.date">
                         <tr>
-                            <th>Nom</th>
-                            <th>Date de modification</th>
-                            <th></th>
+                            <td>
+                                <span class="wd-archives-nom" x-text="doc.label"></span>
+                                <span class="wd-archives-tag" :class="'tag-' + doc.categorie" x-text="doc.categorie_label"></span>
+                            </td>
+                            <td class="wd-archives-date" x-text="doc.date"></td>
+                            <td style="text-align:right;">
+                                <a :href="doc.url" class="wd-archives-btn">Télécharger</a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($documents as $document)
-                            <tr x-show="filtre === 'tous' || filtre === '{{ $document['categorie'] }}'">
-                                <td>
-                                    <span class="wd-archives-nom">{{ $document['label'] }}</span>
-                                    <span class="wd-archives-tag tag-{{ $document['categorie'] }}">{{ $document['categorie_label'] }}</span>
-                                </td>
-                                <td class="wd-archives-date">{{ $document['date']->translatedFormat('d M. Y') }}</td>
-                                <td style="text-align:right;">
-                                    <a href="{{ $document['url'] }}" class="wd-archives-btn">Télécharger</a>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="wd-pagination" x-show="dernierePage > 1">
+            <button type="button" @click="rechercher(page - 1)" :disabled="page <= 1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <span>Page <span x-text="page"></span>/<span x-text="dernierePage"></span></span>
+            <button type="button" @click="rechercher(page + 1)" :disabled="page >= dernierePage">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
         </div>
     </div>
 </section>
+
+<script>
+function bibliothequeArchives(config) {
+    return {
+        rows: config.rows,
+        total: config.total,
+        url: config.url,
+        q: '',
+        categorie: 'tous',
+        page: 1,
+        dernierePage: Math.max(1, Math.ceil(config.total / 10)),
+        filtrerCategorie(categorie) {
+            this.categorie = categorie;
+            this.rechercher(1);
+        },
+        rechercher(page) {
+            if (page < 1 || (this.dernierePage && page > this.dernierePage)) {
+                return;
+            }
+            const params = new URLSearchParams({ q: this.q, categorie: this.categorie, page: page });
+            fetch(this.url + '?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.json())
+                .then(data => {
+                    this.rows = data.rows;
+                    this.page = data.page;
+                    this.dernierePage = data.derniere_page;
+                    this.total = data.total;
+                });
+        }
+    };
+}
+</script>
 
 <section class="wd-section" id="documents-personnels">
     <div class="wd-section-head">
