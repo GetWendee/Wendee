@@ -169,19 +169,22 @@
     gap:14px;
 }
 .wd-doc-file-actions a,.wd-doc-file-actions button{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;
+    height:30px;
     background:none;
-    border:none;
-    padding:0;
-    font-size:11px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.03em;
+    border:1px solid var(--line);
+    border-radius:7px;
     cursor:pointer;
     text-decoration:none;
     font-family:inherit;
 }
 .wd-doc-file-actions a{color:var(--pink);}
+.wd-doc-file-actions a:hover{background:#fdf2f8;border-color:var(--pink);}
 .wd-doc-file-actions button{color:#b94d4d;}
+.wd-doc-file-actions button:hover{background:#fdf0f0;border-color:#b94d4d;}
 .wd-upload-overlay{
     position:fixed;
     inset:0;
