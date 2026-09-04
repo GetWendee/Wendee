@@ -15,6 +15,20 @@
         }
 
         $totalPeriode = $joursGrille->sum('total');
+
+        $sujetLabels = [
+            'point_etape' => "Point d'étape",
+            'bilan_patrimonial' => 'Bilan patrimonial',
+            'signature_document' => 'Signature document',
+            'suivi_portefeuille' => 'Suivi portefeuille',
+            'autre' => 'Autre',
+        ];
+        $formatLabels = [
+            'visioconference' => 'Visioconférence',
+            'telephone' => 'Téléphone',
+            'agence' => 'Agence',
+            'domicile' => 'Domicile',
+        ];
     @endphp
 
     <div class="wd-agenda p-8">
@@ -83,6 +97,19 @@
             .wd-agenda-month-pill .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto}
             .wd-agenda-month-more{font-size:10.5px;color:var(--muted);font-weight:600;padding:2px 6px}
 
+            .wd-agenda-event, .wd-agenda-month-pill{cursor:pointer}
+
+            .wd-agenda-modal-overlay{position:fixed;inset:0;background:rgba(21,21,21,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+            .wd-agenda-modal{background:var(--white);border-radius:20px;padding:26px 28px;max-width:360px;width:100%;position:relative}
+            .wd-agenda-modal-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;border:none;background:var(--bg);color:var(--muted);font-size:16px;cursor:pointer;line-height:1}
+            .wd-agenda-modal-close:hover{color:var(--ink)}
+            .wd-agenda-modal-date{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--pink);margin:0 0 6px}
+            .wd-agenda-modal h3{font-size:18px;font-weight:700;color:var(--dark);margin:0 0 16px}
+            .wd-agenda-modal-row{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+            .wd-agenda-modal-row:first-of-type{border-top:0}
+            .wd-agenda-modal-row .lbl{color:var(--muted);font-weight:600;flex:0 0 auto}
+            .wd-agenda-modal-row span:last-child{color:var(--ink);font-weight:600;text-align:right}
+
             @media (max-width:960px){
                 .wd-agenda-daycol-header .dow, .wd-agenda-event-client{font-size:10px}
                 .wd-agenda-month-cell{min-height:70px}
@@ -148,7 +175,14 @@
                             <span class="num">{{ $jourData['date']->day }}</span>
                             @foreach ($jourData['evenements']->take(4) as $rdv)
                                 @php $couleur = $couleurs[$rdv->user_id] ?? '#f40087'; @endphp
-                                <div class="wd-agenda-month-pill" title="{{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }} · {{ $rdv->client->prenom }} {{ $rdv->client->nom }} · {{ $rdv->conseiller->name ?? '' }}">
+                                <div class="wd-agenda-month-pill"
+                                     data-wd-rdv
+                                     data-date="{{ $rdv->starts_at->format('d/m/Y') }} · {{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }}"
+                                     data-client="{{ $rdv->client->prenom }} {{ $rdv->client->nom }}"
+                                     data-tel="{{ $rdv->client->telephone_mobile ?? '' }}"
+                                     data-email="{{ $rdv->client->email ?? '' }}"
+                                     data-sujet="{{ $sujetLabels[$rdv->sujet] ?? '' }}"
+                                     data-format="{{ $formatLabels[$rdv->format] ?? '' }}">
                                     <span class="dot" style="background: {{ $couleur }};"></span>
                                     {{ $rdv->starts_at->format('H:i') }} {{ $rdv->client->nom }}
                                 </div>
@@ -183,7 +217,13 @@
                                 @php $rdv = $ev['rdv']; $couleur = $couleurs[$rdv->user_id] ?? '#f40087'; @endphp
                                 <div class="wd-agenda-event"
                                      style="top: {{ $ev['top_pct'] }}%; height: {{ $ev['height_pct'] }}%; left: {{ $ev['left_pct'] }}%; width: calc({{ $ev['width_pct'] }}% - 3px); background: {{ $couleur }}22; border-left-color: {{ $couleur }};"
-                                     title="{{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }} · {{ $rdv->client->prenom }} {{ $rdv->client->nom }} · {{ $rdv->conseiller->name ?? '' }}{{ $rdv->sujet ? ' · '.$rdv->sujet : '' }}">
+                                     data-wd-rdv
+                                     data-date="{{ $rdv->starts_at->format('d/m/Y') }} · {{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }}"
+                                     data-client="{{ $rdv->client->prenom }} {{ $rdv->client->nom }}"
+                                     data-tel="{{ $rdv->client->telephone_mobile ?? '' }}"
+                                     data-email="{{ $rdv->client->email ?? '' }}"
+                                     data-sujet="{{ $sujetLabels[$rdv->sujet] ?? '' }}"
+                                     data-format="{{ $formatLabels[$rdv->format] ?? '' }}">
                                     <span class="wd-agenda-event-heure">{{ $rdv->starts_at->format('H:i') }}</span>
                                     <span class="wd-agenda-event-client">{{ $rdv->client->prenom }} {{ $rdv->client->nom }}</span>
                                 </div>
@@ -196,14 +236,54 @@
 
     </div>
 
+    <div class="wd-agenda-modal-overlay" data-wd-rdv-modal hidden>
+        <div class="wd-agenda-modal">
+            <button type="button" class="wd-agenda-modal-close" data-wd-rdv-modal-close>&times;</button>
+            <p class="wd-agenda-modal-date" data-wd-rdv-modal-date></p>
+            <h3 data-wd-rdv-modal-client></h3>
+            <div class="wd-agenda-modal-row"><span class="lbl">Téléphone</span><span data-wd-rdv-modal-tel></span></div>
+            <div class="wd-agenda-modal-row"><span class="lbl">Email</span><span data-wd-rdv-modal-email></span></div>
+            <div class="wd-agenda-modal-row"><span class="lbl">Sujet</span><span data-wd-rdv-modal-sujet></span></div>
+            <div class="wd-agenda-modal-row"><span class="lbl">Format</span><span data-wd-rdv-modal-format></span></div>
+        </div>
+    </div>
+
     <script>
         (function () {
             var bouton = document.querySelector('[data-wd-cal-popup]');
 
-            if (! bouton) { return; }
+            if (bouton) {
+                bouton.addEventListener('click', function () {
+                    window.open("{{ route('tenant.calendrier.index') }}", 'wd-calendrier', 'width=480,height=580');
+                });
+            }
 
-            bouton.addEventListener('click', function () {
-                window.open("{{ route('tenant.calendrier.index') }}", 'wd-calendrier', 'width=480,height=580');
+            var modal = document.querySelector('[data-wd-rdv-modal]');
+
+            if (! modal) { return; }
+
+            function texteOu(valeur, defaut) {
+                return valeur && valeur.length ? valeur : defaut;
+            }
+
+            document.querySelectorAll('[data-wd-rdv]').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    modal.querySelector('[data-wd-rdv-modal-date]').textContent = el.getAttribute('data-date') || '';
+                    modal.querySelector('[data-wd-rdv-modal-client]').textContent = el.getAttribute('data-client') || '';
+                    modal.querySelector('[data-wd-rdv-modal-tel]').textContent = texteOu(el.getAttribute('data-tel'), '-');
+                    modal.querySelector('[data-wd-rdv-modal-email]').textContent = texteOu(el.getAttribute('data-email'), '-');
+                    modal.querySelector('[data-wd-rdv-modal-sujet]').textContent = texteOu(el.getAttribute('data-sujet'), '-');
+                    modal.querySelector('[data-wd-rdv-modal-format]').textContent = texteOu(el.getAttribute('data-format'), '-');
+                    modal.hidden = false;
+                });
+            });
+
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) { modal.hidden = true; }
+            });
+
+            modal.querySelector('[data-wd-rdv-modal-close]').addEventListener('click', function () {
+                modal.hidden = true;
             });
         })();
     </script>
