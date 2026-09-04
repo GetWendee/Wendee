@@ -45,6 +45,7 @@
             .wd-agenda-cal-badges{display:flex;gap:6px}
             .wd-agenda-cal-badge{font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--bg);color:var(--muted)}
             .wd-agenda-cal-badge.ok{background:rgba(77,135,96,.12);color:var(--green)}
+            .wd-agenda-cal-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
 
             .wd-agenda-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
             .wd-agenda-switch{display:inline-flex;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:4px;gap:2px}
@@ -129,6 +130,9 @@
             </div>
 
             <div class="wd-agenda-cal">
+                @if ($estCourtier)
+                    <button type="button" class="wd-agenda-cal-btn" data-wd-mes-rdv data-mon-id="{{ auth()->id() }}">Uniquement mes RDV</button>
+                @endif
                 <button type="button" class="wd-agenda-cal-btn" data-wd-cal-popup>Connecter mon calendrier</button>
                 <span class="wd-agenda-cal-badges">
                     <span class="wd-agenda-cal-badge {{ isset($connexionsCalendrier['google']) ? 'ok' : '' }}">Google{{ isset($connexionsCalendrier['google']) ? ' ✓' : '' }}</span>
@@ -227,6 +231,8 @@
                                      style="top: {{ $ev['top_pct'] }}%; height: {{ $ev['height_pct'] }}%; left: {{ $ev['left_pct'] }}%; width: calc({{ $ev['width_pct'] }}% - 3px); background: {{ $couleur }}22; border-left-color: {{ $couleur }};"
                                      data-wd-rdv
                                      data-conseiller-id="{{ $rdv->user_id }}"
+                                     data-start-min="{{ $ev['debut_minutes'] }}"
+                                     data-end-min="{{ $ev['fin_minutes'] }}"
                                      data-date="{{ $rdv->starts_at->format('d/m/Y') }} · {{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }}"
                                      data-client="{{ $rdv->client->prenom }} {{ $rdv->client->nom }}"
                                      data-conseiller="{{ $rdv->conseiller->name ?? '' }}"
@@ -269,31 +275,104 @@
                 });
             }
 
+            function relayoutColonnes() {
+                document.querySelectorAll('.wd-agenda-daycol').forEach(function (colonne) {
+                    var evenements = Array.prototype.slice.call(colonne.querySelectorAll('.wd-agenda-event:not(.wd-agenda-hidden)'));
+
+                    if (! evenements.length) { return; }
+
+                    evenements.sort(function (a, b) {
+                        return parseInt(a.getAttribute('data-start-min'), 10) - parseInt(b.getAttribute('data-start-min'), 10);
+                    });
+
+                    var clusters = [];
+                    var clusterCourant = [];
+                    var finMaxCluster = -1;
+
+                    evenements.forEach(function (el) {
+                        var debut = parseInt(el.getAttribute('data-start-min'), 10);
+                        var fin = parseInt(el.getAttribute('data-end-min'), 10);
+
+                        if (clusterCourant.length && debut >= finMaxCluster) {
+                            clusters.push(clusterCourant);
+                            clusterCourant = [];
+                            finMaxCluster = -1;
+                        }
+
+                        clusterCourant.push(el);
+                        finMaxCluster = Math.max(finMaxCluster, fin);
+                    });
+
+                    if (clusterCourant.length) { clusters.push(clusterCourant); }
+
+                    clusters.forEach(function (cluster) {
+                        var finsLanes = [];
+
+                        cluster.forEach(function (el) {
+                            var debut = parseInt(el.getAttribute('data-start-min'), 10);
+                            var fin = parseInt(el.getAttribute('data-end-min'), 10);
+                            var lane = finsLanes.findIndex(function (finLane) { return debut >= finLane; });
+
+                            if (lane === -1) {
+                                lane = finsLanes.length;
+                                finsLanes.push(fin);
+                            } else {
+                                finsLanes[lane] = fin;
+                            }
+
+                            el.setAttribute('data-lane', lane);
+                        });
+
+                        var laneCount = finsLanes.length;
+                        var largeur = 100 / laneCount;
+
+                        cluster.forEach(function (el) {
+                            var lane = parseInt(el.getAttribute('data-lane'), 10);
+                            el.style.left = (lane * largeur) + '%';
+                            el.style.width = 'calc(' + largeur + '% - 3px)';
+                        });
+                    });
+                });
+            }
+
             var legende = document.querySelector('[data-wd-legend]');
+            var boutonMesRdv = document.querySelector('[data-wd-mes-rdv]');
+            var monId = boutonMesRdv ? boutonMesRdv.getAttribute('data-mon-id') : null;
+
+            function appliquerFiltre(idFiltre) {
+                if (legende) {
+                    legende.querySelectorAll('[data-wd-legend-filter]').forEach(function (b) {
+                        b.classList.toggle('active', idFiltre !== null && b.getAttribute('data-wd-legend-filter') === idFiltre);
+                    });
+
+                    legende.classList.toggle('filtering', idFiltre !== null);
+                }
+
+                if (boutonMesRdv) {
+                    boutonMesRdv.classList.toggle('active', idFiltre !== null && idFiltre === monId);
+                }
+
+                document.querySelectorAll('[data-conseiller-id]').forEach(function (el) {
+                    var visible = idFiltre === null || el.getAttribute('data-conseiller-id') === idFiltre;
+                    el.classList.toggle('wd-agenda-hidden', ! visible);
+                });
+
+                relayoutColonnes();
+            }
 
             if (legende) {
                 legende.querySelectorAll('[data-wd-legend-filter]').forEach(function (bouton) {
                     bouton.addEventListener('click', function () {
                         var dejaActif = bouton.classList.contains('active');
-
-                        legende.querySelectorAll('[data-wd-legend-filter]').forEach(function (b) {
-                            b.classList.remove('active');
-                        });
-
-                        var idFiltre = null;
-
-                        if (! dejaActif) {
-                            bouton.classList.add('active');
-                            idFiltre = bouton.getAttribute('data-wd-legend-filter');
-                        }
-
-                        legende.classList.toggle('filtering', idFiltre !== null);
-
-                        document.querySelectorAll('[data-conseiller-id]').forEach(function (el) {
-                            var visible = idFiltre === null || el.getAttribute('data-conseiller-id') === idFiltre;
-                            el.classList.toggle('wd-agenda-hidden', ! visible);
-                        });
+                        appliquerFiltre(dejaActif ? null : bouton.getAttribute('data-wd-legend-filter'));
                     });
+                });
+            }
+
+            if (boutonMesRdv) {
+                boutonMesRdv.addEventListener('click', function () {
+                    var dejaActif = boutonMesRdv.classList.contains('active');
+                    appliquerFiltre(dejaActif ? null : monId);
                 });
             }
 
