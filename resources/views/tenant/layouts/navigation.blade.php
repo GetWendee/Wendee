@@ -22,10 +22,12 @@
             <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
             <span>Tableau de bord</span>
         </a>
+        @if(Auth::check() && Auth::user()->effectiveRole() !== 'courtier')
         <a class="{{ request()->routeIs('tenant.clients.*') ? 'active' : '' }}" href="{{ route('tenant.clients.index') }}">
             <svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM3 21v-2a6 6 0 0 1 12 0v2M17 11a4 4 0 0 0 0-8M16 13a6 6 0 0 1 5 6v2"/></svg>
             <span>Mon portefeuille</span>
         </a>
+        @endif
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
         <a class="{{ request()->routeIs('tenant.portefeuille-cabinet.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille-cabinet.index') }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>

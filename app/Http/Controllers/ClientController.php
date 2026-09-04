@@ -28,6 +28,8 @@ class ClientController extends Controller
     {
         $user = $request->user();
 
+        abort_if($user && $user->effectiveRole() === 'courtier', 403);
+
         $query = Client::query()->with('conseiller')->orderBy('nom');
 
         if ($user->effectiveRole() === 'conseiller' && ! $user->voitTousLesClients()) {
