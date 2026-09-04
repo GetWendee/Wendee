@@ -115,7 +115,7 @@ class RendezVousController extends Controller
         return match ($vue) {
             'jour' => $dateRef->copy()->addDays($sens),
             'mois' => $dateRef->copy()->addMonths($sens),
-            default => $dateRef->copy()->addWeeks($sens * 7),
+            default => $dateRef->copy()->addWeeks($sens),
         };
     }
 
