@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CalendarConnection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Laravel\Socialite\Facades\Socialite;
 
 class CalendarConnectionController extends Controller
@@ -37,7 +38,7 @@ class CalendarConnectionController extends Controller
         return $driver->redirect();
     }
 
-    public function callback(string $provider): RedirectResponse
+    public function callback(string $provider): View
     {
         abort_unless(in_array($provider, ['google', 'microsoft'], true), 404);
 
