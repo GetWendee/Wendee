@@ -99,7 +99,9 @@
 
             .wd-agenda-event, .wd-agenda-month-pill{cursor:pointer}
 
-            .wd-agenda-modal-overlay{position:fixed;inset:0;background:rgba(21,21,21,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+            .wd-agenda-modal-overlay{position:fixed;inset:0;background:rgba(21,21,21,.45);align-items:center;justify-content:center;z-index:200;padding:20px}
+            .wd-agenda-modal-overlay[hidden]{display:none}
+            .wd-agenda-modal-overlay:not([hidden]){display:flex}
             .wd-agenda-modal{background:var(--white);border-radius:20px;padding:26px 28px;max-width:360px;width:100%;position:relative}
             .wd-agenda-modal-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;border:none;background:var(--bg);color:var(--muted);font-size:16px;cursor:pointer;line-height:1}
             .wd-agenda-modal-close:hover{color:var(--ink)}
