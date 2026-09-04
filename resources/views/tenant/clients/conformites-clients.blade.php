@@ -138,9 +138,79 @@
     color:var(--muted);
 }
 .wd-doc-empty svg{flex:0 0 auto;color:#c7c1bb;}
+
+.wd-subtabs{
+    display:flex;
+    align-items:center;
+    gap:22px;
+    margin:0 0 28px;
+    padding:16px 0 16px;
+    border-bottom:1px solid var(--line);
+}
+.wd-subtabs-links{
+    display:flex;
+    align-items:center;
+    gap:26px;
+    padding-left:22px;
+    border-left:1px solid var(--line);
+}
+.wd-subtabs a{
+    position:relative;
+    padding-bottom:5px;
+    color:#817b76;
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    text-decoration:none;
+}
+.wd-subtabs a::after{
+    content:'';
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:2px;
+    background:var(--pink);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .18s ease;
+}
+.wd-subtabs a:hover{color:#151515;}
+.wd-subtabs a:hover::after{transform:scaleX(1);}
+.wd-btn-dark{
+    flex:0 0 auto;
+    min-width:220px;
+    min-height:40px;
+    padding:0 20px;
+    border:1px solid rgba(255,255,255,.10);
+    border-top:2px solid #FF3399;
+    border-radius:8px;
+    background:#242424;
+    color:#ffffff;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-family:inherit;
+}
 </style>
 
-<section class="wd-section">
+<nav class="wd-subtabs">
+    <button type="button" class="wd-btn-dark">Ajouter un document</button>
+    <div class="wd-subtabs-links">
+        <a href="#bibliotheque">Bibliothèque</a>
+        <a href="#documents-personnels">Documents personnels</a>
+        <a href="#documents-mandats">Documents liés aux mandats</a>
+    </div>
+</nav>
+
+<section class="wd-section" id="bibliotheque">
     <div class="wd-section-head">
         <div>
             <div class="wd-eyebrow">Documents générés</div>
@@ -188,7 +258,7 @@
     </div>
 </section>
 
-<section class="wd-section">
+<section class="wd-section" id="documents-personnels">
     <div class="wd-section-head">
         <div>
             <div class="wd-eyebrow">KYC</div>
@@ -231,7 +301,7 @@
     </div>
 </section>
 
-<section class="wd-section">
+<section class="wd-section" id="documents-mandats">
     <div class="wd-section-head">
         <div>
             <div class="wd-eyebrow">Mandats</div>
