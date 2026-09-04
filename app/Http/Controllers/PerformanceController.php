@@ -149,6 +149,8 @@ class PerformanceController extends Controller
 
         $repartition = $this->repartitionAllocation($patrimoine);
 
+        $evolutionPatrimoine = $this->evolutionPatrimoine($clients);
+
         $conseillers = collect([$user])->merge(
             User::query()->where('role', 'conseiller')->where('parent_id', $user->id)->orderBy('name')->get()
         );
@@ -201,6 +203,7 @@ class PerformanceController extends Controller
             'auditsPeriode' => $auditsPeriode,
             'evolutionAudits' => $evolutionAudits,
             'repartition' => $repartition,
+            'evolutionPatrimoine' => $evolutionPatrimoine,
             'lignesConseillers' => $lignesConseillers,
             'alertesConformite' => $alertesConformite,
         ]);
@@ -234,6 +237,34 @@ class PerformanceController extends Controller
                 $now->copy()->subQuarterNoOverflow()->endOfQuarter(),
             ],
         };
+    }
+
+    /**
+     * Total des actifs du cabinet, cumulé mois par mois selon la date de
+     * création des clients (approximation faute d'historique réel du
+     * patrimoine, qui n'est pas versionné dans le temps aujourd'hui).
+     */
+    private function evolutionPatrimoine($clients): array
+    {
+        $now = now();
+        $points = [];
+
+        for ($i = 12; $i >= 0; $i--) {
+            $finMois = $now->copy()->subMonths($i)->endOfMonth();
+
+            $total = $clients
+                ->filter(fn (Client $client) => $client->created_at && $client->created_at->lte($finMois))
+                ->flatMap->patrimoineElements
+                ->whereIn('categorie', ['actif_financier', 'actif_non_financier'])
+                ->sum('montant');
+
+            $points[] = [
+                'label' => mb_convert_case($finMois->locale('fr')->isoFormat('MMM YY'), MB_CASE_TITLE),
+                'total' => (float) $total,
+            ];
+        }
+
+        return $points;
     }
 
     /**

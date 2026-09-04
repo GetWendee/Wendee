@@ -151,8 +151,21 @@
 
             <div class="bg-white rounded-3xl border border-gray-200 p-6">
                 <p class="text-xs uppercase tracking-[0.14em] text-gray-400 font-semibold mb-8">Évolution patrimoine cabinet</p>
-                <div class="flex items-center justify-center h-40">
-                    <p class="text-sm text-gray-400">Historique insuffisant</p>
+
+                @php
+                    $maxPatrimoine = collect($evolutionPatrimoine)->max('total') ?: 1;
+                @endphp
+
+                <div style="display: flex; align-items: flex-end; gap: 6px; height: 180px;">
+                    @foreach ($evolutionPatrimoine as $point)
+                        @php
+                            $hauteur = $maxPatrimoine > 0 ? max(2, ($point['total'] / $maxPatrimoine) * 100) : 2;
+                        @endphp
+                        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;" title="{{ $point['label'] }} : {{ number_format($point['total'], 0, ',', ' ') }} €">
+                            <div style="width: 100%; max-width: 22px; height: {{ $hauteur }}%; background: #ff008a; border-radius: 4px 4px 0 0;"></div>
+                            <span style="margin-top: 6px; font-size: 10px; color: #9ca3af;">{{ $point['label'] }}</span>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
