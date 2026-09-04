@@ -146,7 +146,7 @@
                 @if ($classementConseillers->isEmpty())
                     <p style="font-size:13px;color:var(--muted)">Aucun dossier facturé sur la période.</p>
                 @else
-                    <table class="wd-rev-table">
+                    <table class="wd-rev-table" data-sortable>
                         <thead>
                             <tr>
                                 <th>Conseiller</th>
@@ -207,7 +207,7 @@
             @if ($detailClients->isEmpty())
                 <p style="font-size:13px;color:var(--muted)">Aucun revenu enregistré sur la période.</p>
             @else
-                <table class="wd-rev-table">
+                <table class="wd-rev-table" data-sortable>
                     <thead>
                         <tr>
                             <th>Client</th>
@@ -249,6 +249,52 @@
                 rows.forEach(function (row) {
                     var nom = row.getAttribute('data-rev-name') || '';
                     row.style.display = nom.indexOf(terme) !== -1 ? '' : 'none';
+                });
+            });
+        })();
+
+        (function () {
+            document.querySelectorAll('.wd-rev-table[data-sortable]').forEach(function (table) {
+                var headers = table.querySelectorAll('thead th');
+
+                headers.forEach(function (th, index) {
+                    th.style.cursor = 'pointer';
+                    th.style.userSelect = 'none';
+
+                    th.addEventListener('click', function () {
+                        var tbody = table.querySelector('tbody');
+                        var rowsList = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+                        var direction = th.getAttribute('data-dir') === 'asc' ? 'desc' : 'asc';
+
+                        headers.forEach(function (h) {
+                            h.removeAttribute('data-dir');
+                            var arrow = h.querySelector('.wd-sort-arrow');
+                            if (arrow) { arrow.remove(); }
+                        });
+
+                        th.setAttribute('data-dir', direction);
+
+                        var arrow = document.createElement('span');
+                        arrow.className = 'wd-sort-arrow';
+                        arrow.style.marginLeft = '4px';
+                        arrow.textContent = direction === 'asc' ? '▲' : '▼';
+                        th.appendChild(arrow);
+
+                        rowsList.sort(function (a, b) {
+                            var textA = a.children[index].textContent.trim();
+                            var textB = b.children[index].textContent.trim();
+
+                            var numA = parseFloat(textA.replace(/[^0-9,.-]/g, '').replace(',', '.'));
+                            var numB = parseFloat(textB.replace(/[^0-9,.-]/g, '').replace(',', '.'));
+                            var isNumeric = ! isNaN(numA) && ! isNaN(numB) && /[0-9]/.test(textA);
+
+                            var result = isNumeric ? (numA - numB) : textA.localeCompare(textB, 'fr');
+
+                            return direction === 'asc' ? result : -result;
+                        });
+
+                        rowsList.forEach(function (row) { tbody.appendChild(row); });
+                    });
                 });
             });
         })();
