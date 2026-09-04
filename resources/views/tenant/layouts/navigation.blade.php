@@ -9,6 +9,7 @@
         request()->routeIs('tenant.performances.*') => 'Cabinet · Patrimoine sous gestion',
         request()->routeIs('tenant.revenus.*') => 'Cabinet · Revenus',
         request()->routeIs('tenant.commissions.*') => 'Cabinet · Commissions',
+        request()->routeIs('tenant.rendez-vous.*') => 'Agenda · Rendez-vous',
         request()->routeIs('tenant.profil.rib.*') => 'Compte · Mon RIB',
         default => 'Wendee',
     };
@@ -42,17 +43,11 @@
             <span>Créer un utilisateur</span>
         </a>
         @endif
-        <a href="{{ route('tenant.calendrier.index') }}" class="{{ request()->routeIs('tenant.calendrier.*') ? 'active' : '' }}">
+        <a href="{{ route('tenant.rendez-vous.index') }}" class="{{ request()->routeIs('tenant.rendez-vous.*') ? 'active' : '' }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
             <span>Rendez-vous</span>
         </a>
         <div class="wd-nav-section">Activité</div>
-        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
-        <a class="{{ request()->routeIs('tenant.cabinet') ? 'active' : '' }}" href="{{ route('tenant.cabinet') }}">
-            <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
-            <span>Cabinet</span>
-        </a>
-        @endif
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
         <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
             <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>

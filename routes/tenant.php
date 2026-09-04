@@ -148,10 +148,11 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::put('/investisseur/{client}', [ProfilInvestisseurController::class, 'update'])->name('clients.profil.update');
         Route::get('/investisseur/{client}/pdf', [ClientController::class, 'telechargerProfilInvestisseurPdf'])->name('clients.profil.pdf');
 
-        Route::get('/rendez-vous', [CalendarConnectionController::class, 'index'])->name('calendrier.index');
+        Route::get('/rendez-vous', [RendezVousController::class, 'index'])->name('rendez-vous.index');
+        Route::get('/rendez-vous/calendriers', [CalendarConnectionController::class, 'index'])->name('calendrier.index');
         Route::get('/rendez-vous/connecter/{provider}', [CalendarConnectionController::class, 'redirect'])->name('calendrier.connecter');
         Route::get('/rendez-vous/callback/{provider}', [CalendarConnectionController::class, 'callback'])->name('calendrier.callback');
-        Route::delete('/rendez-vous/{connection}', [CalendarConnectionController::class, 'destroy'])->name('calendrier.destroy');
+        Route::delete('/rendez-vous/calendriers/{connection}', [CalendarConnectionController::class, 'destroy'])->name('calendrier.destroy');
         Route::get('/rendez-vous/disponibilites', [RendezVousController::class, 'disponibilites'])->name('rendez-vous.disponibilites');
         Route::post('/clients/{client}/rendez-vous', [RendezVousController::class, 'store'])->name('clients.rendez-vous.store');
         Route::post('/rendez-vous/{rendezVous}/annuler', [RendezVousController::class, 'annuler'])->name('rendez-vous.annuler');

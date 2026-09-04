@@ -13,7 +13,7 @@ class CalendarConnectionController extends Controller
     {
         $connexions = CalendarConnection::where('user_id', Auth::id())->get()->keyBy('provider');
 
-        return view('tenant.calendrier.connecter', compact('connexions'));
+        return view('tenant.calendrier.popup', compact('connexions'));
     }
 
     public function redirect(string $provider): RedirectResponse
@@ -54,8 +54,7 @@ class CalendarConnectionController extends Controller
             ]
         );
 
-        return redirect()->route('tenant.calendrier.index')
-            ->with('status', ucfirst($provider).' connecté avec succès.');
+        return view('tenant.calendrier.callback-close', ['provider' => $provider]);
     }
 
     public function destroy(CalendarConnection $connection): RedirectResponse
