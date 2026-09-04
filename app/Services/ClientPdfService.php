@@ -36,6 +36,72 @@ class ClientPdfService
         ];
     }
 
+    public function patrimoine(Client $client): array
+    {
+        $client->loadMissing(['patrimoineElements', 'patrimoineFiscalite', 'patrimoineObjectifs', 'conseiller']);
+
+        $cabinet = CabinetProfile::query()->first();
+        $conseiller = $client->conseiller;
+
+        $analyse = $client->analyses()
+            ->where('type', 'patrimoine')
+            ->where('status', 'completed')
+            ->latest('created_at')
+            ->first();
+
+        $resultat = $analyse?->result_json ?? [];
+
+        $categories = ['actif_financier', 'actif_non_financier', 'passif', 'revenu', 'charge'];
+        $elements = [];
+        foreach ($categories as $categorie) {
+            $elements[$categorie] = $client->patrimoineElements->where('categorie', $categorie)->values();
+        }
+
+        $data = $this->basePdfData($client, $cabinet, $conseiller);
+        $data['lieuSignature'] = $client->patrimoineFiscalite?->lieu_signature ?: $cabinet?->ville;
+        $data['fiscalite'] = $client->patrimoineFiscalite;
+        $data['elements'] = $elements;
+        $data['objectifs'] = $client->patrimoineObjectifs;
+        $data['pointsForts'] = is_array($resultat['points_forts'] ?? null) ? $resultat['points_forts'] : [];
+        $data['pointsAttention'] = is_array($resultat['points_attention'] ?? null) ? $resultat['points_attention'] : [];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('tenant.clients.pdf.patrimoine', $data);
+
+        return [
+            'pdf' => $pdf,
+            'filename' => $this->nommerFichierPdf('Recueil patrimonial', $client),
+        ];
+    }
+
+    public function profilInvestisseur(Client $client): array
+    {
+        $client->loadMissing(['profilInvestisseur', 'conseiller']);
+
+        $cabinet = CabinetProfile::query()->first();
+        $conseiller = $client->conseiller;
+
+        $analyse = $client->analyses()
+            ->where('type', 'profil_investisseur')
+            ->where('status', 'completed')
+            ->latest('created_at')
+            ->first();
+
+        $resultat = $analyse?->result_json ?? [];
+
+        $data = $this->basePdfData($client, $cabinet, $conseiller);
+        $data['lieuSignature'] = $cabinet?->ville;
+        $data['profil'] = $client->profilInvestisseur;
+        $data['pointsForts'] = is_array($resultat['points_forts'] ?? null) ? $resultat['points_forts'] : [];
+        $data['pointsAttention'] = is_array($resultat['points_attention'] ?? null) ? $resultat['points_attention'] : [];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('tenant.clients.pdf.profil-investisseur', $data);
+
+        return [
+            'pdf' => $pdf,
+            'filename' => $this->nommerFichierPdf('Profil investisseur', $client),
+        ];
+    }
+
     private function basePdfData(Client $client, ?CabinetProfile $cabinet, $conseiller): array
     {
         $nomClient = trim(

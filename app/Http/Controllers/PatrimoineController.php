@@ -270,12 +270,11 @@ class PatrimoineController extends Controller
             );
         }
 
-        if ($codeValide) {
-            $message = 'Patrimoine validé par le client.';
-        } else {
-            $verification->enregistrerModification($client, 'patrimoine');
-            $message = 'Patrimoine enregistré.';
-        }
+        $verification->enregistrerModification($client, 'patrimoine');
+
+        $message = $codeValide
+            ? 'Patrimoine validé par le client.'
+            : 'Patrimoine enregistré.';
 
         return redirect()->route('tenant.clients.patrimoine.edit', $client)->with('status', $message);
     }

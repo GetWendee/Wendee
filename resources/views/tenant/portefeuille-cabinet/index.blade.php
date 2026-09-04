@@ -18,20 +18,19 @@
             </div>
 
             <div class="flex flex-wrap gap-3">
-                @if (in_array($user->role, ['courtier', 'conseiller'], true))
-                    <button type="button"
-                            class="inline-flex items-center gap-2 rounded-xl bg-[#232323] px-5 py-3 text-sm font-semibold text-white hover:bg-black transition">
-                        <span class="text-lg leading-none">+</span>
-                        Ajouter un apporteur
-                    </button>
-                @endif
-
-                @if (in_array($user->role, ['courtier', 'conseiller', 'apporteur'], true))
-                    <a href="{{ route('tenant.clients.create') }}"
-                       class="inline-flex items-center gap-2 rounded-xl bg-[#ff008a] px-5 py-3 text-sm font-semibold text-white hover:opacity-90 transition">
-                        <span class="text-lg leading-none">+</span>
-                        Ajouter un client
+                @php
+                    $newAccountRoles = $user->creatableUserRoles();
+                @endphp
+                @if (count($newAccountRoles) === 0)
+                    <a href="{{ route('tenant.clients.create') }}" class="wd-new-client">
+                        <span class="wd-new-client-plus">+</span>
+                        <span>Nouveau compte</span>
                     </a>
+                @else
+                    <button type="button" class="wd-new-client" data-new-account-trigger>
+                        <span class="wd-new-client-plus">+</span>
+                        <span>Nouveau compte</span>
+                    </button>
                 @endif
             </div>
         </section>
@@ -342,4 +341,56 @@
         </script>
 
     </div>
+<style>
+.wd-new-client{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    min-height:42px;
+    padding:0 17px;
+
+    background:#242424;
+    border:1px solid #242424;
+    border-radius:7px;
+
+    color:#fff !important;
+    text-decoration:none !important;
+
+    font-size:12px;
+    font-weight:650;
+    letter-spacing:-.01em;
+
+    box-shadow:0 5px 16px rgba(36,36,36,.10);
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease,
+        background .15s ease;
+}
+
+.wd-new-client-plus{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    width:20px;
+    height:20px;
+
+    border-radius:50%;
+    background:#f40087;
+    color:#fff;
+
+    font-size:17px;
+    font-weight:400;
+    line-height:1;
+}
+
+.wd-new-client:hover{
+    background:#171717;
+    box-shadow:0 8px 20px rgba(36,36,36,.16);
+    transform:translateY(-1px);
+}
+</style>
+
 </x-tenant-app-layout>

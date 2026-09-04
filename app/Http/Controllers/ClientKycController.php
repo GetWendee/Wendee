@@ -188,12 +188,11 @@ class ClientKycController extends Controller
             );
         }
 
-        if ($codeValide) {
-            $message = 'Recueil KYC validé par le client.';
-        } else {
-            $verification->enregistrerModification($client, 'kyc');
-            $message = 'Recueil KYC enregistré.';
-        }
+        $verification->enregistrerModification($client, 'kyc');
+
+        $message = $codeValide
+            ? 'Recueil KYC validé par le client.'
+            : 'Recueil KYC enregistré.';
 
         return redirect()->route('tenant.clients.kyc.edit', $client)->with('status', $message);
     }

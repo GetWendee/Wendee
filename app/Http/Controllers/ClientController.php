@@ -460,6 +460,20 @@ class ClientController extends Controller
         return $resultat['pdf']->download($resultat['filename']);
     }
 
+    public function telechargerPatrimoinePdf(Client $client): \Symfony\Component\HttpFoundation\Response
+    {
+        $resultat = app(\App\Services\ClientPdfService::class)->patrimoine($client);
+
+        return $resultat['pdf']->download($resultat['filename']);
+    }
+
+    public function telechargerProfilInvestisseurPdf(Client $client): \Symfony\Component\HttpFoundation\Response
+    {
+        $resultat = app(\App\Services\ClientPdfService::class)->profilInvestisseur($client);
+
+        return $resultat['pdf']->download($resultat['filename']);
+    }
+
     private function typesBibliotheque(): array
     {
         return [
@@ -477,6 +491,8 @@ class ClientController extends Controller
             'mandat_assurance_vehicule' => ['label' => 'Mandat assurance véhicule', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-vehicule.pdf'],
             'mandat_plan_epargne_retraite' => ["label" => "Mandat plan d'épargne retraite", 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-plan-epargne-retraite.pdf'],
             'kyc' => ['label' => 'Recueil de connaissance client', 'categorie' => 'informations-client', 'categorie_label' => 'Informations client', 'route' => 'tenant.clients.kyc.pdf'],
+            'patrimoine' => ['label' => 'Recueil patrimonial', 'categorie' => 'informations-client', 'categorie_label' => 'Informations client', 'route' => 'tenant.clients.patrimoine.pdf'],
+            'profil_investisseur' => ['label' => 'Profil investisseur', 'categorie' => 'informations-client', 'categorie_label' => 'Informations client', 'route' => 'tenant.clients.profil.pdf'],
         ];
     }
 

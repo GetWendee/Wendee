@@ -77,6 +77,8 @@ class VerificationCodeService
         try {
             $resultat = match ($module) {
                 'kyc' => app(ClientPdfService::class)->kyc($client),
+                'patrimoine' => app(ClientPdfService::class)->patrimoine($client),
+                'profil_investisseur' => app(ClientPdfService::class)->profilInvestisseur($client),
                 default => null,
             };
         } catch (\Throwable $e) {

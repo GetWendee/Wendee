@@ -164,12 +164,11 @@ class ProfilInvestisseurController extends Controller
             );
         }
 
-        if ($codeValide) {
-            $message = 'Profil investisseur validé par le client.';
-        } else {
-            $verification->enregistrerModification($client, 'profil_investisseur');
-            $message = 'Profil investisseur enregistré.';
-        }
+        $verification->enregistrerModification($client, 'profil_investisseur');
+
+        $message = $codeValide
+            ? 'Profil investisseur validé par le client.'
+            : 'Profil investisseur enregistré.';
 
         return redirect()
             ->route('tenant.clients.profil.edit', $client)

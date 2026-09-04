@@ -131,8 +131,10 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::get('/sirene/{siret}', [SireneLookupController::class, 'rechercher'])->name('sirene.rechercher');
         Route::get('/patrimoine/{client}', [PatrimoineController::class, 'edit'])->name('clients.patrimoine.edit');
         Route::put('/patrimoine/{client}', [PatrimoineController::class, 'update'])->name('clients.patrimoine.update');
+        Route::get('/patrimoine/{client}/pdf', [ClientController::class, 'telechargerPatrimoinePdf'])->name('clients.patrimoine.pdf');
         Route::get('/investisseur/{client}', [ProfilInvestisseurController::class, 'edit'])->name('clients.profil.edit');
         Route::put('/investisseur/{client}', [ProfilInvestisseurController::class, 'update'])->name('clients.profil.update');
+        Route::get('/investisseur/{client}/pdf', [ClientController::class, 'telechargerProfilInvestisseurPdf'])->name('clients.profil.pdf');
 
         Route::get('/rendez-vous', [CalendarConnectionController::class, 'index'])->name('calendrier.index');
         Route::get('/rendez-vous/connecter/{provider}', [CalendarConnectionController::class, 'redirect'])->name('calendrier.connecter');
