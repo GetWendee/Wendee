@@ -41,7 +41,7 @@
             .wd-agenda-nav{display:flex;align-items:center;gap:14px}
             .wd-agenda-nav a{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--white);color:var(--ink);text-decoration:none;font-size:15px}
             .wd-agenda-nav a:hover{border-color:var(--pink);color:var(--pink)}
-            .wd-agenda-nav .today{padding:0 16px;height:34px;display:flex;align-items:center;border-radius:10px;border:1px solid var(--line);background:var(--white);color:var(--ink);text-decoration:none;font-size:12.5px;font-weight:700}
+            .wd-agenda-nav .today{width:auto;padding:0 16px;height:34px;display:flex;align-items:center;border-radius:10px;border:1px solid var(--line);background:var(--white);color:var(--ink);text-decoration:none;font-size:12.5px;font-weight:700;white-space:nowrap}
             .wd-agenda-nav .today:hover{border-color:var(--pink);color:var(--pink)}
             .wd-agenda-period{font-size:14px;font-weight:700;color:var(--dark);text-transform:capitalize;min-width:220px}
 
