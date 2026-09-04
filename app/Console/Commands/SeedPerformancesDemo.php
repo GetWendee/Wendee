@@ -4,9 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Client;
 use App\Models\ClientAnalysis;
-use App\Models\ClientKyc;
 use App\Models\PatrimoineElement;
-use App\Models\ProfilInvestisseur;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -121,18 +119,12 @@ class SeedPerformancesDemo extends Command
                      * conformité, sans logique supplémentaire.
                      */
                     if (random_int(0, 100) < 80) {
-                        $kyc = ClientKyc::create([
-                            'client_id' => $client->id,
-                            'signe_le' => $date,
-                        ]);
+                        $kyc = $client->kyc()->create(['signe_le' => $date]);
                         $kyc->forceFill(['created_at' => $date, 'updated_at' => $date])->save();
                     }
 
                     if (random_int(0, 100) < 70) {
-                        $profil = ProfilInvestisseur::create([
-                            'client_id' => $client->id,
-                            'signe_le' => $date,
-                        ]);
+                        $profil = $client->profilInvestisseur()->create(['signe_le' => $date]);
                         $profil->forceFill(['created_at' => $date, 'updated_at' => $date])->save();
                     }
 
