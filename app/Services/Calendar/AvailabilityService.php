@@ -89,6 +89,19 @@ class AvailabilityService
     }
 
     /**
+     * Vrai si le créneau [debut, fin) est libre pour ce conseiller : ni RDV
+     * Wendee existant, ni plage occupée sur un calendrier externe connecté.
+     * Vérification serveur, à ne jamais remplacer par la seule liste de
+     * créneaux affichée côté client (une requête peut arriver après coup).
+     */
+    public function creneauLibre(User $conseiller, Carbon $debut, Carbon $fin, ?int $exclureRendezVousId = null): bool
+    {
+        $plages = $this->plagesOccupees($conseiller, $debut, $fin, $exclureRendezVousId);
+
+        return ! $this->chevaucheUnePlage($debut, $fin, $plages);
+    }
+
+    /**
      * @return array<int, array{start: Carbon, end: Carbon}>
      */
     protected function plagesOccupees(User $conseiller, Carbon $from, Carbon $to, ?int $exclureRendezVousId = null): array

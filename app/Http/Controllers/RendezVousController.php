@@ -296,6 +296,16 @@ class RendezVousController extends Controller
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        $debut = Carbon::parse($validated['starts_at']);
+        $fin = Carbon::parse($validated['ends_at']);
+
+        // Vérification serveur : la liste de créneaux du formulaire peut être
+        // périmée (deux requêtes rapprochées, onglet resté ouvert). On ne se
+        // fie jamais à ce que le client affiche pour autoriser l'écriture.
+        if (! $this->disponibilite->creneauLibre(Auth::user(), $debut, $fin)) {
+            abort(409, "Ce créneau vient d'être pris, choisis-en un autre.");
+        }
+
         $rendezVous = RendezVous::create([
             'client_id' => $client->id,
             'user_id' => Auth::id(),
@@ -360,6 +370,13 @@ class RendezVousController extends Controller
             'starts_at' => ['required', 'date', 'after:now'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
         ]);
+
+        $debut = Carbon::parse($validated['starts_at']);
+        $fin = Carbon::parse($validated['ends_at']);
+
+        if (! $this->disponibilite->creneauLibre(Auth::user(), $debut, $fin, $rendezVous->id)) {
+            abort(409, "Ce créneau vient d'être pris, choisis-en un autre.");
+        }
 
         $rendezVous->update([
             'starts_at' => $validated['starts_at'],

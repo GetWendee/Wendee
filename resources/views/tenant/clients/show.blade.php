@@ -2471,6 +2471,7 @@ function rdvLigne(data, urlDisponibilites, urlDecaler) {
         creneaux: [],
         creneauChoisi: null,
         chargement: false,
+        decalageEnCours: false,
         toggle() {
             this.open = !this.open;
         },
@@ -2508,7 +2509,8 @@ function rdvLigne(data, urlDisponibilites, urlDecaler) {
                 .finally(() => { this.chargement = false; });
         },
         confirmerDecalage() {
-            if (!this.creneauChoisi) return;
+            if (!this.creneauChoisi || this.decalageEnCours) return;
+            this.decalageEnCours = true;
             fetch(urlDecaler, {
                 method: 'POST',
                 headers: {
@@ -2519,7 +2521,17 @@ function rdvLigne(data, urlDisponibilites, urlDecaler) {
                     starts_at: this.creneauChoisi.start,
                     ends_at: this.creneauChoisi.end,
                 }),
-            }).then(() => { window.location.reload(); });
+            }).then((reponse) => {
+                if (! reponse.ok) {
+                    this.decalageEnCours = false;
+                    alert(reponse.status === 409 ? "Ce créneau vient d'être pris, choisis-en un autre." : "Le décalage a échoué, réessaie.");
+                    return;
+                }
+                window.location.reload();
+            }).catch(() => {
+                this.decalageEnCours = false;
+                alert("Le décalage a échoué, réessaie.");
+            });
         },
     };
 }
@@ -2571,7 +2583,7 @@ function rdvPopup(urlDisponibilites, urlStore) {
             }).then((reponse) => {
                 if (! reponse.ok) {
                     this.reservationEnCours = false;
-                    alert("La réservation a échoué, réessaie.");
+                    alert(reponse.status === 409 ? "Ce créneau vient d'être pris, choisis-en un autre." : "La réservation a échoué, réessaie.");
                     return;
                 }
                 this.visible = false;
@@ -2693,7 +2705,7 @@ function rdvPopup(urlDisponibilites, urlStore) {
                             </div>
 
                             <div style="display:flex;gap:8px;">
-                                <button type="button" x-on:click="confirmerDecalage()" :disabled="!creneauChoisi" style="background:#1b1716;color:#fff;border:none;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;">Confirmer le décalage</button>
+                                <button type="button" x-on:click="confirmerDecalage()" :disabled="!creneauChoisi || decalageEnCours" style="background:#1b1716;color:#fff;border:none;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;" x-text="decalageEnCours ? 'Enregistrement...' : 'Confirmer le décalage'"></button>
                                 <button type="button" x-on:click="decalage = false" style="background:none;border:1px solid #ded9d4;border-radius:999px;padding:7px 16px;font-size:12px;font-weight:600;color:#817b76;cursor:pointer;">Annuler le décalage</button>
                             </div>
                         </div>
