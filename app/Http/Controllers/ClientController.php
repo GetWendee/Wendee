@@ -36,9 +36,26 @@ class ClientController extends Controller
             $query->where('apporteur_id', $user->id);
         }
 
-        $clients = $query->paginate(20);
+        $recherche = trim((string) $request->query('q', ''));
 
-        return view('tenant.clients.index', ['clients' => $clients]);
+        if ($recherche !== '') {
+            $query->where(function ($q) use ($recherche) {
+                $q->where('nom', 'like', "%{$recherche}%")
+                    ->orWhere('prenom', 'like', "%{$recherche}%")
+                    ->orWhere('email', 'like', "%{$recherche}%")
+                    ->orWhere('ville', 'like', "%{$recherche}%");
+            });
+        }
+
+        $totalClients = Client::count();
+
+        $clients = $query->paginate(20)->withQueryString();
+
+        return view('tenant.clients.index', [
+            'clients' => $clients,
+            'recherche' => $recherche,
+            'totalClients' => $totalClients,
+        ]);
     }
 
     public function create(): View|RedirectResponse
