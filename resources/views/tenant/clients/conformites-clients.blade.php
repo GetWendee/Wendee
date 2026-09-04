@@ -106,7 +106,7 @@
 }
 .wd-docs-grid{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(4,minmax(0,1fr));
     gap:16px;
 }
 @media (max-width:900px){
@@ -121,6 +121,7 @@
     border-radius:12px;
     padding:20px;
     box-shadow:0 1px 3px rgba(21,21,21,.04);
+    min-width:0;
 }
 .wd-doc-titre{
     font-size:14px;
