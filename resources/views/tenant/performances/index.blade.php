@@ -12,10 +12,10 @@
             .wd-perf-switch a.active{background:var(--dark);color:#fff}
             .wd-perf-switch a:not(.active):hover{color:var(--ink)}
 
-            .wd-perf-hero{background:var(--dark);border-radius:28px;padding:38px 42px;color:#fff;display:grid;grid-template-columns:auto 1fr;gap:56px;align-items:center;margin-bottom:18px}
+            .wd-perf-hero{background:var(--dark);border-radius:28px;padding:38px 48px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:56px;margin-bottom:18px}
             .wd-perf-hero-label{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.5);font-weight:700}
             .wd-perf-hero-value{font-size:46px;font-weight:700;margin:10px 0 0;letter-spacing:-.02em;white-space:nowrap}
-            .wd-perf-hero-sub{display:flex;gap:40px;border-left:1px solid rgba(255,255,255,.14);padding-left:40px}
+            .wd-perf-hero-sub{display:flex;flex:1;justify-content:space-evenly;gap:40px;border-left:1px solid rgba(255,255,255,.14);padding-left:48px}
             .wd-perf-hero-sub .lbl{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
             .wd-perf-hero-sub .val{font-size:19px;font-weight:700;margin-top:8px}
             .wd-perf-hero-sub .val.pink{color:#ff5cb8}
@@ -47,7 +47,10 @@
             .wd-perf-rank-side .clients{font-size:11px;color:var(--muted);margin-top:3px}
 
             .wd-perf-donut-wrap{display:flex;flex-direction:column;align-items:center}
-            .wd-perf-donut{position:relative;width:172px;height:172px}
+            .wd-perf-donut{position:relative;width:172px;height:172px;cursor:pointer}
+            .wd-perf-donut-tooltip{position:fixed;pointer-events:none;background:var(--dark);color:#fff;font-size:12px;font-weight:600;padding:9px 14px;border-radius:10px;z-index:80;white-space:nowrap;transform:translate(-50%,-130%);opacity:0;transition:opacity .1s}
+            .wd-perf-donut-tooltip.show{opacity:1}
+            .wd-perf-donut-tooltip .pct{color:#ff8fc9;margin-left:6px}
             .wd-perf-donut-hole{position:absolute;inset:16%;background:var(--white);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
             .wd-perf-donut-hole .amount{font-size:15px;font-weight:700;color:var(--dark)}
             .wd-perf-donut-hole .lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:2px}
@@ -70,7 +73,7 @@
             .wd-perf-badge.warn{background:rgba(185,77,77,.1);color:var(--red)}
 
             @media (max-width:960px){
-                .wd-perf-hero{grid-template-columns:1fr}
+                .wd-perf-hero{flex-direction:column;align-items:flex-start}
                 .wd-perf-hero-sub{border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.14);padding-top:22px;flex-wrap:wrap}
                 .wd-perf-tiles{grid-template-columns:1fr}
                 .wd-perf-grid{grid-template-columns:1fr}
@@ -81,7 +84,7 @@
         <div class="wd-perf-head">
             <div>
                 <p class="wd-perf-eyebrow">Vue cabinet</p>
-                <h1 class="wd-perf-title">Performances</h1>
+                <h1 class="wd-perf-title">Patrimoine sous gestion</h1>
             </div>
 
             <div class="wd-perf-switch">
@@ -188,7 +191,7 @@
                     @endphp
 
                     <div class="wd-perf-donut-wrap">
-                        <div class="wd-perf-donut" style="border-radius:50%;background:conic-gradient({{ $gradient }});">
+                        <div class="wd-perf-donut" style="border-radius:50%;background:conic-gradient({{ $gradient }});" data-wd-donut data-segments="{{ json_encode(array_map(fn ($bucket) => ['label' => $bucket['label'], 'pct' => $bucket['pct'], 'montant' => $bucket['montant']], array_values($repartition))) }}">
                             <div class="wd-perf-donut-hole">
                                 <span class="amount">{{ number_format($actifs / 1000, 0, ',', ' ') }} k€</span>
                                 <span class="lbl">Total actifs</span>
@@ -285,4 +288,59 @@
         </div>
 
     </div>
+
+    <div class="wd-perf-donut-tooltip" data-wd-donut-tooltip></div>
+
+    <script>
+        (function () {
+            var donut = document.querySelector('[data-wd-donut]');
+            var tooltip = document.querySelector('[data-wd-donut-tooltip]');
+
+            if (! donut || ! tooltip) { return; }
+
+            var segments = JSON.parse(donut.getAttribute('data-segments') || '[]');
+            var formateur = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
+            var formateurPct = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+            function segmentAt(pct) {
+                var cursor = 0;
+                for (var i = 0; i < segments.length; i++) {
+                    cursor += segments[i].pct;
+                    if (pct <= cursor) { return segments[i]; }
+                }
+                return segments[segments.length - 1] || null;
+            }
+
+            donut.addEventListener('mousemove', function (e) {
+                var rect = donut.getBoundingClientRect();
+                var cx = rect.left + rect.width / 2;
+                var cy = rect.top + rect.height / 2;
+                var dx = e.clientX - cx;
+                var dy = e.clientY - cy;
+
+                if (Math.sqrt(dx * dx + dy * dy) < rect.width * 0.16) {
+                    tooltip.classList.remove('show');
+                    return;
+                }
+
+                var angle = (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
+                var pct = (angle / 360) * 100;
+                var segment = segmentAt(pct);
+
+                if (! segment) {
+                    tooltip.classList.remove('show');
+                    return;
+                }
+
+                tooltip.innerHTML = segment.label + ' <span class="pct">' + formateurPct.format(segment.pct) + '%</span><br>' + formateur.format(segment.montant) + ' €';
+                tooltip.style.left = e.clientX + 'px';
+                tooltip.style.top = e.clientY + 'px';
+                tooltip.classList.add('show');
+            });
+
+            donut.addEventListener('mouseleave', function () {
+                tooltip.classList.remove('show');
+            });
+        })();
+    </script>
 </x-tenant-app-layout>

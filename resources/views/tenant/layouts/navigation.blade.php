@@ -6,7 +6,7 @@
         request()->routeIs('tenant.users.*') => 'Équipe · Nouveau compte',
         request()->routeIs('tenant.clients.*') => 'Portefeuille · Clients',
         request()->routeIs('tenant.portefeuille-cabinet.*') => 'Cabinet · Portefeuille global',
-        request()->routeIs('tenant.performances.*') => 'Cabinet · Encours',
+        request()->routeIs('tenant.performances.*') => 'Cabinet · Patrimoine sous gestion',
         request()->routeIs('tenant.revenus.*') => 'Cabinet · Revenus',
         request()->routeIs('tenant.commissions.*') => 'Cabinet · Commissions',
         request()->routeIs('tenant.profil.rib.*') => 'Compte · Mon RIB',
@@ -56,12 +56,12 @@
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
         <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
             <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>
-            <span>Encours</span>
+            <span>Patrimoine sous gestion</span>
         </a>
         @else
         <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
             <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>
-            <span>Encours</span>
+            <span>Patrimoine sous gestion</span>
             <span class="wd-soon">Bientot</span>
         </a>
         @endif
