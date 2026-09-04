@@ -59,9 +59,13 @@
             .wd-agenda-nav .today:hover{border-color:var(--pink);color:var(--pink)}
             .wd-agenda-period{font-size:14px;font-weight:700;color:var(--dark);text-transform:capitalize;min-width:220px}
 
-            .wd-agenda-legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}
-            .wd-agenda-legend-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink);font-weight:600}
+            .wd-agenda-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+            .wd-agenda-legend-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink);font-weight:600;background:none;border:1px solid transparent;border-radius:999px;padding:5px 10px;cursor:pointer}
+            .wd-agenda-legend-item:hover{background:var(--bg)}
+            .wd-agenda-legend-item.active{border-color:var(--line);background:var(--white)}
+            .wd-agenda-legend.filtering .wd-agenda-legend-item:not(.active){opacity:.45}
             .wd-agenda-legend-item .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+            .wd-agenda-event.wd-agenda-hidden, .wd-agenda-month-pill.wd-agenda-hidden{display:none}
 
             .wd-agenda-empty{font-size:13px;color:var(--muted);text-align:center;padding:14px 0}
 
@@ -149,12 +153,12 @@
         </div>
 
         @if ($estCourtier && $conseillers->count() > 1)
-            <div class="wd-agenda-legend">
+            <div class="wd-agenda-legend" data-wd-legend>
                 @foreach ($conseillers as $conseiller)
-                    <span class="wd-agenda-legend-item">
+                    <button type="button" class="wd-agenda-legend-item" data-wd-legend-filter="{{ $conseiller->id }}">
                         <span class="dot" style="background: {{ $couleurs[$conseiller->id] }};"></span>
                         {{ $conseiller->name }}
-                    </span>
+                    </button>
                 @endforeach
             </div>
         @endif
@@ -179,6 +183,7 @@
                                 @php $couleur = $couleurs[$rdv->user_id] ?? '#f40087'; @endphp
                                 <div class="wd-agenda-month-pill"
                                      data-wd-rdv
+                                     data-conseiller-id="{{ $rdv->user_id }}"
                                      data-date="{{ $rdv->starts_at->format('d/m/Y') }} · {{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }}"
                                      data-client="{{ $rdv->client->prenom }} {{ $rdv->client->nom }}"
                                      data-conseiller="{{ $rdv->conseiller->name ?? '' }}"
@@ -221,6 +226,7 @@
                                 <div class="wd-agenda-event"
                                      style="top: {{ $ev['top_pct'] }}%; height: {{ $ev['height_pct'] }}%; left: {{ $ev['left_pct'] }}%; width: calc({{ $ev['width_pct'] }}% - 3px); background: {{ $couleur }}22; border-left-color: {{ $couleur }};"
                                      data-wd-rdv
+                                     data-conseiller-id="{{ $rdv->user_id }}"
                                      data-date="{{ $rdv->starts_at->format('d/m/Y') }} · {{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }}"
                                      data-client="{{ $rdv->client->prenom }} {{ $rdv->client->nom }}"
                                      data-conseiller="{{ $rdv->conseiller->name ?? '' }}"
@@ -260,6 +266,34 @@
             if (bouton) {
                 bouton.addEventListener('click', function () {
                     window.open("{{ route('tenant.calendrier.index') }}", 'wd-calendrier', 'width=480,height=580');
+                });
+            }
+
+            var legende = document.querySelector('[data-wd-legend]');
+
+            if (legende) {
+                legende.querySelectorAll('[data-wd-legend-filter]').forEach(function (bouton) {
+                    bouton.addEventListener('click', function () {
+                        var dejaActif = bouton.classList.contains('active');
+
+                        legende.querySelectorAll('[data-wd-legend-filter]').forEach(function (b) {
+                            b.classList.remove('active');
+                        });
+
+                        var idFiltre = null;
+
+                        if (! dejaActif) {
+                            bouton.classList.add('active');
+                            idFiltre = bouton.getAttribute('data-wd-legend-filter');
+                        }
+
+                        legende.classList.toggle('filtering', idFiltre !== null);
+
+                        document.querySelectorAll('[data-conseiller-id]').forEach(function (el) {
+                            var visible = idFiltre === null || el.getAttribute('data-conseiller-id') === idFiltre;
+                            el.classList.toggle('wd-agenda-hidden', ! visible);
+                        });
+                    });
                 });
             }
 
