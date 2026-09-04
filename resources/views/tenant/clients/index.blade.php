@@ -140,4 +140,77 @@
         </div>
 
     </div>
+
+    <script>
+        (function () {
+            var form = document.querySelector('.wd-cli-search');
+            var input = form ? form.querySelector('input[name="q"]') : null;
+
+            if (! form || ! input) { return; }
+
+            var minuteur = null;
+
+            function chargerResultats(url, mettreAJourChamp) {
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function (reponse) { return reponse.text(); })
+                    .then(function (html) {
+                        var doc = new DOMParser().parseFromString(html, 'text/html');
+
+                        var carte = document.querySelector('.wd-cli-card');
+                        var nouvelleCarte = doc.querySelector('.wd-cli-card');
+                        if (carte && nouvelleCarte) { carte.innerHTML = nouvelleCarte.innerHTML; }
+
+                        var pagination = document.querySelector('.wd-cli-pagination');
+                        var nouvellePagination = doc.querySelector('.wd-cli-pagination');
+                        if (pagination && nouvellePagination) { pagination.innerHTML = nouvellePagination.innerHTML; }
+
+                        var compteur = document.querySelector('.wd-cli-count');
+                        var nouveauCompteur = doc.querySelector('.wd-cli-count');
+                        if (compteur && nouveauCompteur) { compteur.textContent = nouveauCompteur.textContent; }
+
+                        var ancienClear = document.querySelector('.wd-cli-clear');
+                        var nouveauClear = doc.querySelector('.wd-cli-clear');
+                        if (nouveauClear && ! ancienClear) {
+                            form.insertAdjacentHTML('afterend', nouveauClear.outerHTML);
+                        } else if (! nouveauClear && ancienClear) {
+                            ancienClear.remove();
+                        } else if (nouveauClear && ancienClear) {
+                            ancienClear.outerHTML = nouveauClear.outerHTML;
+                        }
+
+                        if (mettreAJourChamp !== undefined) { input.value = mettreAJourChamp; }
+
+                        window.history.replaceState({}, '', url || window.location.pathname);
+                    });
+            }
+
+            input.addEventListener('input', function () {
+                clearTimeout(minuteur);
+                minuteur = setTimeout(function () {
+                    var params = new URLSearchParams(window.location.search);
+
+                    if (input.value) { params.set('q', input.value); } else { params.delete('q'); }
+                    params.delete('page');
+
+                    var url = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                    chargerResultats(url);
+                }, 350);
+            });
+
+            form.addEventListener('submit', function (e) { e.preventDefault(); });
+
+            document.addEventListener('click', function (e) {
+                var lien = e.target.closest('.wd-cli-pagination a, .wd-cli-clear');
+                if (! lien || ! lien.getAttribute('href')) { return; }
+
+                e.preventDefault();
+
+                if (lien.classList.contains('wd-cli-clear')) {
+                    chargerResultats(lien.getAttribute('href'), '');
+                } else {
+                    chargerResultats(lien.getAttribute('href'));
+                }
+            });
+        })();
+    </script>
 </x-tenant-app-layout>
