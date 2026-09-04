@@ -65,12 +65,21 @@ class PortefeuilleCabinetController extends Controller
                 ->orderBy('name')
                 ->get();
 
-            $clients = Client::query()
+            $clientsQuery = Client::query()
                 ->with(['conseiller', 'apporteur', 'kyc', 'profilInvestisseur', 'patrimoineElements'])
-                ->where('conseiller_id', $user->id)
                 ->orderBy('nom')
-                ->orderBy('prenom')
-                ->get();
+                ->orderBy('prenom');
+
+            /*
+             * Un courtier peut accorder à un conseiller le droit de voir
+             * tous les clients du cabinet. Ce droit ne concerne que les
+             * clients, jamais la liste des apporteurs ci-dessus.
+             */
+            if (! $user->voitTousLesClients()) {
+                $clientsQuery->where('conseiller_id', $user->id);
+            }
+
+            $clients = $clientsQuery->get();
         }
 
         elseif ($user->effectiveRole() === 'apporteur') {

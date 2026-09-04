@@ -37,6 +37,31 @@
             </dl>
         </section>
 
+        @if (auth()->user()->effectiveRole() === 'courtier' && $profileUser->role === 'conseiller')
+            <section class="bg-white rounded-3xl border border-gray-200 p-6">
+                <p class="text-xs uppercase tracking-[0.18em] text-[#ff008a] font-semibold">
+                    Droits
+                </p>
+
+                <div class="mt-4 flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">Voir tous les clients du cabinet</p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Par défaut, {{ $profileUser->name }} ne voit que ses propres clients. Active ce droit pour qu'il voie tous les clients du cabinet. Ses apporteurs restent inchangés.
+                        </p>
+                    </div>
+
+                    <form method="POST" action="{{ route('tenant.users.toggle-voit-tous-les-clients', $profileUser) }}">
+                        @csrf
+                        <button type="submit"
+                                class="shrink-0 rounded-xl border px-4 py-2 text-sm font-semibold transition {{ $profileUser->voit_tous_les_clients ? 'border-[#ff008a] text-[#ff008a] bg-[#ff008a]/5' : 'border-gray-200 text-gray-600 hover:border-[#ff008a] hover:text-[#ff008a]' }}">
+                            {{ $profileUser->voit_tous_les_clients ? 'Activé' : 'Désactivé' }}
+                        </button>
+                    </form>
+                </div>
+            </section>
+        @endif
+
         <section class="bg-white rounded-3xl border border-gray-200 overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-100">
                 <p class="text-xs uppercase tracking-[0.18em] text-[#ff008a] font-semibold">

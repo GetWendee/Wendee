@@ -24,9 +24,19 @@ class ClientController extends Controller
         return $libelle . ' - ' . $nomClient . ' - ' . now()->format('d-m-Y') . '.pdf';
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $clients = Client::with('conseiller')->orderBy('nom')->paginate(20);
+        $user = $request->user();
+
+        $query = Client::query()->with('conseiller')->orderBy('nom');
+
+        if ($user->effectiveRole() === 'conseiller' && ! $user->voitTousLesClients()) {
+            $query->where('conseiller_id', $user->id);
+        } elseif ($user->effectiveRole() === 'apporteur') {
+            $query->where('apporteur_id', $user->id);
+        }
+
+        $clients = $query->paginate(20);
 
         return view('tenant.clients.index', ['clients' => $clients]);
     }

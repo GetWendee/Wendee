@@ -69,6 +69,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/utilisateurs/creer', [UserAccountController::class, 'create'])->name('users.create');
         Route::post('/utilisateurs', [UserAccountController::class, 'store'])->name('users.store');
         Route::get('/utilisateurs/{user}', [UserAccountController::class, 'show'])->name('users.show');
+        Route::post('/utilisateurs/{user}/voit-tous-les-clients', [UserAccountController::class, 'toggleVoitTousLesClients'])->name('users.toggle-voit-tous-les-clients');
         Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
         Route::get('/clients/creer', [ClientController::class, 'create'])->name('clients.create');
         Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');

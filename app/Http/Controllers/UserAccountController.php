@@ -167,4 +167,21 @@ class UserAccountController extends Controller
 
         return view('tenant.users.show', ['profileUser' => $user]);
     }
+
+    /**
+     * Le courtier accorde ou retire à un conseiller le droit de voir
+     * tous les clients du cabinet (et non plus seulement les siens).
+     * Ne concerne jamais la visibilité des apporteurs.
+     */
+    public function toggleVoitTousLesClients(Request $request, User $user): RedirectResponse
+    {
+        $viewer = $request->user();
+
+        abort_unless($viewer->effectiveRole() === 'courtier', 403);
+        abort_unless($user->role === 'conseiller' && $user->parent_id === $viewer->id, 403);
+
+        $user->update(['voit_tous_les_clients' => ! $user->voit_tous_les_clients]);
+
+        return redirect()->route('tenant.users.show', $user);
+    }
 }
