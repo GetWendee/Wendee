@@ -10,7 +10,7 @@ if (function_exists('tenant') && tenant()) {
 }
 $cabinetName = $cabinetProfile?->nom_commercial ?: null;
 $cabinetLogo = $cabinetProfile && $cabinetProfile->logo
-    ? asset('storage/' . $cabinetProfile->logo)
+    ? tenant_asset($cabinetProfile->logo)
     : null;
 @endphp
 <tr>
