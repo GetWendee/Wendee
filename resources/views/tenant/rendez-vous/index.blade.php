@@ -80,9 +80,9 @@
             .wd-agenda-hour-col .wd-agenda-hour-label:first-child{transform:translateY(0)}
             .wd-agenda-daycol{position:relative;border-left:1px solid var(--line);background-image:repeating-linear-gradient(to bottom, var(--line) 0, var(--line) 1px, transparent 1px, transparent {{ $hauteurLigne }}px)}
             .wd-agenda-daycol.today{background-color:rgba(244,0,135,.03)}
-            .wd-agenda-event{position:absolute;border-radius:8px;border-left:3px solid;padding:4px 7px;font-size:11px;overflow:hidden;line-height:1.35}
-            .wd-agenda-event-heure{display:block;font-weight:700;color:var(--dark);font-size:10.5px}
-            .wd-agenda-event-client{display:block;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            .wd-agenda-event{position:absolute;border-radius:6px;border-left:3px solid;padding:2px 6px;font-size:11px;overflow:hidden;line-height:1.2;min-height:26px}
+            .wd-agenda-event-heure{display:block;font-weight:700;color:var(--dark);font-size:9.5px}
+            .wd-agenda-event-client{display:block;color:var(--ink);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
             /* Vue mois */
             .wd-agenda-month-header{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line)}
