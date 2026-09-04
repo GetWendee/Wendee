@@ -105,7 +105,6 @@ html,body{
 .wd-tabs{display:flex;gap:4px;margin:16px 0 24px;padding:5px;background:#ebe8e5;border-radius:10px;}
 .wd-tabs a{flex:1;text-align:center;padding:10px 16px;border-radius:7px;text-decoration:none;color:#77706c;font-size:11px;}
 .wd-tabs a.active{background:#fff;color:#171514;font-weight:750;}
-.wd-tabs-action{margin-left:auto;}
 .wd-btn-dark{
     flex:0 0 auto;
     min-width:220px;
@@ -233,47 +232,4 @@ Contrat
 <a href="{{ route('tenant.clients.conformites-clients', $client) }}" class="{{ ($active ?? null) === 'archives' ? 'active' : '' }}">
 Archives
 </a>
-<button type="button" class="wd-btn-dark wd-tabs-action" data-dossier-trigger>
-{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
-</button>
 </nav>
-
-<div class="wd-newaccount-overlay" data-dossier-modal hidden>
-<div class="wd-newaccount-modal">
-<div class="wd-newaccount-head">
-<div>
-<div class="wd-eyebrow">Dossier client</div>
-<h3>{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}</h3>
-</div>
-<button type="button" class="wd-newaccount-close" data-dossier-close aria-label="Fermer">&times;</button>
-</div>
-<div class="wd-newaccount-choices">
-<a href="{{ route('tenant.clients.kyc.edit', $client) }}" class="wd-newaccount-choice">
-<span class="wd-newaccount-choice-title">KYC</span>
-<span class="wd-newaccount-choice-desc">Recueil de connaissance client.</span>
-</a>
-<a href="{{ route('tenant.clients.patrimoine.edit', $client) }}" class="wd-newaccount-choice">
-<span class="wd-newaccount-choice-title">Patrimoine</span>
-<span class="wd-newaccount-choice-desc">Analyse patrimoniale du client.</span>
-</a>
-<a href="{{ route('tenant.clients.profil.edit', $client) }}" class="wd-newaccount-choice">
-<span class="wd-newaccount-choice-title">Profil investisseur</span>
-<span class="wd-newaccount-choice-desc">Profil de risque et objectifs.</span>
-</a>
-</div>
-</div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var overlay = document.querySelector('[data-dossier-modal]');
-    var triggers = document.querySelectorAll('[data-dossier-trigger]');
-    var closeBtn = document.querySelector('[data-dossier-close]');
-    if (!overlay || !triggers.length) { return; }
-    triggers.forEach(function (trigger) {
-        trigger.addEventListener('click', function () { overlay.hidden = false; });
-    });
-    if (closeBtn) { closeBtn.addEventListener('click', function () { overlay.hidden = true; }); }
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) { overlay.hidden = true; } });
-});
-</script>
