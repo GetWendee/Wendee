@@ -81,6 +81,11 @@ class Client extends Model
         return $this->hasMany(ClientAnalysis::class);
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ClientDocument::class);
+    }
+
     public function completionStatus(): array
     {
         $oneYearAgo = now()->subYear();

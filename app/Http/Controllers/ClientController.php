@@ -493,9 +493,13 @@ class ClientController extends Controller
             ];
         })->filter()->sortByDesc('date')->values();
 
+        $fichiersPersonnels = $client->documents()->get()->keyBy('type');
+
         return view('tenant.clients.conformites-clients', [
             'client' => $client,
             'documents' => $documents,
+            'fichiersPersonnels' => $fichiersPersonnels,
+            'typesDocumentsPersonnels' => \App\Http\Controllers\ClientDocumentController::TYPES,
         ]);
     }
 

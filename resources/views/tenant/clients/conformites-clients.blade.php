@@ -1,6 +1,12 @@
 <x-tenant-app-layout>
 @include('tenant.clients.partials.header-tabs', ['active' => 'archives'])
 
+@if (session('status_simple'))
+    <div style="background:#e9f4ec;border:1px solid #cfe6d6;color:#2f5d3f;border-radius:9px;padding:12px 16px;font-size:13px;margin-bottom:6px;">
+        {{ session('status_simple') }}
+    </div>
+@endif
+
 <style>
 .wd-section{margin-top:22px;scroll-margin-top:88px;}
 .wd-section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px;}
@@ -138,6 +144,98 @@
     color:var(--muted);
 }
 .wd-doc-empty svg{flex:0 0 auto;color:#c7c1bb;}
+.wd-doc-file{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:12px 14px;
+}
+.wd-doc-file-nom{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:var(--ink);
+    font-weight:600;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.wd-doc-file-nom svg{flex:0 0 auto;color:var(--pink);}
+.wd-doc-file-actions{
+    display:flex;
+    gap:14px;
+}
+.wd-doc-file-actions a,.wd-doc-file-actions button{
+    background:none;
+    border:none;
+    padding:0;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    cursor:pointer;
+    text-decoration:none;
+    font-family:inherit;
+}
+.wd-doc-file-actions a{color:var(--pink);}
+.wd-doc-file-actions button{color:#b94d4d;}
+.wd-upload-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(21,21,21,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:3000;
+}
+.wd-upload-modal{
+    background:#fff;
+    border-radius:14px;
+    width:420px;
+    max-width:92vw;
+    padding:26px;
+}
+.wd-upload-modal h3{
+    margin:4px 0 18px;
+    font-size:18px;
+    letter-spacing:-.02em;
+}
+.wd-upload-field{margin-bottom:16px;}
+.wd-upload-field label{
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-bottom:6px;
+}
+.wd-upload-field select,.wd-upload-field input[type=file]{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 11px;
+    font-size:13px;
+    font-family:inherit;
+}
+.wd-upload-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:6px;
+}
+.wd-upload-cancel{
+    background:none;
+    border:none;
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    cursor:pointer;
+    padding:10px 14px;
+}
 
 .wd-subtabs{
     display:flex;
@@ -214,9 +312,9 @@
 }
 </style>
 
-<div x-data="{ toast: false }" x-cloak>
+<div x-data="{ uploadOpen: false }" x-cloak>
 <nav class="wd-subtabs">
-    <button type="button" class="wd-btn-dark" @click="toast = true; setTimeout(() => toast = false, 2500)">Ajouter un document</button>
+    <button type="button" class="wd-btn-dark" @click="uploadOpen = true">Ajouter un document</button>
     <div class="wd-subtabs-links">
         <a href="#bibliotheque">Bibliothèque</a>
         <a href="#documents-personnels">Documents personnels</a>
@@ -280,38 +378,11 @@
         </div>
     </div>
     <div class="wd-docs-grid">
-        <div class="wd-doc-card">
-            <div class="wd-doc-titre">Mes pièces d'identité</div>
-            <div class="wd-doc-sub">Carte d'identité, passeport, carte de résident</div>
-            <div class="wd-doc-empty">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                Aucun document
-            </div>
-        </div>
-        <div class="wd-doc-card">
-            <div class="wd-doc-titre">Mes justificatifs de domicile</div>
-            <div class="wd-doc-sub">Documents liés à votre adresse</div>
-            <div class="wd-doc-empty">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                Aucun document
-            </div>
-        </div>
-        <div class="wd-doc-card">
-            <div class="wd-doc-titre">Avis d'imposition</div>
-            <div class="wd-doc-sub">Dernier document fiscal sur vos revenus</div>
-            <div class="wd-doc-empty">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                Aucun document
-            </div>
-        </div>
-        <div class="wd-doc-card">
-            <div class="wd-doc-titre">Avis IFI</div>
-            <div class="wd-doc-sub">Document fiscal de votre patrimoine immobilier</div>
-            <div class="wd-doc-empty">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                Aucun document
-            </div>
-        </div>
+        @foreach ($typesDocumentsPersonnels as $cle => $meta)
+            @if ($meta['categorie'] === 'personnels')
+                @include('tenant.clients.partials.document-card', ['cle' => $cle, 'meta' => $meta])
+            @endif
+        @endforeach
     </div>
 </section>
 
@@ -323,42 +394,43 @@
         </div>
     </div>
     <div class="wd-docs-grid">
-        <div class="wd-doc-card">
-            <div class="wd-doc-titre">Permis de conduire</div>
-            <div class="wd-doc-sub">Assurance véhicule</div>
-            <div class="wd-doc-empty">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                Aucun document
-            </div>
-        </div>
-        <div class="wd-doc-card">
-            <div class="wd-doc-titre">Cartes grises</div>
-            <div class="wd-doc-sub">Assurance véhicule</div>
-            <div class="wd-doc-empty">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                Aucun document
-            </div>
-        </div>
-        <div class="wd-doc-card">
-            <div class="wd-doc-titre">Relevés d'information</div>
-            <div class="wd-doc-sub">Assurance véhicule</div>
-            <div class="wd-doc-empty">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                Aucun document
-            </div>
-        </div>
-        <div class="wd-doc-card">
-            <div class="wd-doc-titre">Relevés d'information</div>
-            <div class="wd-doc-sub">Assurance habitation</div>
-            <div class="wd-doc-empty">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                Aucun document
-            </div>
-        </div>
+        @foreach ($typesDocumentsPersonnels as $cle => $meta)
+            @if ($meta['categorie'] === 'mandats')
+                @include('tenant.clients.partials.document-card', ['cle' => $cle, 'meta' => $meta])
+            @endif
+        @endforeach
     </div>
 </section>
 
-<div class="wd-toast" x-show="toast" x-transition>Ajout de document : fonctionnalité à venir.</div>
+<div class="wd-upload-overlay" x-show="uploadOpen" x-cloak @click.self="uploadOpen = false">
+    <div class="wd-upload-modal">
+        <div class="wd-eyebrow">Documents</div>
+        <h3>Ajouter un document</h3>
+        <form method="POST" action="{{ route('tenant.clients.documents.store', $client) }}" enctype="multipart/form-data">
+            @csrf
+            <div class="wd-upload-field">
+                <label>Type de document</label>
+                <select name="type" required>
+                    @foreach ($typesDocumentsPersonnels as $cle => $meta)
+                        <option value="{{ $cle }}">{{ $meta['label'] }} @if($meta['sub']) - {{ $meta['sub'] }} @endif</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="wd-upload-field">
+                <label>Fichier (PDF, JPG, PNG — 10 Mo max)</label>
+                <input type="file" name="fichier" accept=".pdf,.jpg,.jpeg,.png" required>
+            </div>
+            @error('fichier')
+                <p style="color:#b94d4d;font-size:12px;margin:-8px 0 14px;">{{ $message }}</p>
+            @enderror
+            <div class="wd-upload-actions">
+                <button type="button" class="wd-upload-cancel" @click="uploadOpen = false">Annuler</button>
+                <button type="submit" class="wd-btn-dark" style="min-width:auto;">Envoyer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 </div>
 
 </x-tenant-app-layout>

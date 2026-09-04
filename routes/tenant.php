@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientDocumentController;
 use App\Http\Controllers\ClientKycController;
 use App\Http\Controllers\SireneLookupController;
 use App\Http\Controllers\DashboardController;
@@ -76,6 +77,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/mission/{client}', [ClientController::class, 'mission'])->name('clients.mission');
         Route::get('/contrats-clients/{client}', [ClientController::class, 'contratsClients'])->name('clients.contrats-clients');
         Route::get('/conformites-clients/{client}', [ClientController::class, 'conformitesClients'])->name('clients.conformites-clients');
+        Route::post('/conformites-clients/{client}/documents', [ClientDocumentController::class, 'store'])->name('clients.documents.store');
+        Route::get('/conformites-clients/{client}/documents/{type}/telecharger', [ClientDocumentController::class, 'download'])->name('clients.documents.download');
+        Route::delete('/conformites-clients/{client}/documents/{type}', [ClientDocumentController::class, 'destroy'])->name('clients.documents.destroy');
         Route::get('/mandat-assurance-vie/{client}', [ClientController::class, 'mandatAssuranceVie'])->name('clients.mandat-assurance-vie');
         Route::post('/mandat-assurance-vie/{client}', [ClientController::class, 'enregistrerMandatAssuranceVie'])->name('clients.mandat-assurance-vie.enregistrer');
         Route::get('/mandat-assurance-vie/{client}/pdf', [ClientController::class, 'telechargerMandatAssuranceViePdf'])->name('clients.mandat-assurance-vie.pdf');
