@@ -66,8 +66,10 @@ body { font-family: 'Montserrat', sans-serif; font-size: 10pt; color: #242424; l
     $experience = $nettoyer($profil?->score_experience_global_echelle);
     $connaissance = $nettoyer($profil?->score_connaissance_global_echelle);
     $pertes = $profil?->score_capacite_subir_pertes_echelle ? $nettoyer($profil->score_capacite_subir_pertes_echelle) : null;
-    $objectif = ! empty($profil?->reponses['profil_investisseur_objetifs'] ?? null)
-        ? (config('patrimoine.objectifs')[$profil->reponses['profil_investisseur_objetifs']] ?? $profil->reponses['profil_investisseur_objetifs'])
+    $valeurObjectifs = $profil?->reponses['profil_investisseur_objetifs'] ?? null;
+    $valeursObjectifs = is_array($valeurObjectifs) ? $valeurObjectifs : (is_string($valeurObjectifs) && $valeurObjectifs !== '' ? [$valeurObjectifs] : []);
+    $objectif = ! empty($valeursObjectifs)
+        ? implode(', ', array_map(fn ($code) => config('patrimoine.objectifs')[$code] ?? $code, $valeursObjectifs))
         : null;
 @endphp
 <div class="accent-bar"></div>

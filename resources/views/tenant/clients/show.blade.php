@@ -276,11 +276,15 @@
             $profil?->orientation_extra_financier_echelle ? 'Orientation : ' . $profil->orientation_extra_financier_echelle : null,
             $profil?->thematiques_esg_echelle ? 'Thématiques ESG : ' . $profil->thematiques_esg_echelle : null,
         ]),
-        'Objectifs' => array_filter([
-            ! empty($profil?->reponses['profil_investisseur_objetifs'] ?? null)
-                ? (config('patrimoine.objectifs')[$profil->reponses['profil_investisseur_objetifs']] ?? $profil->reponses['profil_investisseur_objetifs'])
-                : null,
-        ]),
+        'Objectifs' => (function () use ($profil) {
+            $valeur = $profil?->reponses['profil_investisseur_objetifs'] ?? null;
+            $valeurs = is_array($valeur) ? $valeur : (is_string($valeur) && $valeur !== '' ? [$valeur] : []);
+
+            return array_values(array_filter(array_map(
+                fn ($code) => config('patrimoine.objectifs')[$code] ?? $code,
+                $valeurs
+            )));
+        })(),
     ];
 
     $donneesInvestisseur = array_filter($donneesInvestisseur);
