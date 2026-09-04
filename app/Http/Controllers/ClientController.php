@@ -2330,7 +2330,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = $this->nommerFichierPdf('Mandat plan d'épargne retraite', $client);
+        $filename = $this->nommerFichierPdf('Mandat plan d\'épargne retraite', $client);
 
         return $pdf->download($filename);
     }
@@ -2640,7 +2640,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = $this->nommerFichierPdf('Plan d'action', $client);
+        $filename = $this->nommerFichierPdf('Plan d\'action', $client);
 
         return $pdf->download($filename);
     }
