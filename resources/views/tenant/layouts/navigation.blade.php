@@ -7,6 +7,7 @@
         request()->routeIs('tenant.clients.*') => 'Portefeuille · Clients',
         request()->routeIs('tenant.portefeuille-cabinet.*') => 'Cabinet · Portefeuille global',
         request()->routeIs('tenant.performances.*') => 'Cabinet · Performances',
+        request()->routeIs('tenant.revenus.*') => 'Cabinet · Revenus',
         default => 'Wendee',
     };
 @endphp
@@ -62,11 +63,18 @@
             <span class="wd-soon">Bientot</span>
         </a>
         @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
+        <a class="{{ request()->routeIs('tenant.revenus.*') ? 'active' : '' }}" href="{{ route('tenant.revenus.index') }}">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-.9-1.8-1.5-3.2-1.5C10 7 9 8 9 9.3c0 1.5 1.4 2.1 3 2.7 1.7.6 3 1.3 3 2.8 0 1.3-1.1 2.2-3 2.2-1.4 0-2.6-.5-3.5-1.5M12 5v14"/></svg>
+            <span>Revenus</span>
+        </a>
+        @else
         <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-.9-1.8-1.5-3.2-1.5C10 7 9 8 9 9.3c0 1.5 1.4 2.1 3 2.7 1.7.6 3 1.3 3 2.8 0 1.3-1.1 2.2-3 2.2-1.4 0-2.6-.5-3.5-1.5M12 5v14"/></svg>
             <span>Revenus</span>
             <span class="wd-soon">Bientot</span>
         </a>
+        @endif
         <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
             <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>
             <span>Commissions</span>

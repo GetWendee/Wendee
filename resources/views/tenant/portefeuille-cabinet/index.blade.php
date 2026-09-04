@@ -169,7 +169,7 @@
                                 <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="w-12 h-12 rounded-2xl bg-[#232323] text-white flex items-center justify-center text-base font-semibold shrink-0">
-                                            {{ strtoupper(substr($conseiller->name, 0, 1)) }}
+                                            {{ mb_strtoupper(mb_substr($conseiller->name, 0, 1)) }}
                                         </div>
 
                                         <div class="min-w-0">
@@ -209,7 +209,7 @@
                                 <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="w-12 h-12 rounded-2xl bg-[#fff0f7] text-[#ff008a] flex items-center justify-center text-base font-semibold shrink-0">
-                                            {{ strtoupper(substr($apporteur->name, 0, 1)) }}
+                                            {{ mb_strtoupper(mb_substr($apporteur->name, 0, 1)) }}
                                         </div>
 
                                         <div class="min-w-0">
@@ -246,7 +246,7 @@
                                 <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="w-12 h-12 rounded-2xl bg-white text-gray-600 flex items-center justify-center text-base font-semibold shrink-0">
-                                            {{ strtoupper(substr($client->prenom, 0, 1).substr($client->nom, 0, 1)) }}
+                                            {{ mb_strtoupper(mb_substr($client->prenom, 0, 1).mb_substr($client->nom, 0, 1)) }}
                                         </div>
 
                                         <div class="min-w-0">
