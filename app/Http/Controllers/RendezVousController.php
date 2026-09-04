@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CalendarConnection;
 use App\Models\Client;
 use App\Models\RendezVous;
+use App\Models\User;
 use App\Services\Calendar\AvailabilityService;
 use App\Services\Calendar\GoogleCalendarService;
 use Carbon\Carbon;
@@ -61,7 +62,30 @@ class RendezVousController extends Controller
 
         $rdvs = $requeteRdv->get();
 
-        $conseillers = $rdvs->pluck('conseiller')->filter()->unique('id')->values();
+        // Créneaux déjà pris sur les calendriers externes connectés (Google/Outlook),
+        // hors RDV Wendee, pour matérialiser les indisponibilités (ex : médecin).
+        // Non calculé en vue mois : trop dense pour être lisible et coûteux en appels API.
+        $indisposParConseiller = collect();
+
+        if ($vue !== 'mois') {
+            $conseillersAConsiderer = $user->effectiveRole() === 'courtier'
+                ? User::whereIn('role', ['courtier', 'conseiller'])->get()
+                : collect([$user]);
+
+            foreach ($conseillersAConsiderer as $conseiller) {
+                $plages = $this->disponibilite->busyExternes($conseiller, $debutAffichage, $finAffichage->copy()->endOfDay());
+
+                if (! empty($plages)) {
+                    $indisposParConseiller->put($conseiller->id, ['conseiller' => $conseiller, 'plages' => $plages]);
+                }
+            }
+        }
+
+        $conseillers = $rdvs->pluck('conseiller')->filter()
+            ->concat($indisposParConseiller->pluck('conseiller'))
+            ->unique('id')
+            ->values();
+
         $couleurs = $conseillers->mapWithKeys(fn ($c, $i) => [$c->id => self::PALETTE_CONSEILLERS[$i % count(self::PALETTE_CONSEILLERS)]]);
 
         $joursGrille = collect();
@@ -72,6 +96,7 @@ class RendezVousController extends Controller
             $joursGrille->push([
                 'date' => $jour->copy(),
                 'evenements' => $vue === 'mois' ? $rdvsDuJour : $this->layoutJournee($rdvsDuJour),
+                'indispos' => $vue === 'mois' ? [] : $this->layoutIndispos($indisposParConseiller, $jour->copy()),
                 'total' => $rdvsDuJour->count(),
             ]);
         }
@@ -201,6 +226,45 @@ class RendezVousController extends Controller
 
             return $e;
         }, $resultat);
+    }
+
+    /**
+     * Positionne les plages "indisponible" (agendas externes connectés, hors
+     * Wendee) d'une journée dans la même grille horaire que les RDV. Pleine
+     * largeur de colonne, pas de gestion de lanes : c'est un simple indicateur
+     * en arrière-plan, pas un créneau réservable dans Wendee.
+     *
+     * @return array<int, array{conseiller_id: int, top_pct: float, height_pct: float}>
+     */
+    private function layoutIndispos(Collection $indisposParConseiller, Carbon $jour): array
+    {
+        $totalMinutes = (self::HEURE_FIN - self::HEURE_DEBUT) * 60;
+        $debutGrille = $jour->copy()->startOfDay()->addHours(self::HEURE_DEBUT);
+        $finGrille = $jour->copy()->startOfDay()->addHours(self::HEURE_FIN);
+
+        $resultat = [];
+
+        foreach ($indisposParConseiller as $conseillerId => $donnees) {
+            foreach ($donnees['plages'] as $plage) {
+                if ($plage['end']->lte($debutGrille) || $plage['start']->gte($finGrille)) {
+                    continue;
+                }
+
+                $debut = $plage['start']->lt($debutGrille) ? $debutGrille : $plage['start'];
+                $fin = $plage['end']->gt($finGrille) ? $finGrille : $plage['end'];
+
+                $minutesDebut = $debutGrille->diffInMinutes($debut, false);
+                $minutesFin = $debutGrille->diffInMinutes($fin, false);
+
+                $resultat[] = [
+                    'conseiller_id' => $conseillerId,
+                    'top_pct' => ($minutesDebut / $totalMinutes) * 100,
+                    'height_pct' => max(1.5, (($minutesFin - $minutesDebut) / $totalMinutes) * 100),
+                ];
+            }
+        }
+
+        return $resultat;
     }
 
     /**

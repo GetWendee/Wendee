@@ -67,9 +67,13 @@ class AvailabilityService
     }
 
     /**
+     * Plages occupées des calendriers externes connectés (Google/Outlook) d'un
+     * conseiller sur une période, sans les RDV Wendee. Utilisé pour matérialiser
+     * dans l'agenda les créneaux déjà pris ailleurs (ex : rendez-vous médecin).
+     *
      * @return array<int, array{start: Carbon, end: Carbon}>
      */
-    protected function plagesOccupees(User $conseiller, Carbon $from, Carbon $to, ?int $exclureRendezVousId = null): array
+    public function busyExternes(User $conseiller, Carbon $from, Carbon $to): array
     {
         $plages = [];
 
@@ -80,6 +84,16 @@ class AvailabilityService
                 default => [],
             });
         }
+
+        return $plages;
+    }
+
+    /**
+     * @return array<int, array{start: Carbon, end: Carbon}>
+     */
+    protected function plagesOccupees(User $conseiller, Carbon $from, Carbon $to, ?int $exclureRendezVousId = null): array
+    {
+        $plages = $this->busyExternes($conseiller, $from, $to);
 
         // Les RDV déjà pris dans Wendee comptent aussi comme occupés,
         // même si la synchro calendrier externe a du retard.

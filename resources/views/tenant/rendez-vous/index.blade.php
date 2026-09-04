@@ -29,6 +29,8 @@
             'agence' => 'Agence',
             'domicile' => 'Domicile',
         ];
+
+        $nomsConseillers = $conseillers->pluck('name', 'id');
     @endphp
 
     <div class="wd-agenda p-8">
@@ -66,7 +68,7 @@
             .wd-agenda-legend-item.active{border-color:var(--line);background:var(--white)}
             .wd-agenda-legend.filtering .wd-agenda-legend-item:not(.active){opacity:.45}
             .wd-agenda-legend-item .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
-            .wd-agenda-event.wd-agenda-hidden, .wd-agenda-month-pill.wd-agenda-hidden{display:none}
+            .wd-agenda-event.wd-agenda-hidden, .wd-agenda-month-pill.wd-agenda-hidden, .wd-agenda-busy.wd-agenda-hidden{display:none}
 
             .wd-agenda-empty{font-size:13px;color:var(--muted);text-align:center;padding:14px 0}
 
@@ -86,6 +88,8 @@
             .wd-agenda-daycol{position:relative;border-left:1px solid var(--line);background-image:repeating-linear-gradient(to bottom, var(--line) 0, var(--line) 1px, transparent 1px, transparent {{ $hauteurLigne }}px)}
             .wd-agenda-daycol.today{background-color:rgba(244,0,135,.03)}
             .wd-agenda-event{position:absolute;border-radius:6px;border-left:3px solid;padding:2px 6px;font-size:11px;overflow:hidden;line-height:1.2;min-height:26px}
+            .wd-agenda-event{z-index:2}
+            .wd-agenda-busy{position:absolute;left:0;right:0;border-radius:6px;border-left:3px solid var(--line);background:repeating-linear-gradient(135deg, rgba(21,21,21,.04), rgba(21,21,21,.04) 6px, rgba(21,21,21,.08) 6px, rgba(21,21,21,.08) 12px);z-index:1;pointer-events:none}
             .wd-agenda-event-heure{display:block;font-weight:700;color:var(--dark);font-size:9.5px}
             .wd-agenda-event-client{display:block;color:var(--ink);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
@@ -225,6 +229,13 @@
 
                     @foreach ($joursGrille as $jourData)
                         <div class="wd-agenda-daycol {{ $jourData['date']->isToday() ? 'today' : '' }}">
+                            @foreach ($jourData['indispos'] as $indispo)
+                                @php $couleurIndispo = $couleurs[$indispo['conseiller_id']] ?? '#151515'; @endphp
+                                <div class="wd-agenda-busy"
+                                     style="top: {{ $indispo['top_pct'] }}%; height: {{ $indispo['height_pct'] }}%; border-left-color: {{ $couleurIndispo }}88;"
+                                     data-conseiller-id="{{ $indispo['conseiller_id'] }}"
+                                     title="Indisponible{{ $estCourtier ? ' · '.($nomsConseillers[$indispo['conseiller_id']] ?? '') : '' }}"></div>
+                            @endforeach
                             @foreach ($jourData['evenements'] as $ev)
                                 @php $rdv = $ev['rdv']; $couleur = $couleurs[$rdv->user_id] ?? '#f40087'; @endphp
                                 <div class="wd-agenda-event"
