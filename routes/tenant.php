@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatrimoineController;
 use App\Http\Controllers\ProfilInvestisseurController;
 use App\Http\Controllers\PortefeuilleCabinetController;
+use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\CabinetProfileController;
 use Stancl\Tenancy\Controllers\TenantAssetsController;
 use App\Http\Controllers\UserAccountController;
@@ -66,6 +67,7 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
 
         Route::get('/portefeuille-cabinet', [PortefeuilleCabinetController::class, 'index'])
             ->name('portefeuille-cabinet.index');
+        Route::get('/performances', [PerformanceController::class, 'index'])->name('performances.index');
         Route::get('/utilisateurs/creer', [UserAccountController::class, 'create'])->name('users.create');
         Route::post('/utilisateurs', [UserAccountController::class, 'store'])->name('users.store');
         Route::get('/utilisateurs/{user}', [UserAccountController::class, 'show'])->name('users.show');

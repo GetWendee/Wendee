@@ -6,6 +6,7 @@
         request()->routeIs('tenant.users.*') => 'Équipe · Nouveau compte',
         request()->routeIs('tenant.clients.*') => 'Portefeuille · Clients',
         request()->routeIs('tenant.portefeuille-cabinet.*') => 'Cabinet · Portefeuille global',
+        request()->routeIs('tenant.performances.*') => 'Cabinet · Performances',
         default => 'Wendee',
     };
 @endphp
@@ -49,11 +50,18 @@
             <span>Cabinet</span>
         </a>
         @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
+        <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
+            <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>
+            <span>Performances</span>
+        </a>
+        @else
         <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
             <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>
             <span>Performances</span>
             <span class="wd-soon">Bientot</span>
         </a>
+        @endif
         <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-.9-1.8-1.5-3.2-1.5C10 7 9 8 9 9.3c0 1.5 1.4 2.1 3 2.7 1.7.6 3 1.3 3 2.8 0 1.3-1.1 2.2-3 2.2-1.4 0-2.6-.5-3.5-1.5M12 5v14"/></svg>
             <span>Revenus</span>
