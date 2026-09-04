@@ -12,14 +12,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ClientDocumentController extends Controller
 {
     public const TYPES = [
-        'piece_identite' => ['label' => "Mes pièces d'identité", 'sub' => "Carte d'identité, passeport, carte de résident", 'categorie' => 'personnels'],
-        'justificatif_domicile' => ['label' => 'Mes justificatifs de domicile', 'sub' => 'Documents liés à votre adresse', 'categorie' => 'personnels'],
+        'piece_identite' => ['label' => "Pièces d'identité", 'sub' => "Carte d'identité, passeport, carte de résident", 'categorie' => 'personnels'],
+        'justificatif_domicile' => ['label' => 'Justificatifs de domicile', 'sub' => 'Documents liés à votre adresse', 'categorie' => 'personnels'],
         'avis_imposition' => ['label' => "Avis d'imposition", 'sub' => 'Dernier document fiscal sur vos revenus', 'categorie' => 'personnels'],
         'avis_ifi' => ['label' => 'Avis IFI', 'sub' => 'Document fiscal de votre patrimoine immobilier', 'categorie' => 'personnels'],
         'permis_conduire' => ['label' => 'Permis de conduire', 'sub' => 'Assurance véhicule', 'categorie' => 'mandats'],
         'carte_grise' => ['label' => 'Cartes grises', 'sub' => 'Assurance véhicule', 'categorie' => 'mandats'],
-        'releve_information_vehicule' => ['label' => "Relevés d'information", 'sub' => 'Assurance véhicule', 'categorie' => 'mandats'],
-        'releve_information_habitation' => ['label' => "Relevés d'information", 'sub' => 'Assurance habitation', 'categorie' => 'mandats'],
+        'releve_information_vehicule' => ['label' => "Relevés d'information (véhicule)", 'sub' => 'Assurance véhicule', 'categorie' => 'mandats'],
+        'releve_information_habitation' => ['label' => "Relevés d'information (habitation)", 'sub' => 'Assurance habitation', 'categorie' => 'mandats'],
     ];
 
     public function store(Request $request, Client $client): RedirectResponse
