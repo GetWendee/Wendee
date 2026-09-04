@@ -411,8 +411,9 @@
             <div class="wd-upload-field">
                 <label>Type de document</label>
                 <select name="type" required>
+                    <option value="" disabled selected>Choisir</option>
                     @foreach ($typesDocumentsPersonnels as $cle => $meta)
-                        <option value="{{ $cle }}">{{ $meta['label'] }} @if($meta['sub']) - {{ $meta['sub'] }} @endif</option>
+                        <option value="{{ $cle }}">{{ $meta['label'] }}</option>
                     @endforeach
                 </select>
             </div>
