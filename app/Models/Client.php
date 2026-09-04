@@ -40,6 +40,22 @@ class Client extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Vrai si ce user a le droit de consulter/modifier cette fiche client.
+     * Courtier : toujours. Conseiller : son client, ou tous si droit accordé.
+     * Apporteur : son client apporté. Client : sa propre fiche.
+     */
+    public function estVisiblePar(User $user): bool
+    {
+        return match ($user->effectiveRole()) {
+            'courtier' => true,
+            'conseiller' => $this->conseiller_id === $user->id || $user->voitTousLesClients(),
+            'apporteur' => $this->apporteur_id === $user->id,
+            'client' => $this->user_id === $user->id,
+            default => false,
+        };
+    }
+
     public function kyc(): HasOne
     {
         return $this->hasOne(ClientKyc::class);

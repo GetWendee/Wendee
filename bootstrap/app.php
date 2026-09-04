@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'client.access' => \App\Http\Middleware\EnsureClientAccess::class,
+        ]);
+
         $middleware->redirectGuestsTo(function (Request $request) {
             if (function_exists('tenant') && tenant()) {
                 return route('tenant.login', absolute: false);

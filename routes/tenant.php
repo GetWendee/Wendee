@@ -47,7 +47,7 @@ Route::put('/cabinet/', [CabinetProfileController::class, 'update'])
     ->middleware(['auth', 'verified'])
     ->name('cabinet.update');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
 
     Route::post('/dev/view-as-role', function (\Illuminate\Http\Request $request) {
 
