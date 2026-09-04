@@ -92,6 +92,9 @@ class UserAccountController extends Controller
             'apporteur_engagement_sans_encaissement' => ['nullable', 'boolean'],
             'apporteur_engagement_orientation' => ['nullable', 'boolean'],
             'apporteur_engagement_conformite' => ['nullable', 'boolean'],
+            'rib_iban' => ['nullable', 'string', 'max:34'],
+            'rib_bic' => ['nullable', 'string', 'max:11'],
+            'rib_titulaire' => ['nullable', 'string', 'max:255'],
         ]);
 
         abort_unless($creator->canCreateUserRole($validated['role']), 403);
@@ -142,6 +145,10 @@ class UserAccountController extends Controller
             'apporteur_engagement_sans_encaissement' => $isApporteur ? ($validated['apporteur_engagement_sans_encaissement'] ?? false) : null,
             'apporteur_engagement_orientation' => $isApporteur ? ($validated['apporteur_engagement_orientation'] ?? false) : null,
             'apporteur_engagement_conformite' => $isApporteur ? ($validated['apporteur_engagement_conformite'] ?? false) : null,
+            'rib_iban' => $isApporteur ? ($validated['rib_iban'] ?? null) : null,
+            'rib_bic' => $isApporteur ? ($validated['rib_bic'] ?? null) : null,
+            'rib_titulaire' => $isApporteur ? ($validated['rib_titulaire'] ?? null) : null,
+            'rib_soumis_le' => ($isApporteur && ! empty($validated['rib_iban'])) ? now() : null,
         ]);
 
         Password::broker()->sendResetLink(['email' => $newUser->email]);
@@ -183,5 +190,60 @@ class UserAccountController extends Controller
         $user->update(['voit_tous_les_clients' => ! $user->voit_tous_les_clients]);
 
         return redirect()->route('tenant.users.show', $user);
+    }
+
+    /**
+     * Le courtier valide le RIB soumis par un apporteur. Tant que ce n'est
+     * pas fait, ses commissions ne peuvent pas être marquées virées
+     * (vérifié dans CommissionController::validerVirements()).
+     */
+    public function validerRib(Request $request, User $user): RedirectResponse
+    {
+        $viewer = $request->user();
+
+        abort_unless($viewer->effectiveRole() === 'courtier', 403);
+        abort_unless($user->role === 'apporteur' && $user->parent_id === $viewer->id, 403);
+        abort_unless(! empty($user->rib_iban), 404);
+
+        $user->update(['rib_valide' => true]);
+
+        return redirect()->route('tenant.users.show', $user)->with('status', 'RIB validé.');
+    }
+
+    /**
+     * Formulaire self-service : l'apporteur ajoute ou modifie son propre
+     * RIB. Toute modification remet rib_valide à false : le courtier doit
+     * revalider avant tout futur virement.
+     */
+    public function editRib(Request $request): View
+    {
+        $user = $request->user();
+
+        abort_unless($user->role === 'apporteur', 403);
+
+        return view('tenant.users.rib', ['profileUser' => $user]);
+    }
+
+    public function updateRib(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        abort_unless($user->role === 'apporteur', 403);
+
+        $validated = $request->validate([
+            'rib_iban' => ['required', 'string', 'max:34'],
+            'rib_bic' => ['nullable', 'string', 'max:11'],
+            'rib_titulaire' => ['required', 'string', 'max:255'],
+        ]);
+
+        $user->update([
+            'rib_iban' => $validated['rib_iban'],
+            'rib_bic' => $validated['rib_bic'] ?? null,
+            'rib_titulaire' => $validated['rib_titulaire'],
+            'rib_valide' => false,
+            'rib_soumis_le' => now(),
+        ]);
+
+        return redirect()->route('tenant.profil.rib.edit')->with('status', 'RIB enregistré, en attente de validation par le courtier.');
     }
 }

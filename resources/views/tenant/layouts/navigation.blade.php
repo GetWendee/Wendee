@@ -6,8 +6,10 @@
         request()->routeIs('tenant.users.*') => 'Équipe · Nouveau compte',
         request()->routeIs('tenant.clients.*') => 'Portefeuille · Clients',
         request()->routeIs('tenant.portefeuille-cabinet.*') => 'Cabinet · Portefeuille global',
-        request()->routeIs('tenant.performances.*') => 'Cabinet · Performances',
+        request()->routeIs('tenant.performances.*') => 'Cabinet · Encours',
         request()->routeIs('tenant.revenus.*') => 'Cabinet · Revenus',
+        request()->routeIs('tenant.commissions.*') => 'Cabinet · Commissions',
+        request()->routeIs('tenant.profil.rib.*') => 'Compte · Mon RIB',
         default => 'Wendee',
     };
 @endphp
@@ -54,12 +56,12 @@
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
         <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
             <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>
-            <span>Performances</span>
+            <span>Encours</span>
         </a>
         @else
         <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
             <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>
-            <span>Performances</span>
+            <span>Encours</span>
             <span class="wd-soon">Bientot</span>
         </a>
         @endif
@@ -75,12 +77,25 @@
             <span class="wd-soon">Bientot</span>
         </a>
         @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
+        <a class="{{ request()->routeIs('tenant.commissions.*') ? 'active' : '' }}" href="{{ route('tenant.commissions.index') }}">
+            <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>
+            <span>Commissions</span>
+        </a>
+        @else
         <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
             <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>
             <span>Commissions</span>
             <span class="wd-soon">Bientot</span>
         </a>
+        @endif
         <div class="wd-nav-section">Compte</div>
+        @if(Auth::check() && Auth::user()->effectiveRole() === 'apporteur')
+        <a class="{{ request()->routeIs('tenant.profil.rib.*') ? 'active' : '' }}" href="{{ route('tenant.profil.rib.edit') }}">
+            <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>
+            <span>Mon RIB</span>
+        </a>
+        @endif
         <a class="{{ request()->routeIs('tenant.cabinet') ? 'active' : '' }}" href="{{ route('tenant.cabinet') }}">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
             <span>Paramètres</span>

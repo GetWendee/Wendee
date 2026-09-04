@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'email', 'telephone', 'password', 'role', 'parent_id', 'voit_tous_les_clients', 'activation_pending', 'objectifs', 'perimetres', 'habilitations', 'numero_orias', 'apporteur_forme_juridique', 'apporteur_denomination_sociale', 'apporteur_date_creation', 'apporteur_siren', 'apporteur_siret', 'apporteur_rcs_ville', 'apporteur_rcs_numero', 'apporteur_representant_legal', 'apporteur_immatricule_orias', 'apporteur_roles', 'apporteur_role_commentaire', 'apporteur_orias_numero', 'apporteur_statut_reglemente', 'apporteur_autorite_controle', 'apporteur_rcp', 'apporteur_rcp_compagnie', 'apporteur_autre_reseau', 'apporteur_nom_reseau', 'apporteur_mode_acquisition', 'apporteur_typologie_client', 'apporteur_volume_mensuel_reco', 'apporteur_zone_geographique', 'apporteur_type_remuneration', 'apporteur_remuneration_pourcentage', 'apporteur_remuneration_fixe', 'apporteur_declenchement_remuneration', 'apporteur_remuneration_produit_reglemente', 'apporteur_engagement_sans_conseil', 'apporteur_engagement_sans_presentation', 'apporteur_engagement_sans_encaissement', 'apporteur_engagement_orientation', 'apporteur_engagement_conformite'])]
+#[Fillable(['name', 'email', 'telephone', 'password', 'role', 'parent_id', 'voit_tous_les_clients', 'activation_pending', 'objectifs', 'perimetres', 'habilitations', 'numero_orias', 'apporteur_forme_juridique', 'apporteur_denomination_sociale', 'apporteur_date_creation', 'apporteur_siren', 'apporteur_siret', 'apporteur_rcs_ville', 'apporteur_rcs_numero', 'apporteur_representant_legal', 'apporteur_immatricule_orias', 'apporteur_roles', 'apporteur_role_commentaire', 'apporteur_orias_numero', 'apporteur_statut_reglemente', 'apporteur_autorite_controle', 'apporteur_rcp', 'apporteur_rcp_compagnie', 'apporteur_autre_reseau', 'apporteur_nom_reseau', 'apporteur_mode_acquisition', 'apporteur_typologie_client', 'apporteur_volume_mensuel_reco', 'apporteur_zone_geographique', 'apporteur_type_remuneration', 'apporteur_remuneration_pourcentage', 'apporteur_remuneration_fixe', 'apporteur_declenchement_remuneration', 'apporteur_remuneration_produit_reglemente', 'apporteur_engagement_sans_conseil', 'apporteur_engagement_sans_presentation', 'apporteur_engagement_sans_encaissement', 'apporteur_engagement_orientation', 'apporteur_engagement_conformite', 'rib_iban', 'rib_bic', 'rib_titulaire', 'rib_valide', 'rib_soumis_le'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -48,6 +48,8 @@ class User extends Authenticatable
             'apporteur_engagement_sans_encaissement' => 'boolean',
             'apporteur_engagement_orientation' => 'boolean',
             'apporteur_engagement_conformite' => 'boolean',
+            'rib_valide' => 'boolean',
+            'rib_soumis_le' => 'datetime',
         ];
     }
 
@@ -81,6 +83,15 @@ class User extends Authenticatable
     public function voitTousLesClients(): bool
     {
         return $this->effectiveRole() === 'courtier' || (bool) $this->voit_tous_les_clients;
+    }
+
+    /**
+     * RIB soumis par l'apporteur, mais pas encore validé par le courtier.
+     * Tant qu'il n'est pas validé, aucun virement ne peut lui être marqué payé.
+     */
+    public function ribEnAttenteDeValidation(): bool
+    {
+        return ! empty($this->rib_iban) && ! $this->rib_valide;
     }
 
     public function apporteurs(): HasMany

@@ -686,6 +686,30 @@ $roleSousTitres = [
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="wd-cabinet-field">
+                    <label>RIB (facultatif à la création, peut être ajouté plus tard par l'apporteur lui-même)</label>
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>Titulaire du compte</label>
+                    <input type="text" name="rib_titulaire" value="{{ old('rib_titulaire') }}">
+                    @error('rib_titulaire')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>IBAN</label>
+                    <input type="text" name="rib_iban" value="{{ old('rib_iban') }}">
+                    @error('rib_iban')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="wd-cabinet-field">
+                    <label>BIC</label>
+                    <input type="text" name="rib_bic" value="{{ old('rib_bic') }}">
+                    @error('rib_bic')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
                 @endif
             </div>
             <button type="submit" class="wd-cabinet-save">Créer le compte</button>

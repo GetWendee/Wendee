@@ -37,6 +37,33 @@
             </dl>
         </section>
 
+        @if ($profileUser->role === 'apporteur' && $profileUser->rib_iban)
+            <section class="bg-white rounded-3xl border border-gray-200 p-6">
+                <p class="text-xs uppercase tracking-[0.18em] text-[#ff008a] font-semibold">
+                    RIB
+                </p>
+
+                <div class="mt-4 flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">{{ $profileUser->rib_titulaire }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ $profileUser->rib_iban }} @if($profileUser->rib_bic) &middot; {{ $profileUser->rib_bic }} @endif</p>
+                        <p class="text-xs mt-2 font-semibold {{ $profileUser->rib_valide ? 'text-emerald-600' : 'text-amber-600' }}">
+                            {{ $profileUser->rib_valide ? 'Validé' : 'En attente de validation' }}
+                        </p>
+                    </div>
+
+                    @if (auth()->user()->effectiveRole() === 'courtier' && ! $profileUser->rib_valide)
+                        <form method="POST" action="{{ route('tenant.users.valider-rib', $profileUser) }}">
+                            @csrf
+                            <button type="submit" class="shrink-0 rounded-xl bg-[#ff008a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e6007c] transition">
+                                Valider le RIB
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </section>
+        @endif
+
         @if (auth()->user()->effectiveRole() === 'courtier' && $profileUser->role === 'conseiller')
             <section class="bg-white rounded-3xl border border-gray-200 p-6">
                 <p class="text-xs uppercase tracking-[0.18em] text-[#ff008a] font-semibold">
