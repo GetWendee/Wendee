@@ -1,13 +1,18 @@
 <?php
 
 use App\Http\Controllers\CabinetController;
+use App\Http\Controllers\TacheController;
+use App\Http\Controllers\CentralAccountController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 foreach (config('tenancy.central_domains') as $domain) {
     Route::domain($domain)->group(function () {
         Route::get('/', function () {
-            return view('welcome');
+            if (auth()->check()) {
+                return redirect()->route('dashboard');
+            }
+            return redirect()->route('login');
         });
 
         Route::get('/dashboard', function () {
@@ -23,6 +28,20 @@ foreach (config('tenancy.central_domains') as $domain) {
             Route::get('/cabinets/creer', [CabinetController::class, 'create'])->name('cabinets.create');
             Route::post('/cabinets/sirene', [CabinetController::class, 'searchSirene'])->name('cabinets.sirene');
             Route::post('/cabinets', [CabinetController::class, 'store'])->name('cabinets.store');
+            Route::get('/cabinets/{tenant}/modifier', [CabinetController::class, 'edit'])->name('cabinets.edit');
+            Route::put('/cabinets/{tenant}', [CabinetController::class, 'update'])->name('cabinets.update');
+            Route::patch('/cabinets/{tenant}/toggle-actif', [CabinetController::class, 'toggleActif'])->name('cabinets.toggle-actif');
+            Route::delete('/cabinets/{tenant}', [CabinetController::class, 'destroy'])->name('cabinets.destroy');
+            Route::get('/a-faire', [TacheController::class, 'index'])->name('a-faire.index');
+            Route::post('/a-faire', [TacheController::class, 'store'])->name('a-faire.store');
+            Route::put('/a-faire/{tache}', [TacheController::class, 'update'])->name('a-faire.update');
+            Route::patch('/a-faire/{tache}/toggle', [TacheController::class, 'toggleFait'])->name('a-faire.toggle');
+            Route::delete('/a-faire/{tache}', [TacheController::class, 'destroy'])->name('a-faire.destroy');
+            Route::get('/mails', function () {
+                return view('mails.index');
+            })->name('mails.index');
+            Route::get('/comptes/creer', [CentralAccountController::class, 'create'])->name('comptes.create');
+            Route::post('/comptes', [CentralAccountController::class, 'store'])->name('comptes.store');
         });
 
         require __DIR__.'/auth.php';

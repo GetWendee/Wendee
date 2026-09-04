@@ -253,7 +253,7 @@ class CabinetController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $tenant->run(function () use (
+        [$courtier, $tokenReset] = $tenant->run(function () use (
             $validated,
             $sireneData
         ) {
@@ -305,14 +305,6 @@ class CabinetController extends Controller
 
             $token = Password::createToken($user);
 
-            $user->notify(
-                new WelcomeCourtierNotification(
-                    $token,
-                    $validated['slug'].'.wendee.fr',
-                    $validated['name']
-                )
-            );
-
             \Illuminate\Support\Facades\Mail::send(
                 'emails.cabinet-created',
                 [
@@ -331,12 +323,56 @@ class CabinetController extends Controller
                         ->subject('Nouveau cabinet créé sur Wendee');
                 }
             );
+
+            return [$user, $token];
         });
+
+        $courtier->notifyNow(
+            new WelcomeCourtierNotification(
+                $tokenReset,
+                $validated['slug'].'.wendee.fr',
+                $validated['name']
+            )
+        );
 
         return redirect()->route('cabinets.index')->with('status', [
             'cabinet' => $validated['name'],
             'domain' => $validated['slug'].'.wendee.fr',
             'courtier_email' => $validated['courtier_email'],
         ]);
+    }
+
+    public function edit(Tenant $tenant): View
+    {
+        return view('cabinets.edit', ['cabinet' => $tenant]);
+    }
+
+    public function update(Request $request, Tenant $tenant): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+        $tenant->update(['name' => $validated['name']]);
+        return redirect()->route('cabinets.index')->with('status_simple', 'Cabinet mis à jour.');
+    }
+
+    public function toggleActif(Tenant $tenant): RedirectResponse
+    {
+        $nouvelEtat = ! ($tenant->actif ?? true);
+        $tenant->update(['actif' => $nouvelEtat]);
+        return redirect()->route('cabinets.index')->with(
+            'status_simple',
+            $nouvelEtat ? 'Cabinet réactivé.' : 'Cabinet désactivé.'
+        );
+    }
+
+    public function destroy(Tenant $tenant): RedirectResponse
+    {
+        $nom = $tenant->name;
+        $tenant->delete();
+        return redirect()->route('cabinets.index')->with(
+            'status_simple',
+            "Cabinet « {$nom} » supprimé définitivement (base de données comprise)."
+        );
     }
 }

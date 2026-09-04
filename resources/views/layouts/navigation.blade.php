@@ -1,20 +1,35 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" style="background:#171514;" class="border-b border-black/20">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ route('dashboard') }}" style="font-weight:800;font-size:22px;letter-spacing:-0.06em;color:#fff;">
+                        <span style="color:#f40087;">W</span>endee
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    <a href="{{ route('dashboard') }}" style="display:inline-flex;align-items:center;padding:0 4px;border-bottom:2px solid {{ request()->routeIs('dashboard') ? '#f40087' : 'transparent' }};color:{{ request()->routeIs('dashboard') ? '#fff' : '#a8a29a' }};font-size:13px;font-weight:600;text-decoration:none;">
                         {{ __('Dashboard') }}
-                    </x-nav-link>
+                    </a>
+                    <a href="{{ route('cabinets.index') }}" style="display:inline-flex;align-items:center;padding:0 4px;border-bottom:2px solid {{ request()->routeIs('cabinets.index') ? '#f40087' : 'transparent' }};color:{{ request()->routeIs('cabinets.index') ? '#fff' : '#a8a29a' }};font-size:13px;font-weight:600;text-decoration:none;">
+                        {{ __('Cabinets') }}
+                    </a>
+                    <a href="{{ route('cabinets.create') }}" style="display:inline-flex;align-items:center;padding:0 4px;border-bottom:2px solid {{ request()->routeIs('cabinets.create') ? '#f40087' : 'transparent' }};color:{{ request()->routeIs('cabinets.create') ? '#fff' : '#a8a29a' }};font-size:13px;font-weight:600;text-decoration:none;">
+                        {{ __('Créer un cabinet') }}
+                    </a>
+                    <a href="{{ route('a-faire.index') }}" style="display:inline-flex;align-items:center;padding:0 4px;border-bottom:2px solid {{ request()->routeIs('a-faire.*') ? '#f40087' : 'transparent' }};color:{{ request()->routeIs('a-faire.*') ? '#fff' : '#a8a29a' }};font-size:13px;font-weight:600;text-decoration:none;">
+                        {{ __('À faire') }}
+                    </a>
+                    <a href="{{ route('mails.index') }}" style="display:inline-flex;align-items:center;padding:0 4px;border-bottom:2px solid {{ request()->routeIs('mails.*') ? '#f40087' : 'transparent' }};color:{{ request()->routeIs('mails.*') ? '#fff' : '#a8a29a' }};font-size:13px;font-weight:600;text-decoration:none;">
+                        {{ __('Mails') }}
+                    </a>
+                    <a href="{{ route('comptes.create') }}" style="display:inline-flex;align-items:center;padding:0 4px;border-bottom:2px solid {{ request()->routeIs('comptes.*') ? '#f40087' : 'transparent' }};color:{{ request()->routeIs('comptes.*') ? '#fff' : '#a8a29a' }};font-size:13px;font-weight:600;text-decoration:none;">
+                        {{ __('Créer un compte') }}
+                    </a>
                 </div>
             </div>
 
@@ -22,7 +37,7 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                        <button style="color:#fff;" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md bg-transparent hover:opacity-80 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->name }}</div>
 
                             <div class="ms-1">
@@ -69,6 +84,21 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('cabinets.index')" :active="request()->routeIs('cabinets.index')">
+                {{ __('Cabinets') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('cabinets.create')" :active="request()->routeIs('cabinets.create')">
+                {{ __('Créer un cabinet') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('a-faire.index')" :active="request()->routeIs('a-faire.*')">
+                {{ __('À faire') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('mails.index')" :active="request()->routeIs('mails.*')">
+                {{ __('Mails') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('comptes.create')" :active="request()->routeIs('comptes.*')">
+                {{ __('Créer un compte') }}
             </x-responsive-nav-link>
         </div>
 
