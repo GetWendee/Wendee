@@ -2452,8 +2452,8 @@ Mes rendez-vous
             <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Notes (optionnel)</label>
             <textarea x-model="notes" rows="2" style="width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;margin-bottom:18px;resize:vertical;color:#151515;color-scheme:light;background:#fff;"></textarea>
 
-            <button type="submit" :disabled="!creneauChoisi" style="width:100%;background:#1b1716;color:#fff;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;opacity:1;" x-bind:style="!creneauChoisi ? 'width:100%;background:#ded9d4;color:#817b76;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:not-allowed;' : 'width:100%;background:#1b1716;color:#fff;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;'">
-                Confirmer le rendez-vous
+            <button type="submit" :disabled="!creneauChoisi || reservationEnCours" style="width:100%;background:#1b1716;color:#fff;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;opacity:1;" x-bind:style="(!creneauChoisi || reservationEnCours) ? 'width:100%;background:#ded9d4;color:#817b76;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:not-allowed;' : 'width:100%;background:#1b1716;color:#fff;border:none;border-radius:999px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;'">
+                <span x-text="reservationEnCours ? 'Enregistrement...' : 'Confirmer le rendez-vous'"></span>
             </button>
         </form>
     </div>
@@ -2534,6 +2534,7 @@ function rdvPopup(urlDisponibilites, urlStore) {
         sujet: '',
         notes: '',
         chargement: false,
+        reservationEnCours: false,
         ouvrir() {
             this.visible = true;
             this.date = new Date().toISOString().slice(0, 10);
@@ -2552,7 +2553,8 @@ function rdvPopup(urlDisponibilites, urlStore) {
                 .finally(() => { this.chargement = false; });
         },
         reserver() {
-            if (!this.creneauChoisi) return;
+            if (!this.creneauChoisi || this.reservationEnCours) return;
+            this.reservationEnCours = true;
             fetch(urlStore, {
                 method: 'POST',
                 headers: {
@@ -2566,9 +2568,17 @@ function rdvPopup(urlDisponibilites, urlStore) {
                     sujet: this.sujet,
                     notes: this.notes,
                 }),
-            }).then(() => {
+            }).then((reponse) => {
+                if (! reponse.ok) {
+                    this.reservationEnCours = false;
+                    alert("La réservation a échoué, réessaie.");
+                    return;
+                }
                 this.visible = false;
                 window.location.reload();
+            }).catch(() => {
+                this.reservationEnCours = false;
+                alert("La réservation a échoué, réessaie.");
             });
         },
     };
