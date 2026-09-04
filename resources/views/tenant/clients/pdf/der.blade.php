@@ -26,7 +26,7 @@ body { font-family: 'Montserrat', sans-serif; font-size: 10pt; color: #242424; l
 .titre { text-align: center; margin: 26px 0 30px; }
 .titre .eyebrow { font-size: 9pt; color: #242424; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
 .titre h1 { font-size: 17pt; font-weight: 700; margin: 6px 0 0; color: #171514; }
-.section-title { font-size: 12pt; font-weight: 700; color: #171514; margin: 26px 0 10px; page-break-after: avoid; text-transform: uppercase; }
+.section-title { font-size: 12pt; font-weight: 700; color: #171514; margin: 26px 0 10px; page-break-after: avoid; page-break-inside: avoid; text-transform: uppercase; }
 .recueil-sous-titre { font-size: 10.5pt; font-weight: 700; color: #171514; margin: 16px 0 6px; }
 .corps-paragraphe { margin: 0 0 8px; text-align: left; }
 .corps-liste { margin: 0 0 8px; padding-left: 18px; }

@@ -29,7 +29,7 @@ body { font-family: 'Montserrat', sans-serif; font-size: 10pt; color: #242424; l
 .titre h1 { font-size: 17pt; font-weight: 700; margin: 6px 0 0; color: #171514; }
 .parties { margin: 20px 0; font-size: 9.5pt; }
 .parties strong { color: #171514; }
-.section-title { font-size: 11pt; font-weight: 700; color: #171514; margin: 22px 0 8px; page-break-after: avoid; }
+.section-title { font-size: 11pt; font-weight: 700; color: #171514; margin: 22px 0 8px; page-break-after: avoid; page-break-inside: avoid; }
 .corps-paragraphe { margin: 0 0 8px; text-align: left; }
 .corps-liste { margin: 0 0 8px; padding-left: 18px; }
 .corps-liste li { margin-bottom: 4px; }
