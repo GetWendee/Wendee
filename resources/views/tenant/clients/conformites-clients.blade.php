@@ -2,7 +2,7 @@
 @include('tenant.clients.partials.header-tabs', ['active' => 'archives'])
 
 <style>
-.wd-section{margin-top:22px;}
+.wd-section{margin-top:22px;scroll-margin-top:88px;}
 .wd-section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px;}
 .wd-section-head h2{margin:4px 0 0;font-size:21px;letter-spacing:-.03em;}
 .wd-panel{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(21,21,21,.04);}
@@ -199,10 +199,24 @@
     cursor:pointer;
     font-family:inherit;
 }
+.wd-toast{
+    position:fixed;
+    bottom:26px;
+    right:26px;
+    background:#242424;
+    color:#fff;
+    border-top:2px solid var(--pink);
+    padding:12px 20px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+    z-index:2000;
+}
 </style>
 
+<div x-data="{ toast: false }" x-cloak>
 <nav class="wd-subtabs">
-    <button type="button" class="wd-btn-dark">Ajouter un document</button>
+    <button type="button" class="wd-btn-dark" @click="toast = true; setTimeout(() => toast = false, 2500)">Ajouter un document</button>
     <div class="wd-subtabs-links">
         <a href="#bibliotheque">Bibliothèque</a>
         <a href="#documents-personnels">Documents personnels</a>
@@ -343,5 +357,8 @@
         </div>
     </div>
 </section>
+
+<div class="wd-toast" x-show="toast" x-transition>Ajout de document : fonctionnalité à venir.</div>
+</div>
 
 </x-tenant-app-layout>
