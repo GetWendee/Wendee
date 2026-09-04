@@ -22,7 +22,10 @@ class EnsureClientAccess
         if ($client instanceof Client) {
             $user = $request->user();
 
-            abort_unless($user && $client->estVisiblePar($user), 403);
+            if (! $user || ! $client->estVisiblePar($user)) {
+                return redirect()->route('tenant.dashboard')
+                    ->with('status', "Vous n'avez pas accès à ce client.");
+            }
         }
 
         return $next($request);
