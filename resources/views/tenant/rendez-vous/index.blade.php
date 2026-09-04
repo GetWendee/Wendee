@@ -63,6 +63,7 @@
 
             .wd-agenda-timegrid-body{display:grid;position:relative}
             .wd-agenda-hour-label{font-size:10.5px;color:var(--muted);text-align:right;padding-right:10px;transform:translateY(-6px)}
+            .wd-agenda-hour-col .wd-agenda-hour-label:first-child{transform:translateY(0)}
             .wd-agenda-daycol{position:relative;border-left:1px solid var(--line);background-image:repeating-linear-gradient(to bottom, var(--line) 0, var(--line) 1px, transparent 1px, transparent {{ $hauteurLigne }}px)}
             .wd-agenda-daycol.today{background-color:rgba(244,0,135,.03)}
             .wd-agenda-event{position:absolute;border-radius:8px;border-left:3px solid;padding:4px 7px;font-size:11px;overflow:hidden;line-height:1.35}
