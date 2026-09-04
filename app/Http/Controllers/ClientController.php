@@ -453,6 +453,13 @@ class ClientController extends Controller
         ]);
     }
 
+    public function telechargerKycPdf(Client $client): \Symfony\Component\HttpFoundation\Response
+    {
+        $resultat = app(\App\Services\ClientPdfService::class)->kyc($client);
+
+        return $resultat['pdf']->download($resultat['filename']);
+    }
+
     private function typesBibliotheque(): array
     {
         return [
@@ -469,6 +476,7 @@ class ClientController extends Controller
             'mandat_garantie_accident_vie' => ['label' => 'Mandat garantie accident de la vie', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-garantie-accident-vie.pdf'],
             'mandat_assurance_vehicule' => ['label' => 'Mandat assurance véhicule', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-vehicule.pdf'],
             'mandat_plan_epargne_retraite' => ["label" => "Mandat plan d'épargne retraite", 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-plan-epargne-retraite.pdf'],
+            'kyc' => ['label' => 'Recueil de connaissance client', 'categorie' => 'informations-client', 'categorie_label' => 'Informations client', 'route' => 'tenant.clients.kyc.pdf'],
         ];
     }
 

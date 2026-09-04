@@ -6,6 +6,7 @@ use App\Mail\CodeVerificationMail;
 use App\Mail\ModificationEffectueeMail;
 use App\Models\Client;
 use App\Models\VerificationClient;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class VerificationCodeService
@@ -37,7 +38,9 @@ class VerificationCodeService
             return;
         }
 
-        Mail::to($client->email)->send(new ModificationEffectueeMail($client, $module));
+        Mail::to($client->email)->send(
+            new ModificationEffectueeMail($client, $module, $this->genererPieceJointePdf($client, $module))
+        );
     }
 
     public function verifierCode(Client $client, string $module, string $code): bool
@@ -63,5 +66,36 @@ class VerificationCodeService
         }
 
         return $code;
+    }
+
+    /**
+     * Génère le PDF du module concerné pour l'attacher au mail, sans jamais
+     * bloquer l'envoi si la génération échoue (dossier sauvegardé prioritaire).
+     */
+    private function genererPieceJointePdf(Client $client, string $module): ?array
+    {
+        try {
+            $resultat = match ($module) {
+                'kyc' => app(ClientPdfService::class)->kyc($client),
+                default => null,
+            };
+        } catch (\Throwable $e) {
+            Log::error('Erreur génération PDF pièce jointe mail client', [
+                'client_id' => $client->id,
+                'module' => $module,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+
+        if (! $resultat) {
+            return null;
+        }
+
+        return [
+            'contenu' => $resultat['pdf']->output(),
+            'nom' => $resultat['filename'],
+        ];
     }
 }
