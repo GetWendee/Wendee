@@ -452,8 +452,45 @@ class ClientController extends Controller
         Client $client
     ): \Illuminate\View\View
     {
+        $types = [
+            'recommandation' => ['label' => 'Recommandation patrimoniale', 'categorie' => 'recommandations', 'categorie_label' => 'Recommandation', 'route' => 'tenant.clients.recommandation-patrimoniale.pdf'],
+            'plan_action' => ['label' => "Plan d'action", 'categorie' => 'plans-actions', 'categorie_label' => "Plan d'action", 'route' => 'tenant.clients.plan-action.pdf'],
+            'lettre_mission_scpi' => ['label' => 'Lettre de mission SCPI', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.lettre-mission-scpi.pdf'],
+            'mandat_assurance_vie' => ['label' => 'Mandat assurance vie', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-vie.pdf'],
+            'mandat_assurance_deces' => ['label' => 'Mandat assurance décès', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-deces.pdf'],
+            'mandat_assurance_emprunteur' => ['label' => 'Mandat assurance emprunteur', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-emprunteur.pdf'],
+            'mandat_assurance_habitation' => ['label' => 'Mandat assurance habitation', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-habitation.pdf'],
+            'mandat_assurance_obseques' => ['label' => 'Mandat assurance obsèques', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-obseques.pdf'],
+            'mandat_complementaire_sante' => ['label' => 'Mandat complémentaire santé', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-complementaire-sante.pdf'],
+            'mandat_contrat_capitalisation' => ['label' => 'Mandat contrat de capitalisation', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-contrat-capitalisation.pdf'],
+            'mandat_garantie_accident_vie' => ['label' => 'Mandat garantie accident de la vie', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-garantie-accident-vie.pdf'],
+            'mandat_assurance_vehicule' => ['label' => 'Mandat assurance véhicule', 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-assurance-vehicule.pdf'],
+            'mandat_plan_epargne_retraite' => ["label" => "Mandat plan d'épargne retraite", 'categorie' => 'mandats', 'categorie_label' => 'Mandat', 'route' => 'tenant.clients.mandat-plan-epargne-retraite.pdf'],
+        ];
+
+        $documents = collect($types)->map(function ($meta, $type) use ($client) {
+            $analyse = $client->analyses()
+                ->where('type', $type)
+                ->where('status', 'completed')
+                ->latest('completed_at')
+                ->first();
+
+            if (! $analyse) {
+                return null;
+            }
+
+            return [
+                'label' => $meta['label'],
+                'categorie' => $meta['categorie'],
+                'categorie_label' => $meta['categorie_label'],
+                'date' => $analyse->completed_at,
+                'url' => route($meta['route'], $client),
+            ];
+        })->filter()->sortByDesc('date')->values();
+
         return view('tenant.clients.conformites-clients', [
             'client' => $client,
+            'documents' => $documents,
         ]);
     }
 
