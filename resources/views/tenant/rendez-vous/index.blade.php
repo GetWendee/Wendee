@@ -181,6 +181,7 @@
                                      data-wd-rdv
                                      data-date="{{ $rdv->starts_at->format('d/m/Y') }} · {{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }}"
                                      data-client="{{ $rdv->client->prenom }} {{ $rdv->client->nom }}"
+                                     data-conseiller="{{ $rdv->conseiller->name ?? '' }}"
                                      data-tel="{{ $rdv->client->telephone_mobile ?? '' }}"
                                      data-email="{{ $rdv->client->email ?? '' }}"
                                      data-sujet="{{ $sujetLabels[$rdv->sujet] ?? '' }}"
@@ -222,6 +223,7 @@
                                      data-wd-rdv
                                      data-date="{{ $rdv->starts_at->format('d/m/Y') }} · {{ $rdv->starts_at->format('H:i') }}-{{ $rdv->ends_at->format('H:i') }}"
                                      data-client="{{ $rdv->client->prenom }} {{ $rdv->client->nom }}"
+                                     data-conseiller="{{ $rdv->conseiller->name ?? '' }}"
                                      data-tel="{{ $rdv->client->telephone_mobile ?? '' }}"
                                      data-email="{{ $rdv->client->email ?? '' }}"
                                      data-sujet="{{ $sujetLabels[$rdv->sujet] ?? '' }}"
@@ -243,6 +245,7 @@
             <button type="button" class="wd-agenda-modal-close" data-wd-rdv-modal-close>&times;</button>
             <p class="wd-agenda-modal-date" data-wd-rdv-modal-date></p>
             <h3 data-wd-rdv-modal-client></h3>
+            <div class="wd-agenda-modal-row"><span class="lbl">Conseiller</span><span data-wd-rdv-modal-conseiller></span></div>
             <div class="wd-agenda-modal-row"><span class="lbl">Téléphone</span><span data-wd-rdv-modal-tel></span></div>
             <div class="wd-agenda-modal-row"><span class="lbl">Email</span><span data-wd-rdv-modal-email></span></div>
             <div class="wd-agenda-modal-row"><span class="lbl">Sujet</span><span data-wd-rdv-modal-sujet></span></div>
@@ -272,6 +275,7 @@
                 el.addEventListener('click', function () {
                     modal.querySelector('[data-wd-rdv-modal-date]').textContent = el.getAttribute('data-date') || '';
                     modal.querySelector('[data-wd-rdv-modal-client]').textContent = el.getAttribute('data-client') || '';
+                    modal.querySelector('[data-wd-rdv-modal-conseiller]').textContent = texteOu(el.getAttribute('data-conseiller'), '-');
                     modal.querySelector('[data-wd-rdv-modal-tel]').textContent = texteOu(el.getAttribute('data-tel'), '-');
                     modal.querySelector('[data-wd-rdv-modal-email]').textContent = texteOu(el.getAttribute('data-email'), '-');
                     modal.querySelector('[data-wd-rdv-modal-sujet]').textContent = texteOu(el.getAttribute('data-sujet'), '-');
