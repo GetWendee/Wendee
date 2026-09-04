@@ -212,7 +212,7 @@ body { font-family: 'Montserrat', sans-serif; font-size: 10pt; color: #242424; l
     <div class="section-title">Fiche d'entrée en relation</div>
     <table class="recueil-table">
         <tr><td class="recueil-label">ORIAS</td><td>N° {{ $cabinet->numero_orias }} — www.orias.fr</td></tr>
-        <tr><td class="recueil-label">Statuts réglementés</td><td>{{ $cabinet->statuts_reglementaires }}</td></tr>
+        <tr><td class="recueil-label">Statuts réglementés</td><td>{{ is_array($cabinet->statuts_reglementaires) ? implode(', ', $cabinet->statuts_reglementaires) : $cabinet->statuts_reglementaires }}</td></tr>
         <tr><td class="recueil-label">Rémunération</td><td>Commissions versées par les compagnies d'assurance et partenaires ; honoraires éventuels précisés par écrit.</td></tr>
         <tr><td class="recueil-label">Réclamations</td><td>{{ $cabinet->adresse }}, {{ $cabinet->code_postal }} {{ $cabinet->ville }} — {{ $mailConseiller }}</td></tr>
         @if($cabinet->mediateur_nom)

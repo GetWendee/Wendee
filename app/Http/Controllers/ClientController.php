@@ -17,6 +17,13 @@ use App\Services\AI\SuggestionAnalysisService;
 
 class ClientController extends Controller
 {
+    private function nommerFichierPdf(string $libelle, Client $client): string
+    {
+        $nomClient = trim($client->prenom . ' ' . $client->nom);
+
+        return $libelle . ' - ' . $nomClient . ' - ' . now()->format('d-m-Y') . '.pdf';
+    }
+
     public function index(): View
     {
         $clients = Client::with('conseiller')->orderBy('nom')->paginate(20);
@@ -397,9 +404,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Recommandation-Patrimoniale-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Recommandation patrimoniale', $client);
 
         return $pdf->download($filename);
     }
@@ -655,9 +660,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Assurance-Vie-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat assurance vie', $client);
 
         return $pdf->download($filename);
     }
@@ -862,9 +865,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Assurance-Deces-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat assurance décès', $client);
 
         return $pdf->download($filename);
     }
@@ -1063,9 +1064,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Assurance-Emprunteur-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat assurance emprunteur', $client);
 
         return $pdf->download($filename);
     }
@@ -1255,9 +1254,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Assurance-Habitation-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat assurance habitation', $client);
 
         return $pdf->download($filename);
     }
@@ -1413,9 +1410,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Assurance-Obseques-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat assurance obsèques', $client);
 
         return $pdf->download($filename);
     }
@@ -1597,9 +1592,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Complementaire-Sante-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat complémentaire santé', $client);
 
         return $pdf->download($filename);
     }
@@ -1765,9 +1758,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Contrat-Capitalisation-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat contrat de capitalisation', $client);
 
         return $pdf->download($filename);
     }
@@ -1937,9 +1928,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Garantie-Accident-Vie-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat garantie accident de la vie', $client);
 
         return $pdf->download($filename);
     }
@@ -2143,9 +2132,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Assurance-Vehicule-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat assurance véhicule', $client);
 
         return $pdf->download($filename);
     }
@@ -2343,9 +2330,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Mandat-Plan-Epargne-Retraite-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Mandat plan d'épargne retraite', $client);
 
         return $pdf->download($filename);
     }
@@ -2534,9 +2519,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Lettre-Mission-SCPI-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Lettre de mission SCPI', $client);
 
         return $pdf->download($filename);
     }
@@ -2657,9 +2640,7 @@ class ClientController extends Controller
             $data
         );
 
-        $filename = 'Plan-Action-'
-            . \Illuminate\Support\Str::slug($client->nom)
-            . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = $this->nommerFichierPdf('Plan d'action', $client);
 
         return $pdf->download($filename);
     }
