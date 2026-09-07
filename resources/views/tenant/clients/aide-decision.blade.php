@@ -2580,6 +2580,12 @@ Contrat
 Archives
 </a>
 
+@if(in_array($viewRole, ['courtier', 'conseiller']))
+<a href="{{ route('tenant.clients.conformite-lcbft', $client) }}">
+Conformité
+</a>
+@endif
+
 </nav>
 
 

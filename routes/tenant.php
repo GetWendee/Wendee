@@ -96,6 +96,8 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::post('/conformites-clients/{client}/documents', [ClientDocumentController::class, 'store'])->name('clients.documents.store');
         Route::get('/conformites-clients/{client}/documents/{type}/telecharger', [ClientDocumentController::class, 'download'])->name('clients.documents.download');
         Route::delete('/conformites-clients/{client}/documents/{type}', [ClientDocumentController::class, 'destroy'])->name('clients.documents.destroy');
+        Route::get('/conformite/{client}', [ClientController::class, 'conformite'])->name('clients.conformite-lcbft');
+        Route::put('/conformite/{client}', [ClientController::class, 'updateConformite'])->name('clients.conformite-lcbft.update');
         Route::get('/mandat-assurance-vie/{client}', [ClientController::class, 'mandatAssuranceVie'])->name('clients.mandat-assurance-vie');
         Route::post('/mandat-assurance-vie/{client}', [ClientController::class, 'enregistrerMandatAssuranceVie'])->name('clients.mandat-assurance-vie.enregistrer');
         Route::get('/mandat-assurance-vie/{client}/pdf', [ClientController::class, 'telechargerMandatAssuranceViePdf'])->name('clients.mandat-assurance-vie.pdf');

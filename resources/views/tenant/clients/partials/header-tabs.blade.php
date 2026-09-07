@@ -250,4 +250,9 @@ Contrat
 <a href="{{ route('tenant.clients.conformites-clients', $client) }}" class="{{ ($active ?? null) === 'archives' ? 'active' : '' }}">
 Archives
 </a>
+@if(in_array($viewRole, ['courtier', 'conseiller']))
+<a href="{{ route('tenant.clients.conformite-lcbft', $client) }}" class="{{ ($active ?? null) === 'conformite' ? 'active' : '' }}">
+Conformité
+</a>
+@endif
 </nav>

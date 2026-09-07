@@ -605,6 +605,45 @@ class ClientController extends Controller
         ]);
     }
 
+    public function conformite(Client $client): \Illuminate\View\View
+    {
+        $user = auth()->user();
+        abort_if(in_array($user->effectiveRole(), ['apporteur', 'client']), 403);
+
+        $client->load(['kyc', 'patrimoineFiscalite', 'patrimoineElements', 'conformite', 'conseiller', 'apporteur']);
+
+        return view('tenant.clients.conformite', [
+            'client' => $client,
+            'evaluation' => $client->evaluerRisqueLcbFt(),
+        ]);
+    }
+
+    public function updateConformite(Request $request, Client $client): \Illuminate\Http\RedirectResponse
+    {
+        $user = auth()->user();
+        abort_if(in_array($user->effectiveRole(), ['apporteur', 'client']), 403);
+
+        $validated = $request->validate([
+            'origine_fonds_details' => ['nullable', 'string'],
+            'niveau_risque_override' => ['nullable', 'in:faible,standard,eleve'],
+            'motifs_vigilance' => ['nullable', 'array'],
+            'motifs_vigilance.*' => ['string'],
+            'tracfin_statut' => ['required', 'in:neant,en_cours,transmise'],
+            'tracfin_justification' => ['nullable', 'string'],
+            'commentaire' => ['nullable', 'string'],
+        ]);
+
+        $validated['origine_fonds_documentee'] = $request->boolean('origine_fonds_documentee');
+        $validated['vigilance_renforcee'] = $request->boolean('vigilance_renforcee');
+        $validated['date_derniere_revue'] = now();
+
+        $client->conformite()->updateOrCreate(['client_id' => $client->id], $validated);
+
+        return redirect()
+            ->route('tenant.clients.conformite-lcbft', $client)
+            ->with('status', 'conformite-mise-a-jour');
+    }
+
     public function mandatAssuranceVie(
         Client $client
     ): \Illuminate\View\View
