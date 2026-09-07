@@ -9,7 +9,7 @@
         <link href="https://fonts.bunny.net/css?family=montserrat:400,500,600,700&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>
-        html,body{margin:0!important;background:#f3f1ee!important}
+        html,body{margin:0!important;background:#f3f1ee!important;overflow-x:hidden!important}
         :root{
         --bg:#f3f1ee;--white:#fff;--ink:#151515;--muted:#817b76;--line:#ded9d4;
         --dark:#1b1716;--pink:#f40087;--red:#b94d4d;--green:#4d8760;

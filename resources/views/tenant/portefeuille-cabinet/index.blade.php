@@ -37,7 +37,7 @@
 
         {{-- Indicateurs --}}
         <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="bg-white rounded-3xl border border-gray-200 p-6">
+            <div class="wd-kpi-card bg-white rounded-3xl border border-gray-200 p-6">
                 <div class="flex items-center justify-between">
                     <p class="text-xs uppercase tracking-[0.18em] text-gray-400 font-semibold">
                         Conseillers
@@ -50,7 +50,7 @@
                     </div>
                 </div>
 
-                <p class="mt-5 text-3xl font-semibold text-gray-900">
+                <p class="wd-kpi-value mt-5 text-3xl font-semibold text-gray-900">
                     {{ $conseillers->count() }}
                 </p>
 
@@ -59,7 +59,7 @@
                 </p>
             </div>
 
-            <div class="bg-white rounded-3xl border border-gray-200 p-6">
+            <div class="wd-kpi-card bg-white rounded-3xl border border-gray-200 p-6">
                 <div class="flex items-center justify-between">
                     <p class="text-xs uppercase tracking-[0.18em] text-gray-400 font-semibold">
                         Apporteurs
@@ -72,7 +72,7 @@
                     </div>
                 </div>
 
-                <p class="mt-5 text-3xl font-semibold text-gray-900">
+                <p class="wd-kpi-value mt-5 text-3xl font-semibold text-gray-900">
                     {{ $apporteurs->count() }}
                 </p>
 
@@ -81,7 +81,7 @@
                 </p>
             </div>
 
-            <div class="bg-white rounded-3xl border border-gray-200 p-6">
+            <div class="wd-kpi-card bg-white rounded-3xl border border-gray-200 p-6">
                 <div class="flex items-center justify-between">
                     <p class="text-xs uppercase tracking-[0.18em] text-gray-400 font-semibold">
                         Clients
@@ -94,7 +94,7 @@
                     </div>
                 </div>
 
-                <p class="mt-5 text-3xl font-semibold text-gray-900">
+                <p class="wd-kpi-value mt-5 text-3xl font-semibold text-gray-900">
                     {{ $clients->count() }}
                 </p>
 
@@ -137,13 +137,18 @@
                         </svg>
                     </div>
 
-                    <select id="wd-portfolio-role"
-                            class="rounded-xl border-gray-200 bg-gray-50 py-2.5 text-sm focus:border-[#ff008a] focus:ring-[#ff008a]">
-                        <option value="">Tous les profils</option>
-                        <option value="conseiller">Conseillers</option>
-                        <option value="apporteur">Apporteurs</option>
-                        <option value="client">Clients</option>
-                    </select>
+                    <div class="wd-role-select" data-role-select>
+                        <button type="button" class="wd-role-select-trigger" data-role-select-trigger>
+                            <span data-role-select-label>Tous les profils</span>
+                            <svg viewBox="0 0 24 24" class="wd-role-select-chevron"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        <div class="wd-role-select-menu" data-role-select-menu hidden>
+                            <button type="button" class="wd-role-select-option active" data-value="">Tous les profils</button>
+                            <button type="button" class="wd-role-select-option" data-value="conseiller">Conseillers</button>
+                            <button type="button" class="wd-role-select-option" data-value="apporteur">Apporteurs</button>
+                            <button type="button" class="wd-role-select-option" data-value="client">Clients</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -173,7 +178,7 @@
                                         </div>
 
                                         <div class="min-w-0">
-                                            <p class="font-semibold text-gray-900 truncate group-hover:text-[#ff008a] transition">
+                                            <p class="wd-portfolio-name font-semibold text-gray-900 truncate group-hover:text-[#ff008a] transition">
                                                 {{ $conseiller->name }}
                                             </p>
                                             <span class="mt-1 inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#ff008a]">
@@ -213,7 +218,7 @@
                                         </div>
 
                                         <div class="min-w-0">
-                                            <p class="font-semibold text-gray-900 truncate">{{ $apporteur->name }}</p>
+                                            <p class="wd-portfolio-name font-semibold text-gray-900 truncate">{{ $apporteur->name }}</p>
                                             <span class="mt-1 inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
                                                 Apporteur
                                             </span>
@@ -250,7 +255,7 @@
                                         </div>
 
                                         <div class="min-w-0">
-                                            <p class="font-semibold text-gray-900 truncate group-hover:text-[#ff008a] transition">
+                                            <p class="wd-portfolio-name font-semibold text-gray-900 truncate group-hover:text-[#ff008a] transition">
                                                 {{ $client->prenom }} {{ $client->nom }}
                                             </p>
                                             <span class="mt-1 inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
@@ -310,20 +315,23 @@
         <script>
         (function () {
             var search = document.getElementById('wd-portfolio-search');
-            var roleSelect = document.getElementById('wd-portfolio-role');
+            var roleSelectEl = document.querySelector('[data-role-select]');
+            var roleTrigger = document.querySelector('[data-role-select-trigger]');
+            var roleMenu = document.querySelector('[data-role-select-menu]');
+            var roleLabel = document.querySelector('[data-role-select-label]');
             var grid = document.getElementById('wd-portfolio-grid');
             var empty = document.getElementById('wd-portfolio-empty');
-            if (! grid || ! search || ! roleSelect) return;
+            if (! grid || ! search || ! roleSelectEl) return;
 
+            var currentRole = '';
             var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-portfolio-card]'));
 
             function applyFilter() {
                 var term = (search.value || '').trim().toLowerCase();
-                var role = roleSelect.value;
                 var visibleCount = 0;
 
                 cards.forEach(function (card) {
-                    var matchesRole = ! role || card.getAttribute('data-role') === role;
+                    var matchesRole = ! currentRole || card.getAttribute('data-role') === currentRole;
                     var matchesTerm = ! term || card.getAttribute('data-name').indexOf(term) !== -1;
                     var visible = matchesRole && matchesTerm;
                     card.style.display = visible ? '' : 'none';
@@ -336,7 +344,28 @@
             }
 
             search.addEventListener('input', applyFilter);
-            roleSelect.addEventListener('change', applyFilter);
+
+            if (roleTrigger && roleMenu) {
+                roleTrigger.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    roleMenu.hidden = ! roleMenu.hidden;
+                });
+
+                roleMenu.querySelectorAll('[data-value]').forEach(function (option) {
+                    option.addEventListener('click', function () {
+                        currentRole = option.getAttribute('data-value');
+                        roleLabel.textContent = option.textContent;
+                        roleMenu.querySelectorAll('[data-value]').forEach(function (o) { o.classList.remove('active'); });
+                        option.classList.add('active');
+                        roleMenu.hidden = true;
+                        applyFilter();
+                    });
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (! roleSelectEl.contains(e.target)) { roleMenu.hidden = true; }
+                });
+            }
         })();
         </script>
 
@@ -390,6 +419,23 @@
     background:#171717;
     box-shadow:0 8px 20px rgba(36,36,36,.16);
     transform:translateY(-1px);
+}
+
+.wd-role-select{position:relative}
+.wd-role-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-width:170px;padding:0 14px;height:42px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;font-weight:600;color:#111827;cursor:pointer;font-family:inherit}
+.wd-role-select-trigger:hover{border-color:#ff008a}
+.wd-role-select-chevron{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:#9ca3af;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wd-role-select-menu{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:60;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 12px 30px rgba(17,24,39,.12);padding:6px}
+.wd-role-select-menu[hidden]{display:none}
+.wd-role-select-option{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:8px;border:0;background:none;font-size:13px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit}
+.wd-role-select-option:hover{background:#fff0f7;color:#ff008a}
+.wd-role-select-option.active{background:#fff0f7;color:#ff008a}
+
+@media(max-width:640px){
+.wd-portfolio-name{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+.wd-kpi-card{padding:14px!important;border-radius:18px!important}
+.wd-kpi-value{font-size:22px!important;margin-top:8px!important}
+.wd-role-select-trigger{min-width:0}
 }
 </style>
 

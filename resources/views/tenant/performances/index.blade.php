@@ -84,6 +84,14 @@
             .wd-perf{padding:14px}
             .wd-perf-title{font-size:26px}
             .wd-perf-card{padding:18px;border-radius:16px}
+            .wd-perf-hero{padding:22px 20px;border-radius:20px;gap:22px}
+            .wd-perf-hero-value{font-size:28px}
+            .wd-perf-hero-sub{gap:18px;padding-top:16px}
+            .wd-perf-hero-sub .val{font-size:15px;margin-top:6px}
+            .wd-perf-alert-row{flex-wrap:wrap;gap:10px}
+            .wd-perf-alert-name{flex:1 1 100%}
+            .wd-perf-alert-bar{flex:1 1 100%}
+            .wd-perf-badges{flex:1 1 100%;flex-wrap:wrap}
             }
         </style>
 

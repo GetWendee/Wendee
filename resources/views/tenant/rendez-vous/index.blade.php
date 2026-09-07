@@ -132,6 +132,14 @@
                 .wd-agenda-month-cell{min-height:52px;padding:5px}
                 .wd-agenda-month-header div{padding:8px 2px;font-size:9px}
                 .wd-agenda-month-pill{font-size:9.5px;padding:2px 4px}
+                .wd-agenda-toolbar{flex-direction:column;align-items:stretch;gap:12px}
+                .wd-agenda-switch{width:100%}
+                .wd-agenda-switch a{flex:1;text-align:center;padding:9px 4px}
+                .wd-agenda-nav{gap:8px;justify-content:space-between}
+                .wd-agenda-period{min-width:0;font-size:12px}
+                .wd-agenda-card{overflow-x:auto;-webkit-overflow-scrolling:touch}
+                .wd-agenda-timegrid-header,.wd-agenda-timegrid-body{min-width:640px}
+                .wd-agenda-hour-col{position:sticky;left:0;background:var(--white);z-index:3}
             }
         </style>
 

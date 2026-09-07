@@ -185,12 +185,17 @@ document.addEventListener('DOMContentLoaded', function () {
         <span>Menu</span>
     </button>
     <div class="wd-mobile-logo"><b>W</b>endee</div>
-    <form method="POST" action="{{ route('tenant.logout') }}" class="wd-mobile-logout-form">
-        @csrf
-        <button type="submit" class="wd-mobile-logout-btn" aria-label="Déconnexion" title="Déconnexion">
-            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    @if(count($newAccountRoles) > 0)
+        <button type="button" class="wd-mobile-add-btn" data-new-account-trigger aria-label="Nouveau compte" title="Nouveau compte">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </button>
-    </form>
+    @elseif($mobileRole === 'apporteur')
+        <a href="{{ route('tenant.clients.create') }}" class="wd-mobile-add-btn" aria-label="Nouveau compte" title="Nouveau compte">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </a>
+    @else
+        <span class="wd-mobile-add-spacer" aria-hidden="true"></span>
+    @endif
 </header>
 <div class="wd-mobile-menu-overlay" data-mobile-menu-overlay hidden>
     <div class="wd-mobile-menu-panel">
@@ -286,10 +291,11 @@ document.addEventListener('DOMContentLoaded', function () {
 .wd-mobile-logo b{color:var(--pink)}
 .wd-mobile-btn{display:flex;align-items:center;gap:6px;background:none;border:0;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:8px 6px;cursor:pointer;font-family:inherit}
 .wd-mobile-btn svg{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.wd-mobile-logout-form{margin:0}
-.wd-mobile-logout-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.09);color:rgba(255,255,255,.85);border:0;cursor:pointer;transition:background .15s ease,color .15s ease}
-.wd-mobile-logout-btn:hover,.wd-mobile-logout-btn:active{background:rgba(244,0,135,.22);color:#f9c4dd}
-.wd-mobile-logout-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wd-mobile-add-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:var(--pink);color:#fff;border:0;cursor:pointer;text-decoration:none;transition:transform .15s ease}
+.wd-mobile-add-btn:hover,.wd-mobile-add-btn:active{transform:scale(1.06)}
+.wd-mobile-add-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.wd-mobile-add-spacer{width:36px;height:36px;flex:0 0 36px}
+.wd-new-client{display:none!important}
 .wd-mobile-menu-logo{font-size:18px;font-weight:800;letter-spacing:-.05em;color:#151515}
 .wd-mobile-menu-logo b{color:var(--pink)}
 .wd-mobile-menu-section{margin:16px 4px 6px;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a89f99}
@@ -315,19 +321,23 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
     var mobileTopbar = document.querySelector('[data-mobile-topbar]');
     if (mobileTopbar) {
-        var lastY = window.scrollY;
+        var lastY = Math.max(0, window.scrollY);
         var ticking = false;
         window.addEventListener('scroll', function () {
             if (ticking) { return; }
             ticking = true;
             window.requestAnimationFrame(function () {
-                var y = window.scrollY;
-                if (y > lastY && y > 80) {
-                    mobileTopbar.classList.add('wd-mobile-topbar--hidden');
-                } else {
-                    mobileTopbar.classList.remove('wd-mobile-topbar--hidden');
+                var y = Math.max(0, window.scrollY);
+                var maxY = document.documentElement.scrollHeight - window.innerHeight;
+                var delta = y - lastY;
+                if (Math.abs(delta) > 6) {
+                    if (delta > 0 && y > 80 && y < maxY - 4) {
+                        mobileTopbar.classList.add('wd-mobile-topbar--hidden');
+                    } else {
+                        mobileTopbar.classList.remove('wd-mobile-topbar--hidden');
+                    }
+                    lastY = y;
                 }
-                lastY = y;
                 ticking = false;
             });
         }, { passive: true });
