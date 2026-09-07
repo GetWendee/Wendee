@@ -360,6 +360,14 @@ $profil=$anomalies->firstWhere('type','Profil investisseur');
     color:#f40087!important;
 }
 
+@media(max-width:1050px){
+    .wd-summary-premium{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:650px){
+    .wd-summary-premium{grid-template-columns:1fr!important}
+    .wd-summary-premium .wd-sum{padding:18px 20px!important}
+}
+
 /* CARTES FINANCIÈRES PLUS PREMIUM */
 .wd-finances{
     gap:24px!important;
