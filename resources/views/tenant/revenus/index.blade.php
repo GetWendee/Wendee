@@ -54,7 +54,9 @@
                 .wd-perf-grid{grid-template-columns:1fr}
             }
 
-            .wd-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+            .wd-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;min-width:0}
+            .wd-perf-grid{min-width:0}
+            .wd-perf-card{min-width:0}
             .wd-rev-table{min-width:560px}
 
             @media(max-width:650px){
