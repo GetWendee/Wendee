@@ -187,19 +187,19 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="wd-mobile-logo"><b>W</b>endee</div>
     <form method="POST" action="{{ route('tenant.logout') }}" class="wd-mobile-logout-form">
         @csrf
-        <button type="submit" class="wd-mobile-btn wd-mobile-btn-logout">
+        <button type="submit" class="wd-mobile-logout-btn" aria-label="Déconnexion" title="Déconnexion">
             <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-            <span>Déconnexion</span>
         </button>
     </form>
 </header>
 <div class="wd-mobile-menu-overlay" data-mobile-menu-overlay hidden>
     <div class="wd-mobile-menu-panel">
         <div class="wd-mobile-menu-head">
-            <div class="wd-logo"><b>W</b>endee<small>OS du conseiller patrimonial</small></div>
+            <div class="wd-mobile-menu-logo"><b>W</b>endee</div>
             <button type="button" class="wd-mobile-menu-close" data-mobile-menu-close aria-label="Fermer">&times;</button>
         </div>
         <nav class="wd-mobile-menu-nav">
+            <div class="wd-mobile-menu-section">Général</div>
             <a class="{{ request()->routeIs('tenant.dashboard') ? 'active' : '' }}" href="{{ route('tenant.dashboard') }}">
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
                 <span>Tableau de bord</span>
@@ -233,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </a>
             @endif
             @if($mobileRole === 'courtier')
+            <div class="wd-mobile-menu-section">Activité</div>
             <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
                 <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>
                 <span>Patrimoine sous gestion</span>
@@ -245,6 +246,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>
                 <span>Commissions</span>
             </a>
+            @endif
+            <div class="wd-mobile-menu-section">Compte</div>
+            @if($mobileRole === 'courtier')
             <a class="{{ request()->routeIs('tenant.cabinet') ? 'active' : '' }}" href="{{ route('tenant.cabinet') }}">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
                 <span>Paramètres</span>
@@ -282,8 +286,14 @@ document.addEventListener('DOMContentLoaded', function () {
 .wd-mobile-logo b{color:var(--pink)}
 .wd-mobile-btn{display:flex;align-items:center;gap:6px;background:none;border:0;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:8px 6px;cursor:pointer;font-family:inherit}
 .wd-mobile-btn svg{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.wd-mobile-btn-logout{color:#e9a4c4}
 .wd-mobile-logout-form{margin:0}
+.wd-mobile-logout-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.09);color:rgba(255,255,255,.85);border:0;cursor:pointer;transition:background .15s ease,color .15s ease}
+.wd-mobile-logout-btn:hover,.wd-mobile-logout-btn:active{background:rgba(244,0,135,.22);color:#f9c4dd}
+.wd-mobile-logout-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wd-mobile-menu-logo{font-size:18px;font-weight:800;letter-spacing:-.05em;color:#151515}
+.wd-mobile-menu-logo b{color:var(--pink)}
+.wd-mobile-menu-section{margin:16px 4px 6px;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a89f99}
+.wd-mobile-menu-section:first-child{margin-top:0}
 .wd-mobile-menu-overlay{position:fixed;inset:0;background:rgba(20,17,15,.55);z-index:1900;display:flex;align-items:center;justify-content:center;padding:20px}
 .wd-mobile-menu-overlay[hidden]{display:none}
 .wd-mobile-menu-panel{background:#fff;color:#151515;width:100%;max-width:360px;max-height:78vh;overflow-y:auto;border-radius:14px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
