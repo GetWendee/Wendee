@@ -137,9 +137,10 @@
                 .wd-agenda-switch a{flex:1;text-align:center;padding:9px 4px}
                 .wd-agenda-nav{gap:8px;justify-content:space-between}
                 .wd-agenda-period{min-width:0;font-size:12px}
-                .wd-agenda-card{overflow-x:auto;-webkit-overflow-scrolling:touch}
-                .wd-agenda-timegrid-header,.wd-agenda-timegrid-body{min-width:640px}
+                .wd-agenda-card{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
+                .wd-agenda-timegrid-header,.wd-agenda-timegrid-body{min-width:700px}
                 .wd-agenda-hour-col{position:sticky;left:0;background:var(--white);z-index:3}
+                .wd-agenda-card:after{content:"";position:absolute;top:0;right:0;bottom:0;width:26px;background:linear-gradient(to right, transparent, rgba(255,255,255,.96));pointer-events:none;z-index:5}
             }
         </style>
 
