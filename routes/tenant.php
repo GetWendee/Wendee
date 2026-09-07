@@ -14,6 +14,7 @@ use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\RevenuController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\CabinetProfileController;
+use App\Http\Controllers\TenantProfileController;
 use Stancl\Tenancy\Controllers\TenantAssetsController;
 use App\Http\Controllers\UserAccountController;
 use App\Http\Controllers\CalendarConnectionController;
@@ -76,6 +77,8 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::get('/utilisateurs/{user}', [UserAccountController::class, 'show'])->name('users.show');
         Route::post('/utilisateurs/{user}/voit-tous-les-clients', [UserAccountController::class, 'toggleVoitTousLesClients'])->name('users.toggle-voit-tous-les-clients');
         Route::post('/utilisateurs/{user}/valider-rib', [UserAccountController::class, 'validerRib'])->name('users.valider-rib');
+        Route::get('/profil', [TenantProfileController::class, 'edit'])->name('profil.edit');
+        Route::put('/profil', [TenantProfileController::class, 'update'])->name('profil.update');
         Route::get('/mon-rib', [UserAccountController::class, 'editRib'])->name('profil.rib.edit');
         Route::put('/mon-rib', [UserAccountController::class, 'updateRib'])->name('profil.rib.update');
         Route::get('/commissions', [CommissionController::class, 'index'])->name('commissions.index');
