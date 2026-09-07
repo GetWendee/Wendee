@@ -42,6 +42,12 @@
 .wd-modal-eyebrow{font-size:19px;color:var(--ink);font-weight:800;letter-spacing:0;text-transform:none;margin-bottom:4px;}
 .wd-modal-btn-confirm:hover{box-shadow:0 0 0 2px rgba(255,51,153,.15);}
 @keyframes wd-modal-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:600px){
+.wd-reco-card{padding:16px 18px;flex-wrap:wrap;}
+.wd-reco-body,.wd-reco-result{padding:18px;}
+.wd-reco-result-head{flex-wrap:wrap;gap:10px;align-items:flex-start;}
+.wd-modal-card{width:100%;max-width:92vw;}
+}
 </style>
 <section class="wd-section">
     <div class="wd-reco-card">

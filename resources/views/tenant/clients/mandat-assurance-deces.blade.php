@@ -83,6 +83,13 @@
 .wd-modal-btn-cancel{height:36px;padding:0 16px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:11px;font-weight:700;cursor:pointer;}
 .wd-modal-btn-confirm{height:36px;padding:0 16px;border:none;border-radius:8px;background:#242424;border-top:2px solid var(--pink);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
 @keyframes wd-modal-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:600px){
+.wd-mandat-card{padding:16px 18px;}
+.wd-mandat-body{padding:18px;}
+.wd-mandat-header-status{flex-wrap:wrap;}
+.wd-cabinet-checkbox-group{grid-template-columns:1fr;}
+.wd-modal-card{width:100%;max-width:92vw;}
+}
 </style>
 
 <section class="wd-section">

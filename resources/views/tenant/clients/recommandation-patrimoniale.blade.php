@@ -81,6 +81,12 @@
 .wd-cabinet-checkbox:has(input:checked){color:#242424;}
 .wd-cabinet-checkbox:has(input:checked) .wd-cabinet-checkbox-box{border-color:#242424;background:#242424;}
 .wd-cabinet-checkbox:has(input:checked) .wd-cabinet-checkbox-box svg{display:block;}
+@media(max-width:600px){
+.wd-reco-card{padding:16px 18px;flex-wrap:wrap;}
+.wd-reco-body,.wd-reco-result{padding:18px;}
+.wd-reco-result-head{flex-wrap:wrap;gap:10px;align-items:flex-start;}
+.wd-modal-card{width:100%;max-width:92vw;}
+}
 </style>
 <section class="wd-section">
     <div class="wd-reco-card">
