@@ -155,6 +155,17 @@ html,body{
 }
 .wd-section{margin-top:22px;}
 .wd-tabs span.locked{flex:1;text-align:center;padding:10px 16px;border-radius:7px;color:#b7b2ad;font-size:11px;cursor:not-allowed;}
+@media(max-width:800px){
+.wd-hero-main{grid-template-columns:1fr;gap:16px;}
+.wd-actions{justify-content:flex-start;}
+}
+@media(max-width:600px){
+.wd-wrap{padding:16px 14px 40px;}
+.wd-hero-main{padding:20px 20px 18px;}
+.wd-hero h1{font-size:26px;}
+.wd-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.wd-tabs a,.wd-tabs span.locked{flex:0 0 auto;white-space:nowrap;padding:10px 14px;}
+}
 </style>
 <div class="wd-wrap">
 <section class="wd-hero {{ $dossierStatus['a_jour'] ? 'wd-hero-conforme' : 'wd-hero-non-conforme' }}">
