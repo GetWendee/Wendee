@@ -291,10 +291,10 @@ document.addEventListener('DOMContentLoaded', function () {
 .wd-mobile-logo b{color:var(--pink)}
 .wd-mobile-btn{display:flex;align-items:center;gap:6px;background:none;border:0;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:8px 6px;cursor:pointer;font-family:inherit}
 .wd-mobile-btn svg{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.wd-mobile-add-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:var(--pink);color:#fff;border:0;cursor:pointer;text-decoration:none;transition:transform .15s ease}
+.wd-mobile-add-btn{display:flex;align-items:center;justify-content:center;width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:var(--pink);color:#fff;border:0;cursor:pointer;text-decoration:none;transition:transform .15s ease}
 .wd-mobile-add-btn:hover,.wd-mobile-add-btn:active{transform:scale(1.06)}
-.wd-mobile-add-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.wd-mobile-add-spacer{width:36px;height:36px;flex:0 0 36px}
+.wd-mobile-add-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.wd-mobile-add-spacer{width:29px;height:29px;flex:0 0 29px}
 .wd-new-client{display:none!important}
 .wd-mobile-menu-logo{font-size:18px;font-weight:800;letter-spacing:-.05em;color:#151515}
 .wd-mobile-menu-logo b{color:var(--pink)}
