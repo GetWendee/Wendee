@@ -23,7 +23,7 @@
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <x-input-label for="civilite" value="Civilité" />
                             <select id="civilite" name="civilite" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full">
@@ -38,7 +38,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="prenom" value="Prénom" />
                             <x-text-input id="prenom" name="prenom" type="text" class="block mt-1 w-full" :value="old('prenom', $client->prenom)" required autofocus />
@@ -49,7 +49,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="telephone_mobile" value="Téléphone mobile" />
                             <x-text-input id="telephone_mobile" name="telephone_mobile" type="text" maxlength="10" inputmode="numeric" class="block mt-1 w-full" :value="old('telephone_mobile', $client->telephone_mobile)" />
@@ -83,7 +83,7 @@
                         </ul>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <x-input-label for="code_postal" value="Code postal" />
                             <x-text-input id="code_postal" name="code_postal" type="text" class="block mt-1 w-full" :value="old('code_postal', $client->code_postal)" />

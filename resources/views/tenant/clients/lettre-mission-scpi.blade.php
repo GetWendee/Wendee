@@ -83,6 +83,13 @@
 .wd-mandat-header-status{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;}
 .wd-modal-overlay{position:fixed;inset:0;background:rgba(23,21,20,.55);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(2px);display:none;}
 .wd-modal-card{background:#fff;border-radius:14px;padding:24px 26px;width:320px;box-shadow:0 20px 50px rgba(0,0,0,.25);position:relative;overflow:hidden;animation:wd-modal-in .18s ease;}
+@media(max-width:600px){
+.wd-mandat-card{padding:16px 18px;}
+.wd-mandat-body{padding:18px;}
+.wd-mandat-header-status{flex-wrap:wrap;}
+.wd-cabinet-checkbox-group{grid-template-columns:1fr;}
+.wd-modal-card{width:100%;max-width:92vw;}
+}
 .wd-modal-accent{position:absolute;top:0;left:0;right:0;height:4px;background:var(--pink);}
 .wd-modal-eyebrow{font-size:19px;color:var(--ink);font-weight:800;margin-bottom:4px;}
 .wd-modal-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
