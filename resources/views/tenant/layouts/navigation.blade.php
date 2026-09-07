@@ -270,34 +270,35 @@ document.addEventListener('DOMContentLoaded', function () {
 @media(max-width:768px){
 .wd-sidebar{display:none!important}
 .wd-topbar{display:none!important}
-.wd-main{margin-left:0!important;padding-top:56px!important}
+.wd-main{margin-left:0!important;padding-top:0!important;padding-bottom:76px!important}
 .wd-mobile-topbar{
     display:flex;align-items:center;justify-content:space-between;
-    position:fixed;top:0;left:0;right:0;height:56px;z-index:1100;
+    position:fixed;bottom:0;left:0;right:0;height:56px;z-index:1100;
     background:#242424;color:#fff;padding:0 12px;
     transition:transform .3s ease;transform:translateY(0)
 }
-.wd-mobile-topbar.wd-mobile-topbar--hidden{transform:translateY(-100%)}
+.wd-mobile-topbar.wd-mobile-topbar--hidden{transform:translateY(100%)}
 .wd-mobile-logo{font-size:15px;font-weight:800;letter-spacing:-.05em}
 .wd-mobile-logo b{color:var(--pink)}
 .wd-mobile-btn{display:flex;align-items:center;gap:6px;background:none;border:0;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:8px 6px;cursor:pointer;font-family:inherit}
 .wd-mobile-btn svg{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .wd-mobile-btn-logout{color:#e9a4c4}
 .wd-mobile-logout-form{margin:0}
-.wd-mobile-menu-overlay{position:fixed;inset:0;background:rgba(20,17,15,.55);z-index:1900;display:flex;align-items:stretch}
+.wd-mobile-menu-overlay{position:fixed;inset:0;background:rgba(20,17,15,.55);z-index:1900;display:flex;align-items:center;justify-content:center;padding:20px}
 .wd-mobile-menu-overlay[hidden]{display:none}
-.wd-mobile-menu-panel{background:#242424;color:#fff;width:82%;max-width:320px;height:100%;padding:22px 16px;overflow-y:auto;box-shadow:0 0 40px rgba(0,0,0,.3)}
+.wd-mobile-menu-panel{background:#fff;color:#151515;width:100%;max-width:360px;max-height:78vh;overflow-y:auto;border-radius:14px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
 .wd-mobile-menu-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
 .wd-mobile-menu-head .wd-logo{padding:0}
-.wd-mobile-menu-close{background:none;border:0;font-size:24px;line-height:1;color:rgba(255,255,255,.6);cursor:pointer;padding:0 4px}
-.wd-mobile-menu-close:hover{color:#fff}
+.wd-mobile-menu-head .wd-logo small{color:#96908b}
+.wd-mobile-menu-close{background:none;border:0;font-size:24px;line-height:1;color:#918984;cursor:pointer;padding:0 4px}
+.wd-mobile-menu-close:hover{color:#151515}
 .wd-mobile-menu-nav{display:grid;gap:3px}
-.wd-mobile-menu-nav a,.wd-mobile-menu-nav button{display:flex;align-items:center;gap:11px;width:100%;padding:11px;margin:0;border-radius:8px;color:rgba(255,255,255,.72);font-size:13px;text-decoration:none;background:none;border:0;text-align:left;font-family:inherit;cursor:pointer}
-.wd-mobile-menu-nav a svg,.wd-mobile-menu-nav button svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:rgba(255,255,255,.45)}
-.wd-mobile-menu-nav a.active{background:rgba(244,0,135,.15);color:#fff}
+.wd-mobile-menu-nav a,.wd-mobile-menu-nav button{display:flex;align-items:center;gap:11px;width:100%;padding:11px;margin:0;border-radius:8px;color:#4a4542;font-size:13px;text-decoration:none;background:none;border:0;text-align:left;font-family:inherit;cursor:pointer}
+.wd-mobile-menu-nav a svg,.wd-mobile-menu-nav button svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:#9a928d}
+.wd-mobile-menu-nav a.active{background:rgba(244,0,135,.10);color:#151515}
 .wd-mobile-menu-nav a.active svg{color:var(--pink)}
-.wd-mobile-menu-nav a:hover,.wd-mobile-menu-nav button:hover{background:rgba(255,255,255,.08);color:#fff}
-.wd-mobile-menu-sep{margin:10px 4px;border-top:1px solid rgba(255,255,255,.12)}
+.wd-mobile-menu-nav a:hover,.wd-mobile-menu-nav button:hover{background:#f3f1ee;color:#151515}
+.wd-mobile-menu-sep{margin:10px 4px;border-top:1px solid #eeeae7}
 }
 </style>
 <script>
