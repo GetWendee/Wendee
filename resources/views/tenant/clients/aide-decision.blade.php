@@ -454,6 +454,18 @@ html,body{
     font-size:11px;
 }
 
+@media(max-width:800px){
+    .wd-hero-main{grid-template-columns:1fr;gap:16px;}
+    .wd-actions{justify-content:flex-start;}
+}
+@media(max-width:600px){
+    .wd-wrap{padding:16px 14px 40px;}
+    .wd-hero-main{padding:20px 20px 18px;}
+    .wd-hero h1{font-size:26px;}
+    .wd-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .wd-tabs a,.wd-tabs span.locked{flex:0 0 auto;white-space:nowrap;padding:10px 14px;}
+}
+
 .wd-btn-dark{
     flex:0 0 auto;
     min-width:220px;

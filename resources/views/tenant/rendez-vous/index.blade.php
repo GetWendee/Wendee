@@ -125,6 +125,14 @@
                 .wd-agenda-daycol-header .dow, .wd-agenda-event-client{font-size:10px}
                 .wd-agenda-month-cell{min-height:70px}
             }
+            @media (max-width:600px){
+                .wd-agenda{padding:14px}
+                .wd-agenda-title{font-size:26px}
+                .wd-agenda-cal{flex-wrap:wrap}
+                .wd-agenda-month-cell{min-height:52px;padding:5px}
+                .wd-agenda-month-header div{padding:8px 2px;font-size:9px}
+                .wd-agenda-month-pill{font-size:9.5px;padding:2px 4px}
+            }
         </style>
 
         <div class="wd-agenda-head">

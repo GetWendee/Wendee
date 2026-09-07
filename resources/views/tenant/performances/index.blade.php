@@ -79,6 +79,12 @@
                 .wd-perf-grid{grid-template-columns:1fr}
                 .wd-perf-alert-name{flex-basis:140px}
             }
+            .wd-perf-grid,.wd-perf-card{min-width:0}
+            @media(max-width:650px){
+            .wd-perf{padding:14px}
+            .wd-perf-title{font-size:26px}
+            .wd-perf-card{padding:18px;border-radius:16px}
+            }
         </style>
 
         <div class="wd-perf-head">
