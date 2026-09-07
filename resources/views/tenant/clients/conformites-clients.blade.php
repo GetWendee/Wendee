@@ -356,6 +356,13 @@
     font-weight:600;
     z-index:2000;
 }
+.wd-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.wd-archives-table{min-width:420px}
+@media(max-width:650px){
+.wd-subtabs{flex-wrap:wrap;gap:14px;}
+.wd-subtabs-links{border-left:0;padding-left:0;flex-wrap:wrap;gap:16px;width:100%;}
+.wd-btn-dark{min-width:0;width:100%;}
+}
 </style>
 
 <div x-data="{ uploadOpen: false }" x-cloak>
@@ -393,6 +400,7 @@
 
         <div class="wd-panel">
             <div class="wd-archives-empty" x-show="rows.length === 0">Aucun document trouvé.</div>
+            <div class="wd-table-scroll">
             <table class="wd-archives-table" x-show="rows.length > 0">
                 <thead>
                     <tr>
@@ -416,6 +424,7 @@
                     </template>
                 </tbody>
             </table>
+            </div>
         </div>
 
         <div class="wd-pagination" x-show="dernierePage > 1">

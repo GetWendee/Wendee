@@ -53,6 +53,16 @@
                 .wd-perf-tiles{grid-template-columns:1fr}
                 .wd-perf-grid{grid-template-columns:1fr}
             }
+
+            .wd-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+            .wd-rev-table{min-width:560px}
+
+            @media(max-width:650px){
+            .wd-perf{padding:14px}
+            .wd-perf-title{font-size:26px}
+            .wd-perf-card{padding:18px;border-radius:16px}
+            .wd-perf-tile{padding:16px 18px}
+            }
         </style>
 
         <div class="wd-perf-head">
@@ -146,6 +156,7 @@
                 @if ($classementConseillers->isEmpty())
                     <p style="font-size:13px;color:var(--muted)">Aucun dossier facturé sur la période.</p>
                 @else
+                    <div class="wd-table-scroll">
                     <table class="wd-rev-table" data-sortable>
                         <thead>
                             <tr>
@@ -174,6 +185,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
             </div>
 
@@ -207,7 +219,8 @@
             @if ($detailClients->isEmpty())
                 <p style="font-size:13px;color:var(--muted)">Aucun revenu enregistré sur la période.</p>
             @else
-                <table class="wd-rev-table" data-sortable>
+                <div class="wd-table-scroll">
+                    <table class="wd-rev-table" data-sortable>
                     <thead>
                         <tr>
                             <th>Client</th>
@@ -231,6 +244,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                    </div>
             @endif
         </div>
 

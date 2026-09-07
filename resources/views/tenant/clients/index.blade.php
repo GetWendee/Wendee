@@ -49,6 +49,14 @@
                 .wd-cli-search{width:100%}
                 .wd-cli-contact .tel, .wd-cli-table thead th:nth-child(4), .wd-cli-table tbody td:nth-child(4){display:none}
             }
+
+            .wd-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+            .wd-cli-table{min-width:460px}
+
+            @media(max-width:480px){
+                .wd-cli{padding:14px}
+                .wd-cli-title{font-size:26px}
+            }
         </style>
 
         <div class="wd-cli-head">
@@ -76,6 +84,7 @@
         </div>
 
         <div class="wd-cli-card">
+            <div class="wd-table-scroll">
             <table class="wd-cli-table">
                 <thead>
                     <tr>
@@ -133,6 +142,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
 
         <div class="wd-cli-pagination">

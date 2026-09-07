@@ -32,6 +32,15 @@
             .wd-com-badge.ok{background:rgba(77,135,96,.12);color:var(--green)}
 
             .wd-com-statut{font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;background:rgba(77,135,96,.12);color:var(--green);white-space:nowrap}
+
+            .wd-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+            .wd-rev-table{min-width:640px}
+
+            @media(max-width:650px){
+            .wd-perf{padding:14px}
+            .wd-perf-title{font-size:26px}
+            .wd-perf-card{padding:18px;border-radius:16px}
+            }
         </style>
 
         <div class="wd-perf-head">
@@ -50,6 +59,7 @@
             @else
                 <form method="POST" action="{{ route('tenant.commissions.confirmer-fonds-recus') }}">
                     @csrf
+                    <div class="wd-table-scroll">
                     <table class="wd-rev-table">
                         <thead>
                             <tr>
@@ -79,6 +89,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                     <button type="submit" class="wd-com-btn" data-wd-submit="a-recevoir" disabled>Confirmer la réception des fonds</button>
                 </form>
             @endif
@@ -93,6 +104,7 @@
             @else
                 <form method="POST" action="{{ route('tenant.commissions.valider-virements') }}">
                     @csrf
+                    <div class="wd-table-scroll">
                     <table class="wd-rev-table">
                         <thead>
                             <tr>
@@ -123,6 +135,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                     <button type="submit" class="wd-com-btn" data-wd-submit="virements" disabled>Valider les virements sélectionnés</button>
                     <p class="wd-com-empty" style="margin-top:10px;">Les lignes grisées ont un RIB non validé : elles seront ignorées tant que le RIB de l'apporteur n'est pas validé.</p>
                 </form>
@@ -136,7 +149,8 @@
             @if ($derniersPaiements->isEmpty())
                 <p class="wd-com-empty">Aucun virement effectué pour le moment.</p>
             @else
-                <table class="wd-rev-table">
+                <div class="wd-table-scroll">
+                    <table class="wd-rev-table">
                     <thead>
                         <tr>
                             <th>Apporteur</th>
@@ -165,6 +179,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                    </div>
             @endif
         </div>
 
