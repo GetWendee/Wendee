@@ -34,10 +34,26 @@ class ClientKycController extends Controller
 
         $verificationRequise = ! $verificationClient?->verifie_le;
 
+        // Mineurs représentés par ce client (via la table representants),
+        // pas encore ajoutés dans ses personnes à charge : proposés en
+        // suggestion plutôt que de les faire ressaisir à la main.
+        $enfantsDejaAjoutes = $client->personnesACharge->pluck('titulaire_id')->filter();
+
+        $enfantsRepresentesSuggestions = $client->user
+            ? $client->user->representations()
+                ->whereHas('titulaire', fn ($q) => $q->where('type', 'physique')->where('mineur', true))
+                ->with('titulaire')
+                ->get()
+                ->pluck('titulaire')
+                ->reject(fn ($titulaire) => $enfantsDejaAjoutes->contains($titulaire->id))
+                ->values()
+            : collect();
+
         return view('tenant.clients.kyc', [
             'client' => $client,
             'listes' => config('listes'),
             'verificationRequise' => $verificationRequise,
+            'enfantsRepresentesSuggestions' => $enfantsRepresentesSuggestions,
         ]);
     }
 
@@ -130,6 +146,7 @@ class ClientKycController extends Controller
             'personnes_a_charge.*.fiscalement_a_charge' => ['nullable', 'string'],
             'personnes_a_charge.*.garde_alternee' => ['nullable', 'string', 'in:oui,non'],
             'personnes_a_charge.*.invalidite' => ['nullable', 'string', 'in:oui,non'],
+            'personnes_a_charge.*.titulaire_id' => ['nullable', 'integer', 'exists:clients,id'],
         ]);
 
         $validated['a_conjoint'] = $request->boolean('a_conjoint');

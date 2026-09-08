@@ -380,7 +380,7 @@
                 residenceIdentique: '{{ $old('residence_fiscale_identique') }}',
                 estPpe: '{{ $old('est_ppe') }}',
                 prochePpe: '{{ $old('proche_ppe') }}',
-                pac: {{ $client->personnesACharge->count() ? $client->personnesACharge->map(fn($p) => ['civilite' => $p->civilite, 'prenom' => $p->prenom, 'nom' => $p->nom, 'date_naissance' => $p->date_naissance?->format('Y-m-d'), 'enfant_de' => $p->enfant_de, 'fiscalement_a_charge' => $p->fiscalement_a_charge, 'garde_alternee' => $p->garde_alternee, 'invalidite' => $p->invalidite])->toJson() : '[]' }},
+                pac: {{ $client->personnesACharge->count() ? $client->personnesACharge->map(fn($p) => ['civilite' => $p->civilite, 'prenom' => $p->prenom, 'nom' => $p->nom, 'date_naissance' => $p->date_naissance?->format('Y-m-d'), 'enfant_de' => $p->enfant_de, 'fiscalement_a_charge' => $p->fiscalement_a_charge, 'garde_alternee' => $p->garde_alternee, 'invalidite' => $p->invalidite, 'titulaire_id' => $p->titulaire_id])->toJson() : '[]' }},
             }">
                 @csrf
                 @method('PUT')
@@ -698,12 +698,22 @@
                                             {!! $opts($listes['oui_non'], '') !!}
                                         </select>
                                     </div>
+                                    <input type="hidden" :name="`personnes_a_charge[${i}][titulaire_id]`" x-model="p.titulaire_id">
                                     <div class="col-span-2 md:col-span-4 flex justify-end">
                                         <button type="button" @click="pac.splice(i, 1)" class="text-red-600 text-sm underline">Retirer</button>
                                     </div>
                                 </div>
                             </template>
-                            <button type="button" @click="pac.push({civilite:'',prenom:'',nom:'',date_naissance:'',enfant_de:'',fiscalement_a_charge:'',garde_alternee:'',invalidite:''})" class="text-sm text-gray-700 underline">
+                            @foreach($enfantsRepresentesSuggestions as $enfant)
+                                <button
+                                    type="button"
+                                    @click="aPac = true; pac.push({civilite:'', prenom:@js($enfant->prenom), nom:@js($enfant->nom), date_naissance:@js($enfant->date_naissance?->format('Y-m-d')), enfant_de:'client', fiscalement_a_charge:'oui', garde_alternee:'', invalidite:'', titulaire_id:{{ $enfant->id }}})"
+                                    class="text-sm text-[#f40087] underline block mb-2"
+                                >
+                                    + Ajouter {{ $enfant->prenom }} {{ $enfant->nom }} (représenté(e) par ce client)
+                                </button>
+                            @endforeach
+                            <button type="button" @click="pac.push({civilite:'',prenom:'',nom:'',date_naissance:'',enfant_de:'',fiscalement_a_charge:'',garde_alternee:'',invalidite:'',titulaire_id:null})" class="text-sm text-gray-700 underline">
                                 + Ajouter une personne à charge
                             </button>
                         </div>
