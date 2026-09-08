@@ -105,6 +105,30 @@
 .wd-address-results li:hover{
     background:#f3f1ee;
 }
+.wd-mode-select{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:10px;
+    margin-top:6px;
+}
+.wd-mode-option{
+    border:1px solid #ded9d4;
+    border-radius:8px;
+    padding:12px 14px;
+    cursor:pointer;
+    font-size:12px;
+}
+.wd-mode-option input{margin-right:8px}
+.wd-mode-option strong{display:block;font-size:12px;margin-bottom:3px}
+.wd-mode-option span{color:var(--muted);font-size:11px}
+.wd-section-title{
+    margin:26px 0 4px;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#9a928d;
+}
 </style>
 <div class="wd-wrap">
     <section class="wd-head">
@@ -117,8 +141,26 @@
         </div>
     </section>
     <section class="wd-user-form">
-        <form method="POST" action="{{ route('tenant.clients.store') }}">
+        <form method="POST" action="{{ route('tenant.clients.store') }}" enctype="multipart/form-data">
             @csrf
+            <div class="wd-mode-select">
+                <label class="wd-mode-option">
+                    <input type="radio" name="mode" value="soi_meme" data-mode-radio {{ old('mode', 'soi_meme') === 'soi_meme' ? 'checked' : '' }}>
+                    <strong>En son nom propre</strong>
+                    <span>Le client agit pour lui-même.</span>
+                </label>
+                <label class="wd-mode-option">
+                    <input type="radio" name="mode" value="represente_physique" data-mode-radio {{ old('mode') === 'represente_physique' ? 'checked' : '' }}>
+                    <strong>Représente un mineur / majeur protégé</strong>
+                    <span>Parent, tuteur, curateur, mandataire...</span>
+                </label>
+                <label class="wd-mode-option">
+                    <input type="radio" name="mode" value="represente_morale" data-mode-radio {{ old('mode') === 'represente_morale' ? 'checked' : '' }}>
+                    <strong>Représente une société</strong>
+                    <span>Gérant, président, mandataire social...</span>
+                </label>
+            </div>
+            <div class="wd-section-title" data-titre-representant>Le client</div>
             <div class="wd-cabinet-information-grid">
                 <div class="wd-cabinet-field wd-c2">
                     <label>Civilité</label>
@@ -218,6 +260,104 @@
                     @enderror
                 </div>
             </div>
+            <div data-mode-bloc="represente_physique" hidden>
+                <div class="wd-section-title">Le titulaire représenté</div>
+                <div class="wd-cabinet-information-grid">
+                    <div class="wd-cabinet-field wd-c3">
+                        <label>Prénom du titulaire</label>
+                        <input type="text" name="titulaire_prenom" value="{{ old('titulaire_prenom') }}">
+                        @error('titulaire_prenom')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field wd-c3">
+                        <label>Nom du titulaire</label>
+                        <input type="text" name="titulaire_nom" value="{{ old('titulaire_nom') }}">
+                        @error('titulaire_nom')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field wd-c3">
+                        <label>Date de naissance du titulaire</label>
+                        <input type="date" name="titulaire_date_naissance" value="{{ old('titulaire_date_naissance') }}">
+                        @error('titulaire_date_naissance')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field wd-c3">
+                        <label>Relation avec le titulaire</label>
+                        <select name="relation">
+                            <option value="">-</option>
+                            <option value="parent" {{ old('relation') === 'parent' ? 'selected' : '' }}>Parent / représentant légal</option>
+                            <option value="tuteur" {{ old('relation') === 'tuteur' ? 'selected' : '' }}>Tuteur</option>
+                            <option value="curateur" {{ old('relation') === 'curateur' ? 'selected' : '' }}>Curateur</option>
+                            <option value="mandataire" {{ old('relation') === 'mandataire' ? 'selected' : '' }}>Mandataire de protection future</option>
+                        </select>
+                        @error('relation')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field">
+                        <label>Justificatif (livret de famille, jugement...)</label>
+                        <input type="file" name="justificatif" accept=".pdf,.jpg,.jpeg,.png">
+                        @error('justificatif')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            <div data-mode-bloc="represente_morale" hidden>
+                <div class="wd-section-title">La société représentée</div>
+                <div class="wd-cabinet-information-grid">
+                    <div class="wd-cabinet-field wd-c4">
+                        <label>Raison sociale</label>
+                        <input type="text" name="raison_sociale" value="{{ old('raison_sociale') }}">
+                        @error('raison_sociale')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field wd-c2">
+                        <label>Forme juridique</label>
+                        <input type="text" name="forme_juridique" value="{{ old('forme_juridique') }}" placeholder="SARL, SAS, SCI...">
+                        @error('forme_juridique')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field">
+                        <label>Numéro d'immatriculation (SIREN)</label>
+                        <input type="text" name="numero_immatriculation" value="{{ old('numero_immatriculation') }}">
+                        @error('numero_immatriculation')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field">
+                        <label>Adresse du siège social</label>
+                        <input type="text" name="adresse_siege_social" value="{{ old('adresse_siege_social') }}">
+                        @error('adresse_siege_social')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field wd-c3">
+                        <label>Qualité du représentant</label>
+                        <select name="relation">
+                            <option value="">-</option>
+                            <option value="gerant" {{ old('relation') === 'gerant' ? 'selected' : '' }}>Gérant</option>
+                            <option value="president" {{ old('relation') === 'president' ? 'selected' : '' }}>Président</option>
+                            <option value="mandataire" {{ old('relation') === 'mandataire' ? 'selected' : '' }}>Mandataire social</option>
+                        </select>
+                        @error('relation')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="wd-cabinet-field wd-c3">
+                        <label>Justificatif (Kbis, statuts...)</label>
+                        <input type="file" name="justificatif" accept=".pdf,.jpg,.jpeg,.png">
+                        @error('justificatif')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
             <button type="submit" class="wd-cabinet-save">Créer le client</button>
         </form>
     </section>
@@ -231,6 +371,30 @@
         champ.hidden = civilite.value !== 'Mme';
     }
     civilite.addEventListener('change', appliquer);
+    appliquer();
+})();
+(function () {
+    var radios = document.querySelectorAll('[data-mode-radio]');
+    var blocs = document.querySelectorAll('[data-mode-bloc]');
+    var titreRepresentant = document.querySelector('[data-titre-representant]');
+    if (! radios.length) { return; }
+    var libellesTitre = {
+        soi_meme: 'Le client',
+        represente_physique: 'Le représentant (celui qui se connecte)',
+        represente_morale: 'Le représentant (celui qui se connecte)'
+    };
+    function appliquer() {
+        var mode = document.querySelector('[data-mode-radio]:checked').value;
+        blocs.forEach(function (bloc) {
+            bloc.hidden = bloc.getAttribute('data-mode-bloc') !== mode;
+        });
+        if (titreRepresentant) {
+            titreRepresentant.textContent = libellesTitre[mode] || libellesTitre.soi_meme;
+        }
+    }
+    radios.forEach(function (radio) {
+        radio.addEventListener('change', appliquer);
+    });
     appliquer();
 })();
 </script>

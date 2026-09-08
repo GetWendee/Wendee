@@ -6,6 +6,7 @@ use App\Services\PlacementCompatibilityService;
 
 use App\Models\CabinetProfile;
 use App\Models\Client;
+use App\Models\Representant;
 use App\Models\User;
 use App\Services\CabinetCompletionChecker;
 use Illuminate\Http\Request;
@@ -83,7 +84,10 @@ class ClientController extends Controller
                 ->with('status', "Complétez d'abord les informations essentielles de votre cabinet avant de créer un compte.");
         }
 
-        $validated = $request->validate([
+        $mode = $request->input('mode', 'soi_meme');
+
+        $rules = [
+            'mode' => ['required', 'in:soi_meme,represente_physique,represente_morale'],
             'civilite' => ['nullable', 'string', 'in:M.,Mme'],
             'prenom' => ['required', 'string', 'max:255'],
             'nom' => ['required', 'string', 'max:255'],
@@ -96,7 +100,31 @@ class ClientController extends Controller
             'code_postal' => ['nullable', 'string', 'max:10'],
             'ville' => ['nullable', 'string', 'max:255'],
             'pays' => ['nullable', 'string', 'max:255'],
-        ]);
+        ];
+
+        // Le client n'agit pas forcément pour lui-même : mineur/majeur
+        // protégé représenté par un tiers, ou société représentée par un
+        // dirigeant. Voir claude/wendee_modele_dossiers_relations_pouvoirs.md.
+        if ($mode === 'represente_physique') {
+            $rules += [
+                'titulaire_prenom' => ['required', 'string', 'max:255'],
+                'titulaire_nom' => ['required', 'string', 'max:255'],
+                'titulaire_date_naissance' => ['required', 'date'],
+                'relation' => ['required', 'in:parent,tuteur,curateur,mandataire'],
+                'justificatif' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            ];
+        } elseif ($mode === 'represente_morale') {
+            $rules += [
+                'raison_sociale' => ['required', 'string', 'max:255'],
+                'forme_juridique' => ['nullable', 'string', 'max:255'],
+                'numero_immatriculation' => ['nullable', 'string', 'max:20'],
+                'adresse_siege_social' => ['nullable', 'string', 'max:255'],
+                'relation' => ['required', 'in:gerant,president,mandataire'],
+                'justificatif' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            ];
+        }
+
+        $validated = $request->validate($rules);
 
         $user = $request->user();
 
@@ -118,6 +146,8 @@ class ClientController extends Controller
             $conseillerId = $user->id;
         }
 
+        // Le représentant : celui qui se connecte et remplit les
+        // formulaires, qu'il agisse pour lui-même ou pour un tiers.
         $newUser = User::create([
             'name' => trim($validated['prenom'].' '.$validated['nom']),
             'email' => $validated['email'],
@@ -127,7 +157,19 @@ class ClientController extends Controller
             'activation_pending' => true,
         ]);
 
-        $client = Client::create($validated + [
+        $client = Client::create([
+            'civilite' => $validated['civilite'] ?? null,
+            'prenom' => $validated['prenom'],
+            'nom' => $validated['nom'],
+            'nom_jeune_fille' => $validated['nom_jeune_fille'] ?? null,
+            'date_naissance' => $validated['date_naissance'] ?? null,
+            'telephone_mobile' => $validated['telephone_mobile'] ?? null,
+            'telephone_domicile' => $validated['telephone_domicile'] ?? null,
+            'email' => $validated['email'],
+            'adresse' => $validated['adresse'] ?? null,
+            'code_postal' => $validated['code_postal'] ?? null,
+            'ville' => $validated['ville'] ?? null,
+            'pays' => $validated['pays'] ?? null,
             'conseiller_id' => $conseillerId,
             'apporteur_id' => $apporteurId,
             'user_id' => $newUser->id,
@@ -135,7 +177,53 @@ class ClientController extends Controller
 
         Password::broker()->sendResetLink(['email' => $newUser->email]);
 
-        return redirect()->route('tenant.clients.show', $client)->with('status', 'Client créé.');
+        if ($mode === 'soi_meme') {
+            return redirect()->route('tenant.clients.show', $client)->with('status', 'Client créé.');
+        }
+
+        // Le titulaire représenté : sa propre fiche, distincte de celle du
+        // représentant. Pas de compte de connexion pour lui (mineur ou
+        // personne morale), pas d'email requis.
+        if ($mode === 'represente_physique') {
+            $titulaire = Client::create([
+                'type' => 'physique',
+                'mineur' => true,
+                'prenom' => $validated['titulaire_prenom'],
+                'nom' => $validated['titulaire_nom'],
+                'date_naissance' => $validated['titulaire_date_naissance'],
+                'conseiller_id' => $conseillerId,
+                'apporteur_id' => $apporteurId,
+            ]);
+        } else {
+            $titulaire = Client::create([
+                'type' => 'morale',
+                'prenom' => '',
+                'nom' => $validated['raison_sociale'],
+                'raison_sociale' => $validated['raison_sociale'],
+                'forme_juridique' => $validated['forme_juridique'] ?? null,
+                'numero_immatriculation' => $validated['numero_immatriculation'] ?? null,
+                'adresse_siege_social' => $validated['adresse_siege_social'] ?? null,
+                'conseiller_id' => $conseillerId,
+                'apporteur_id' => $apporteurId,
+            ]);
+        }
+
+        $justificatifPath = null;
+        if ($request->hasFile('justificatif')) {
+            $justificatifPath = $request->file('justificatif')->store('representants-justificatifs/'.$titulaire->id, 'local');
+        }
+
+        // Pouvoirs accordés par défaut à la création : tous. Un contrôle
+        // plus fin (par pouvoir) est à construire séparément si besoin.
+        Representant::create([
+            'titulaire_id' => $titulaire->id,
+            'user_id' => $newUser->id,
+            'relation' => $validated['relation'],
+            'pouvoirs' => ['signature', 'souscription', 'kyc', 'profil_investisseur', 'consultation'],
+            'justificatif_path' => $justificatifPath,
+        ]);
+
+        return redirect()->route('tenant.clients.show', $titulaire)->with('status', 'Client créé.');
     }
 
     public function show(Client $client, PlacementCompatibilityService $compatibility): View
