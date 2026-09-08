@@ -125,7 +125,10 @@ class Client extends Model
             'courtier' => true,
             'conseiller' => $this->conseiller_id === $user->id || $user->voitTousLesClients(),
             'apporteur' => $this->apporteur_id === $user->id,
-            'client' => $this->user_id === $user->id,
+            // Un utilisateur 'client' voit sa propre fiche, ou celle de tout
+            // titulaire qu'il représente (mineur, majeur protégé, société).
+            'client' => $this->user_id === $user->id
+                || $this->representants()->where('user_id', $user->id)->exists(),
             default => false,
         };
     }

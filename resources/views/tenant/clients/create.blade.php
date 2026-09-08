@@ -112,15 +112,26 @@
     margin-top:6px;
 }
 .wd-mode-option{
-    border:1px solid #ded9d4;
+    border:1px solid var(--line, #ded9d4);
     border-radius:8px;
     padding:12px 14px;
     cursor:pointer;
     font-size:12px;
+    transition:border-color .15s ease, background-color .15s ease;
 }
-.wd-mode-option input{margin-right:8px}
-.wd-mode-option strong{display:block;font-size:12px;margin-bottom:3px}
+.wd-mode-option:hover{
+    border-color:#c9c2bb;
+}
+.wd-mode-option input{margin-right:8px;accent-color:var(--pink)}
+.wd-mode-option strong{display:block;font-size:12px;margin-bottom:3px;color:var(--dark, #1b1716)}
 .wd-mode-option span{color:var(--muted);font-size:11px}
+.wd-mode-option:has(input:checked){
+    border-color:var(--pink);
+    background:rgba(244,0,135,.05);
+}
+.wd-mode-option:has(input:checked) strong{
+    color:var(--pink);
+}
 .wd-section-title{
     margin:26px 0 4px;
     font-size:11px;
@@ -160,20 +171,22 @@
                     <span>Gérant, président, mandataire social...</span>
                 </label>
             </div>
-            <div class="wd-cabinet-information-grid" data-mode-bloc="represente_physique,represente_morale" hidden>
-                <div class="wd-cabinet-field">
-                    <label>Représentant déjà existant (optionnel)</label>
-                    <select name="representant_existant_id" data-representant-existant>
-                        <option value="">Nouveau représentant</option>
-                        @foreach ($representantsExistants as $r)
-                            <option value="{{ $r->user_id }}" {{ (string) old('representant_existant_id') === (string) $r->user_id ? 'selected' : '' }}>
-                                {{ trim($r->prenom.' '.$r->nom) }} ({{ $r->email }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('representant_existant_id')
-                    <div class="wd-field-error">{{ $message }}</div>
-                    @enderror
+            <div data-mode-bloc="represente_physique,represente_morale" hidden>
+                <div class="wd-cabinet-information-grid">
+                    <div class="wd-cabinet-field">
+                        <label>Représentant déjà existant (optionnel)</label>
+                        <select name="representant_existant_id" data-representant-existant>
+                            <option value="">Nouveau représentant</option>
+                            @foreach ($representantsExistants as $r)
+                                <option value="{{ $r->user_id }}" {{ (string) old('representant_existant_id') === (string) $r->user_id ? 'selected' : '' }}>
+                                    {{ trim($r->prenom.' '.$r->nom) }} ({{ $r->email }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('representant_existant_id')
+                        <div class="wd-field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
             </div>
             <div class="wd-section-title" data-titre-representant>Le client</div>
