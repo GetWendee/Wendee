@@ -88,7 +88,9 @@ class DashboardController extends Controller
 
             $limite = now()->subYear();
 
-            $kycDate = $client->kyc?->signe_le;
+            // Un mineur représenté n'a pas de KYC propre : le sien est
+            // celui de son représentant (voir Client::titulaireKyc()).
+            $kycDate = $client->titulaireKyc()->kyc?->signe_le;
             $kycComplet = ! empty($kycDate) && $kycDate->gte($limite);
 
             $dernierPatrimoine = $client->patrimoineElements
@@ -138,7 +140,7 @@ class DashboardController extends Controller
                 ]);
             }
 
-            $k = $client->kyc;
+            $k = $client->titulaireKyc()->kyc;
 
             $champs = [];
 

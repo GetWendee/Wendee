@@ -4,9 +4,11 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\SetPasswordNotification;
+use App\Support\Formatage;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -51,6 +53,11 @@ class User extends Authenticatable
             'rib_valide' => 'boolean',
             'rib_soumis_le' => 'datetime',
         ];
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => Formatage::nomPropre($value));
     }
 
     public function parent(): BelongsTo

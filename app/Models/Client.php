@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\Formatage;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,6 +41,31 @@ class Client extends Model
             'date_naissance' => 'date',
             'mineur' => 'boolean',
         ];
+    }
+
+    // Prénom/nom toujours enregistrés avec leur majuscule initiale, quelle
+    // que soit la façon dont ils sont saisis. Les particules (de, du, le...)
+    // restent en minuscule sauf en tout début de nom. Ne concerne pas
+    // raison_sociale, une dénomination sociale a sa propre casse.
+    protected function prenom(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => Formatage::nomPropre($value));
+    }
+
+    // Une société garde le nom exactement tel que saisi (raison sociale
+    // officielle) : la casse "Nom Propre" ne s'applique qu'aux personnes.
+    protected function nom(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value, array $attributes) => ($attributes['type'] ?? 'physique') === 'morale'
+                ? $value
+                : Formatage::nomPropre($value),
+        );
+    }
+
+    protected function nomJeuneFille(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => Formatage::nomPropre($value));
     }
 
     public function estMorale(): bool

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\Formatage;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,6 +18,16 @@ class ClientPersonneACharge extends Model
         return [
             'date_naissance' => 'date',
         ];
+    }
+
+    protected function prenom(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => Formatage::nomPropre($value));
+    }
+
+    protected function nom(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => Formatage::nomPropre($value));
     }
 
     public function client(): BelongsTo
