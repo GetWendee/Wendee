@@ -707,6 +707,7 @@
                             @foreach($enfantsRepresentesSuggestions as $enfant)
                                 <button
                                     type="button"
+                                    x-show="! pac.some(p => Number(p.titulaire_id) === {{ $enfant->id }})"
                                     @click="aPac = true; pac.push({civilite:'', prenom:@js($enfant->prenom), nom:@js($enfant->nom), date_naissance:@js($enfant->date_naissance?->format('Y-m-d')), enfant_de:'client', fiscalement_a_charge:'oui', garde_alternee:'', invalidite:'', titulaire_id:{{ $enfant->id }}})"
                                     class="text-sm text-[#f40087] underline block mb-2"
                                 >
