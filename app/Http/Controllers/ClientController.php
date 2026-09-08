@@ -317,8 +317,17 @@ class ClientController extends Controller
         return redirect()->route('tenant.clients.show', $titulaire)->with('status', 'Client créé.');
     }
 
-    public function show(Client $client, PlacementCompatibilityService $compatibility): View
+    public function show(Client $client, PlacementCompatibilityService $compatibility): View|\Illuminate\Http\RedirectResponse
     {
+        // Une société n'a pas la même fiche qu'une personne physique, voir
+        // claude/kyc-personne-morale.md. On reflash les messages
+        // status/error éventuels (ex: "Client créé.") pour qu'ils
+        // survivent à cette redirection supplémentaire.
+        if ($client->estMorale()) {
+            session()->reflash();
+            return redirect()->route('tenant.clients.pilotage-morale', $client);
+        }
+
         $client->load([
             'kyc',
             'patrimoineElements',
