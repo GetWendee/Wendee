@@ -68,6 +68,15 @@ class User extends Authenticatable
         return $this->hasMany(Client::class, 'conseiller_id');
     }
 
+    /**
+     * Titulaires (mineurs, personnes morales...) pour lesquels ce user a
+     * un pouvoir de représentation, via la table representants.
+     */
+    public function representations(): HasMany
+    {
+        return $this->hasMany(Representant::class);
+    }
+
 
     public function effectiveRole(): ?string
     {

@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'civilite', 'prenom', 'nom', 'nom_jeune_fille', 'date_naissance',
     'telephone_mobile', 'telephone_domicile', 'email',
     'adresse', 'code_postal', 'ville', 'pays', 'conseiller_id', 'apporteur_id', 'user_id',
+    'type', 'mineur', 'raison_sociale', 'forme_juridique', 'numero_immatriculation',
+    'adresse_siege_social', 'adresse_direction_effective', 'regime_fiscal',
+    'activite_principale', 'activite_annexes',
 ])]
 class Client extends Model
 {
@@ -34,7 +37,24 @@ class Client extends Model
     {
         return [
             'date_naissance' => 'date',
+            'mineur' => 'boolean',
         ];
+    }
+
+    public function estMorale(): bool
+    {
+        return $this->type === 'morale';
+    }
+
+    /**
+     * Nom d'affichage du titulaire, quel que soit son type (personne
+     * physique ou morale).
+     */
+    public function nomAffichage(): string
+    {
+        return $this->estMorale()
+            ? (string) $this->raison_sociale
+            : trim($this->prenom.' '.$this->nom);
     }
 
     public function conseiller(): BelongsTo
@@ -50,6 +70,17 @@ class Client extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Personnes ayant un pouvoir d'agir pour ce titulaire (représentant
+     * légal d'un mineur, gérant d'une société...). Ne pas confondre avec
+     * user() : un titulaire mineur ou une personne morale n'a pas de
+     * compte de connexion propre, seuls ses représentants en ont un.
+     */
+    public function representants(): HasMany
+    {
+        return $this->hasMany(Representant::class, 'titulaire_id');
     }
 
     /**
