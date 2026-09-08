@@ -13,6 +13,26 @@ class Formatage
         'von', 'van', 'af', 'di', 'da', 'dos', 'das', 'del', 'della', 'y',
     ];
 
+    /**
+     * Pour une raison sociale : on ne force pas la casse interne (une
+     * société peut avoir sa propre typographie), on met juste une
+     * majuscule en première lettre si elle n'y est pas.
+     */
+    public static function premiereMajuscule(?string $valeur): ?string
+    {
+        if ($valeur === null) {
+            return null;
+        }
+
+        $valeur = trim($valeur);
+
+        if ($valeur === '') {
+            return $valeur;
+        }
+
+        return mb_strtoupper(mb_substr($valeur, 0, 1)).mb_substr($valeur, 1);
+    }
+
     public static function nomPropre(?string $valeur): ?string
     {
         if ($valeur === null) {

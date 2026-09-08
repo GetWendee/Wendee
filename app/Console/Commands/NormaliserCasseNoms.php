@@ -29,18 +29,15 @@ class NormaliserCasseNoms extends Command
         $tenant->run(function () use (&$compteur) {
             Client::query()->chunkById(200, function ($clients) use (&$compteur) {
                 foreach ($clients as $client) {
-                    $avant = [$client->prenom, $client->nom, $client->nom_jeune_fille];
-
                     $client->prenom = $client->prenom;
                     $client->nom = $client->nom;
                     $client->nom_jeune_fille = $client->nom_jeune_fille;
+                    $client->raison_sociale = $client->raison_sociale;
 
                     if ($client->isDirty()) {
                         $client->save();
                         $compteur++;
                     }
-
-                    unset($avant);
                 }
             });
 

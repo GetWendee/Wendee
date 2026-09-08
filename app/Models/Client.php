@@ -58,7 +58,7 @@ class Client extends Model
     {
         return Attribute::make(
             set: fn (?string $value, array $attributes) => ($attributes['type'] ?? 'physique') === 'morale'
-                ? $value
+                ? Formatage::premiereMajuscule($value)
                 : Formatage::nomPropre($value),
         );
     }
@@ -66,6 +66,11 @@ class Client extends Model
     protected function nomJeuneFille(): Attribute
     {
         return Attribute::make(set: fn (?string $value) => Formatage::nomPropre($value));
+    }
+
+    protected function raisonSociale(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => Formatage::premiereMajuscule($value));
     }
 
     public function estMorale(): bool
