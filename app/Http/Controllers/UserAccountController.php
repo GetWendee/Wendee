@@ -50,11 +50,7 @@ class UserAccountController extends Controller
             'nom' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'telephone' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
-            'perimetres' => ['nullable', 'array'],
-            'perimetres.*' => ['string', 'in:Assurance,Banque,Finance,Immobilier'],
-            'habilitations' => ['nullable', 'array'],
-            'habilitations.*' => ['string', 'max:255'],
-            'numero_orias' => ['nullable', 'string', 'max:50'],
+            'statut_envisage' => ['required_if:role,conseiller', 'nullable', 'string', 'max:255'],
             'apporteur_forme_juridique' => ['nullable', 'string', 'in:ei,eurl,sasu,sas,sarl,sa,snc,scp'],
             'apporteur_denomination_sociale' => ['nullable', 'string', 'max:255'],
             'apporteur_date_creation' => ['nullable', 'date'],
@@ -110,9 +106,6 @@ class UserAccountController extends Controller
             'role' => $validated['role'],
             'parent_id' => $creator->id,
             'activation_pending' => true,
-            'perimetres' => $isConseiller ? ($validated['perimetres'] ?? []) : null,
-            'habilitations' => $isConseiller ? ($validated['habilitations'] ?? []) : null,
-            'numero_orias' => $isConseiller ? ($validated['numero_orias'] ?? null) : null,
             'apporteur_forme_juridique' => $isApporteur ? ($validated['apporteur_forme_juridique'] ?? null) : null,
             'apporteur_denomination_sociale' => $isApporteur ? ($validated['apporteur_denomination_sociale'] ?? null) : null,
             'apporteur_date_creation' => $isApporteur ? ($validated['apporteur_date_creation'] ?? null) : null,
@@ -150,6 +143,14 @@ class UserAccountController extends Controller
             'rib_titulaire' => $isApporteur ? ($validated['rib_titulaire'] ?? null) : null,
             'rib_soumis_le' => ($isApporteur && ! empty($validated['rib_iban'])) ? now() : null,
         ]);
+
+        if ($isConseiller) {
+            \App\Models\DossierEnrolement::create([
+                'user_id' => $newUser->id,
+                'statut' => 'invited',
+                'statut_demande' => $validated['statut_envisage'] ?? null,
+            ]);
+        }
 
         Password::broker()->sendResetLink(['email' => $newUser->email]);
 

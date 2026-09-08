@@ -87,6 +87,18 @@
         </a>
         @endif
         <div class="wd-nav-section">Compte</div>
+        @if(Auth::check() && Auth::user()->role === 'conseiller' && Auth::user()->dossierEnrolement)
+        <a class="{{ request()->routeIs('tenant.dossier-enrolement.*') ? 'active' : '' }}" href="{{ route('tenant.dossier-enrolement.edit') }}">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <span>Mon dossier</span>
+        </a>
+        @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
+        <a class="{{ request()->routeIs('tenant.back-office-enrolement.*') ? 'active' : '' }}" href="{{ route('tenant.back-office-enrolement.index') }}">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <span>Dossiers d'enrôlement</span>
+        </a>
+        @endif
         @if(Auth::check() && Auth::user()->effectiveRole() === 'apporteur')
         <a class="{{ request()->routeIs('tenant.profil.rib.*') ? 'active' : '' }}" href="{{ route('tenant.profil.rib.edit') }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>

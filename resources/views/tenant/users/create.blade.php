@@ -259,9 +259,9 @@ $roleSousTitres = [
                 </div>
                 @if($selectedRole === 'conseiller')
                 @php
-                $habilitationsOptions = [
-                    "Courtier d'assurance (COA – courtier)",
-                    "Mandataire d'assurance (IAS – mandataire)",
+                $statutEnvisageOptions = [
+                    "Courtier d'assurance (COA - courtier)",
+                    "Mandataire d'assurance (IAS - mandataire)",
                     "Mandataire d'intermédiaire d'assurance (MIA)",
                     'Courtier en opérations de banque et service de paiement (COBSP - courtier)',
                     'Mandataire IOBSP',
@@ -274,33 +274,17 @@ $roleSousTitres = [
                 ];
                 @endphp
                 <div class="wd-cabinet-field">
-                    <label>Périmètres d'intervention</label>
-                    <div class="wd-cabinet-checkbox-group">
-                        @foreach(['Assurance', 'Banque', 'Finance', 'Immobilier'] as $perimetre)
-                        <label class="wd-cabinet-checkbox">
-                            <input type="checkbox" name="perimetres[]" value="{{ $perimetre }}" {{ in_array($perimetre, old('perimetres', [])) ? 'checked' : '' }}>
-                            <span>{{ $perimetre }}</span>
-                        </label>
+                    <label>Statut envisagé</label>
+                    <select name="statut_envisage">
+                        <option value="">Sélectionner un statut</option>
+                        @foreach($statutEnvisageOptions as $statut)
+                        <option value="{{ $statut }}" {{ old('statut_envisage') === $statut ? 'selected' : '' }}>{{ $statut }}</option>
                         @endforeach
-                    </div>
-                </div>
-                <div class="wd-cabinet-field">
-                    <label>Habilitations</label>
-                    <div class="wd-cabinet-checkbox-group wd-cabinet-checkbox-group-wrap">
-                        @foreach($habilitationsOptions as $habilitation)
-                        <label class="wd-cabinet-checkbox">
-                            <input type="checkbox" name="habilitations[]" value="{{ $habilitation }}" {{ in_array($habilitation, old('habilitations', [])) ? 'checked' : '' }}>
-                            <span>{{ $habilitation }}</span>
-                        </label>
-                        @endforeach
-                    </div>
-                </div>
-                <div class="wd-cabinet-field">
-                    <label>Numéro ORIAS</label>
-                    <input type="text" name="numero_orias" value="{{ old('numero_orias') }}">
-                    @error('numero_orias')
+                    </select>
+                    @error('statut_envisage')
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
+                    <div class="wd-field-error" style="color:#817b76;">Ce conseiller sera invité à compléter lui-même son dossier d'enrôlement complet (identité, ORIAS, capacité professionnelle, RCP, mandat).</div>
                 </div>
                 @endif
                 @if($selectedRole === 'apporteur')
