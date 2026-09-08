@@ -417,7 +417,9 @@
     function appliquerReuse() {
         if (! selectReuse || ! grilleIdentite) { return; }
         var reuse = ! selectReuse.disabled && selectReuse.value !== '';
-        grilleIdentite.hidden = reuse;
+        // Le style inline est nécessaire : cet élément a display:grid via sa
+        // classe, qui l'emporte toujours sur l'attribut hidden.
+        grilleIdentite.style.display = reuse ? 'none' : '';
         grilleIdentite.querySelectorAll('input, select').forEach(function (champ) {
             champ.disabled = reuse;
         });

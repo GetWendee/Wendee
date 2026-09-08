@@ -76,17 +76,42 @@ class ClientController extends Controller
         // majeur protégé ou société), pour permettre d'en réutiliser un au
         // lieu d'en recréer un a chaque nouveau titulaire (ex : un curateur
         // professionnel qui suit plusieurs majeurs protégés).
-        $representantsQuery = Client::query()
+        //
+        // Visibilité : un représentant qui agit comme tuteur/curateur/
+        // mandataire pour un majeur protégé est visible de tous les
+        // conseillers du cabinet, ce rôle étant par nature professionnel et
+        // partagé. Un représentant qui n'est que parent d'un mineur (ou
+        // dirigeant d'une société) reste visible uniquement du conseiller
+        // avec qui il travaille déjà, comme n'importe quel client.
+        $representantsExistants = Client::query()
             ->whereHas('user', fn ($q) => $q->where('role', 'client')->has('representations'))
-            ->orderBy('nom');
+            ->with(['user.representations.titulaire'])
+            ->orderBy('nom')
+            ->get(['id', 'user_id', 'prenom', 'nom', 'email', 'conseiller_id', 'apporteur_id'])
+            ->filter(function ($representantClient) use ($user) {
+                $estCurateurMajeurProtege = $representantClient->user->representations
+                    ->contains(function ($representation) {
+                        return in_array($representation->relation, ['tuteur', 'curateur', 'mandataire'], true)
+                            && $representation->titulaire
+                            && $representation->titulaire->type === 'physique'
+                            && ! $representation->titulaire->mineur;
+                    });
 
-        if ($user->effectiveRole() === 'conseiller' && ! $user->voitTousLesClients()) {
-            $representantsQuery->where('conseiller_id', $user->id);
-        } elseif ($user->effectiveRole() === 'apporteur') {
-            $representantsQuery->where('apporteur_id', $user->id);
-        }
+                if ($estCurateurMajeurProtege) {
+                    return true;
+                }
 
-        $representantsExistants = $representantsQuery->get(['id', 'user_id', 'prenom', 'nom', 'email']);
+                if ($user->effectiveRole() === 'conseiller' && ! $user->voitTousLesClients()) {
+                    return $representantClient->conseiller_id === $user->id;
+                }
+
+                if ($user->effectiveRole() === 'apporteur') {
+                    return $representantClient->apporteur_id === $user->id;
+                }
+
+                return true;
+            })
+            ->values();
 
         return view('tenant.clients.create', [
             'representantsExistants' => $representantsExistants,
