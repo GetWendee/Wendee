@@ -95,7 +95,10 @@ class ClientController extends Controller
             'date_naissance' => ['nullable', 'date'],
             'telephone_mobile' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
             'telephone_domicile' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'email' => array_filter([
+                'required', 'email', 'max:255',
+                $mode === 'soi_meme' ? 'unique:users,email' : null,
+            ]),
             'adresse' => ['nullable', 'string', 'max:255'],
             'code_postal' => ['nullable', 'string', 'max:10'],
             'ville' => ['nullable', 'string', 'max:255'],
@@ -147,35 +150,63 @@ class ClientController extends Controller
         }
 
         // Le représentant : celui qui se connecte et remplit les
-        // formulaires, qu'il agisse pour lui-même ou pour un tiers.
-        $newUser = User::create([
-            'name' => trim($validated['prenom'].' '.$validated['nom']),
-            'email' => $validated['email'],
-            'password' => Str::random(40),
-            'role' => 'client',
-            'parent_id' => $user->id,
-            'activation_pending' => true,
-        ]);
+        // formulaires, qu'il agisse pour lui-même ou pour un tiers. Pour
+        // une représentation (curateur, tuteur, dirigeant...), l'email
+        // peut correspondre a un représentant déjà existant, par exemple
+        // un curateur professionnel qui représente déjà un autre majeur
+        // protégé : on réutilise alors son compte au lieu d'en créer un
+        // second, ce qui échouerait de toute façon sur l'unicité de
+        // l'email. Les champs identité saisis dans ce formulaire ne sont
+        // dans ce cas pas utilisés pour modifier le compte existant.
+        $representantExistant = $mode !== 'soi_meme'
+            ? User::where('email', $validated['email'])->first()
+            : null;
 
-        $client = Client::create([
-            'civilite' => $validated['civilite'] ?? null,
-            'prenom' => $validated['prenom'],
-            'nom' => $validated['nom'],
-            'nom_jeune_fille' => $validated['nom_jeune_fille'] ?? null,
-            'date_naissance' => $validated['date_naissance'] ?? null,
-            'telephone_mobile' => $validated['telephone_mobile'] ?? null,
-            'telephone_domicile' => $validated['telephone_domicile'] ?? null,
-            'email' => $validated['email'],
-            'adresse' => $validated['adresse'] ?? null,
-            'code_postal' => $validated['code_postal'] ?? null,
-            'ville' => $validated['ville'] ?? null,
-            'pays' => $validated['pays'] ?? null,
-            'conseiller_id' => $conseillerId,
-            'apporteur_id' => $apporteurId,
-            'user_id' => $newUser->id,
-        ]);
+        if ($representantExistant && $representantExistant->role !== 'client') {
+            return back()
+                ->withErrors(['email' => "Cette adresse est déjà utilisée par un compte conseiller, courtier ou apporteur."])
+                ->withInput();
+        }
 
-        Password::broker()->sendResetLink(['email' => $newUser->email]);
+        if ($representantExistant) {
+            $newUser = $representantExistant;
+            $client = Client::where('user_id', $newUser->id)->first();
+
+            if (! $client) {
+                return back()
+                    ->withErrors(['email' => "Ce compte existe mais aucune fiche client n'y est rattachée. Contactez le support."])
+                    ->withInput();
+            }
+        } else {
+            $newUser = User::create([
+                'name' => trim($validated['prenom'].' '.$validated['nom']),
+                'email' => $validated['email'],
+                'password' => Str::random(40),
+                'role' => 'client',
+                'parent_id' => $user->id,
+                'activation_pending' => true,
+            ]);
+
+            $client = Client::create([
+                'civilite' => $validated['civilite'] ?? null,
+                'prenom' => $validated['prenom'],
+                'nom' => $validated['nom'],
+                'nom_jeune_fille' => $validated['nom_jeune_fille'] ?? null,
+                'date_naissance' => $validated['date_naissance'] ?? null,
+                'telephone_mobile' => $validated['telephone_mobile'] ?? null,
+                'telephone_domicile' => $validated['telephone_domicile'] ?? null,
+                'email' => $validated['email'],
+                'adresse' => $validated['adresse'] ?? null,
+                'code_postal' => $validated['code_postal'] ?? null,
+                'ville' => $validated['ville'] ?? null,
+                'pays' => $validated['pays'] ?? null,
+                'conseiller_id' => $conseillerId,
+                'apporteur_id' => $apporteurId,
+                'user_id' => $newUser->id,
+            ]);
+
+            Password::broker()->sendResetLink(['email' => $newUser->email]);
+        }
 
         if ($mode === 'soi_meme') {
             return redirect()->route('tenant.clients.show', $client)->with('status', 'Client créé.');
