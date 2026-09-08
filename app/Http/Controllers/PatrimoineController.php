@@ -259,7 +259,11 @@ class PatrimoineController extends Controller
          * l'enregistrement du patrimoine.
          */
         try {
-            $patrimoineAnalysis->analyze($client);
+            if ($client->estMorale()) {
+                app(\App\Services\AI\PatrimoineAnalysisServiceMorale::class)->analyze($client);
+            } else {
+                $patrimoineAnalysis->analyze($client);
+            }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error(
                 'Erreur analyse patrimoine OpenAI',

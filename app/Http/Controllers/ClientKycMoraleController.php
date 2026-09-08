@@ -129,6 +129,24 @@ class ClientKycMoraleController extends Controller
 
         $client->kycMorale()->updateOrCreate([], $validated);
 
+        /*
+         * Analyse KYC société native Laravel / OpenAI.
+         *
+         * L'enregistrement du KYC reste prioritaire : une erreur OpenAI ne
+         * doit jamais empêcher la sauvegarde du dossier.
+         */
+        try {
+            app(\App\Services\AI\KycAnalysisServiceMorale::class)->analyze($client);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Erreur analyse KYC société OpenAI',
+                [
+                    'client_id' => $client->id,
+                    'error' => $e->getMessage(),
+                ]
+            );
+        }
+
         $client->intervenants()->delete();
         foreach ($intervenantsGroupes as $type => $lignes) {
             foreach ($lignes as $ligne) {

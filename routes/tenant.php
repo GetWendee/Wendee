@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatrimoineController;
 use App\Http\Controllers\ProfilInvestisseurController;
 use App\Http\Controllers\ProfilInvestisseurMoraleController;
+use App\Http\Controllers\ClientPilotageMoraleController;
 use App\Http\Controllers\PortefeuilleCabinetController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\RevenuController;
@@ -160,6 +161,18 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::put('/kyc-societe/{client}', [ClientKycMoraleController::class, 'update'])->name('clients.kyc-morale.update');
         Route::get('/investisseur-societe/{client}', [ProfilInvestisseurMoraleController::class, 'edit'])->name('clients.profil-investisseur-morale.edit');
         Route::put('/investisseur-societe/{client}', [ProfilInvestisseurMoraleController::class, 'update'])->name('clients.profil-investisseur-morale.update');
+
+        // Circuit Aide à la décision / Suggestion / Recommandation / Plan d'action société.
+        Route::get('/pilotage-societe/{client}', [ClientPilotageMoraleController::class, 'edit'])->name('clients.pilotage-morale');
+        Route::post('/pilotage-societe/{client}/suggestion', [ClientPilotageMoraleController::class, 'genererSuggestion'])->name('clients.pilotage-morale.suggestion');
+        Route::get('/recommandation-societe/{client}', [ClientPilotageMoraleController::class, 'recommandation'])->name('clients.recommandation-morale');
+        Route::post('/recommandation-societe/{client}', [ClientPilotageMoraleController::class, 'genererRecommandation'])->name('clients.recommandation-morale.generer');
+        Route::get('/recommandation-societe/{client}/pdf', [ClientPilotageMoraleController::class, 'telechargerRecommandationPdf'])->name('clients.recommandation-morale.pdf');
+        Route::put('/recommandation-societe/{client}/lettre/{analysis}', [ClientPilotageMoraleController::class, 'modifierRecommandationContenu'])->name('clients.recommandation-morale.modifier');
+        Route::get('/plan-action-societe/{client}', [ClientPilotageMoraleController::class, 'planAction'])->name('clients.plan-action-morale');
+        Route::post('/plan-action-societe/{client}', [ClientPilotageMoraleController::class, 'genererPlanAction'])->name('clients.plan-action-morale.generer');
+        Route::get('/plan-action-societe/{client}/pdf', [ClientPilotageMoraleController::class, 'telechargerPlanActionPdf'])->name('clients.plan-action-morale.pdf');
+        Route::put('/plan-action-societe/{client}/contenu/{analysis}', [ClientPilotageMoraleController::class, 'modifierPlanActionContenu'])->name('clients.plan-action-morale.modifier');
 
         Route::get('/rendez-vous', [RendezVousController::class, 'index'])->name('rendez-vous.index');
         Route::get('/rendez-vous/calendriers', [CalendarConnectionController::class, 'index'])->name('calendrier.index');

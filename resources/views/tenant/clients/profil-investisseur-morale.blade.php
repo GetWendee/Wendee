@@ -11,9 +11,14 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Profil investisseur société - {{ $client->nomAffichage() }}
             </h2>
-            <a href="{{ route('tenant.clients.show', $client) }}" class="text-sm text-gray-600 underline">
-                {{ __('Retour à la fiche client') }}
-            </a>
+            <div class="flex items-center gap-4">
+                <a href="{{ route('tenant.clients.pilotage-morale', $client) }}" class="text-sm text-gray-600 underline">
+                    {{ __('Pilotage société') }}
+                </a>
+                <a href="{{ route('tenant.clients.show', $client) }}" class="text-sm text-gray-600 underline">
+                    {{ __('Retour à la fiche client') }}
+                </a>
+            </div>
         </div>
     </x-slot>
 

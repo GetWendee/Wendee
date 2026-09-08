@@ -420,8 +420,14 @@ class ClientController extends Controller
         return redirect()->route('tenant.clients.show', $client)->with('status', 'Client mis à jour.');
     }
 
-    public function aideDecision(Client $client): \Illuminate\View\View
+    public function aideDecision(Client $client): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
+        // Une société n'a pas le même circuit d'aide à la décision qu'une
+        // personne physique, voir claude/kyc-personne-morale.md.
+        if ($client->estMorale()) {
+            return redirect()->route('tenant.clients.pilotage-morale', $client);
+        }
+
         $client->load([
             'kyc',
             'patrimoineElements',

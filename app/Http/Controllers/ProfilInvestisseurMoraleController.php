@@ -76,6 +76,24 @@ class ProfilInvestisseurMoraleController extends Controller
 
         $client->profilInvestisseurMorale()->updateOrCreate([], $validated);
 
+        /*
+         * Analyse Profil Investisseur société native Laravel / OpenAI.
+         *
+         * Le profil est sauvegardé avant l'analyse. Une erreur OpenAI ne
+         * doit jamais empêcher l'enregistrement du questionnaire.
+         */
+        try {
+            app(\App\Services\AI\ProfilInvestisseurAnalysisServiceMorale::class)->analyze($client);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Erreur analyse Profil Investisseur société OpenAI',
+                [
+                    'client_id' => $client->id,
+                    'error' => $e->getMessage(),
+                ]
+            );
+        }
+
         return redirect()
             ->route('tenant.clients.profil-investisseur-morale.edit', $client)
             ->with('status', 'Profil investisseur société enregistré.');
