@@ -34,8 +34,24 @@ class TacheController extends Controller
             'titre' => ['required', 'string', 'max:255'],
             'page_module' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'fichiers' => ['nullable', 'array'],
+            'fichiers.*' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,txt'],
         ]);
-        Tache::create($validated);
+        $tache = Tache::create([
+            'titre' => $validated['titre'],
+            'page_module' => $validated['page_module'] ?? null,
+            'description' => $validated['description'] ?? null,
+        ]);
+        foreach ($validated['fichiers'] ?? [] as $fichier) {
+            $path = $fichier->store('taches/' . $tache->id, 'local');
+            TachePieceJointe::create([
+                'tache_id' => $tache->id,
+                'fichier_path' => $path,
+                'nom_original' => $fichier->getClientOriginalName(),
+                'mime_type' => $fichier->getMimeType(),
+                'taille' => $fichier->getSize(),
+            ]);
+        }
         return redirect()->route('a-faire.index')->with('status_simple', 'Tâche ajoutée.');
     }
     public function update(Request $request, Tache $tache): RedirectResponse

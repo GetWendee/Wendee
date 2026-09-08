@@ -21,7 +21,7 @@
 
             <div class="bg-white shadow-sm rounded-lg p-6">
                 <h3 class="font-semibold text-gray-800 mb-4">Nouvelle tâche</h3>
-                <form method="POST" action="{{ route('a-faire.store') }}" class="space-y-4">
+                <form method="POST" action="{{ route('a-faire.store') }}" enctype="multipart/form-data" class="space-y-4" x-data="{ fichiers: [] }">
                     @csrf
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Titre</label>
@@ -39,6 +39,47 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         <textarea name="description" rows="3" class="block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pièces jointes</label>
+                        <input type="file" name="fichiers[]" multiple x-ref="ntInput" class="hidden"
+                            @change="
+                                for (const f of $event.target.files) { fichiers.push(f); }
+                                const dt = new DataTransfer();
+                                fichiers.forEach(f => dt.items.add(f));
+                                $refs.ntInput.files = dt.files;
+                            ">
+                        <div class="flex items-center gap-2">
+                            <div
+                                tabindex="0"
+                                @paste="
+                                    for (const item of $event.clipboardData.items) {
+                                        if (item.type.startsWith('image/')) {
+                                            const file = item.getAsFile();
+                                            fichiers.push(new File([file], 'capture-' + Date.now() + '.png', { type: file.type }));
+                                        }
+                                    }
+                                    const dt = new DataTransfer();
+                                    fichiers.forEach(f => dt.items.add(f));
+                                    $refs.ntInput.files = dt.files;
+                                "
+                                class="flex-1 text-xs text-gray-400 border border-dashed border-gray-300 rounded-md px-3 py-2 cursor-text focus:outline-none focus:border-pink-400 focus:text-gray-600"
+                            >Coller une capture d'écran ici (Ctrl+V)</div>
+                            <button type="button" @click="$refs.ntInput.click()" class="px-3 py-2 text-xs font-semibold rounded-md border border-gray-300 text-gray-700 whitespace-nowrap">Choisir un fichier</button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-2" x-show="fichiers.length">
+                            <template x-for="(f, index) in fichiers" :key="index">
+                                <span class="inline-flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2 py-1">
+                                    <span x-text="f.name"></span>
+                                    <button type="button" @click="
+                                        fichiers.splice(index, 1);
+                                        const dt = new DataTransfer();
+                                        fichiers.forEach(ff => dt.items.add(ff));
+                                        $refs.ntInput.files = dt.files;
+                                    " class="text-gray-400 hover:text-red-600">&times;</button>
+                                </span>
+                            </template>
+                        </div>
                     </div>
                     <button type="submit" style="background:#242424;border-top:2px solid #f40087;" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest">
                         Enregistrer
