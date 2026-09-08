@@ -279,7 +279,7 @@
                     </div>
                     <div class="wd-cabinet-field wd-c3">
                         <label>Date de naissance du titulaire</label>
-                        <input type="date" name="titulaire_date_naissance" value="{{ old('titulaire_date_naissance') }}">
+                        <input type="date" name="titulaire_date_naissance" value="{{ old('titulaire_date_naissance') }}" max="{{ now()->format('Y-m-d') }}">
                         @error('titulaire_date_naissance')
                         <div class="wd-field-error">{{ $message }}</div>
                         @enderror
@@ -386,7 +386,11 @@
     function appliquer() {
         var mode = document.querySelector('[data-mode-radio]:checked').value;
         blocs.forEach(function (bloc) {
-            bloc.hidden = bloc.getAttribute('data-mode-bloc') !== mode;
+            var actif = bloc.getAttribute('data-mode-bloc') === mode;
+            bloc.hidden = ! actif;
+            bloc.querySelectorAll('input, select').forEach(function (champ) {
+                champ.disabled = ! actif;
+            });
         });
         if (titreRepresentant) {
             titreRepresentant.textContent = libellesTitre[mode] || libellesTitre.soi_meme;
