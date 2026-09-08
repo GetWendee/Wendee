@@ -84,6 +84,37 @@ class Client extends Model
     }
 
     /**
+     * Vrai si le KYC de ce titulaire est celui de son représentant (mineur
+     * représenté) plutôt que le sien propre. Une personne morale a son
+     * propre KYC dédié (à construire séparément), ce n'est pas ce cas.
+     */
+    public function kycDelegueAuRepresentant(): bool
+    {
+        // Un mineur n'a pas de KYC propre, c'est celui du foyer de son
+        // représentant. Un majeur protégé (tutelle, curatelle, mandat de
+        // protection future) garde sa propre fiche : son KYC lui
+        // appartient, seul le répondant change.
+        return $this->mineur;
+    }
+
+    /**
+     * Le titulaire dont le KYC doit effectivement être rempli/consulté :
+     * lui-même, sauf mineur représenté, auquel cas c'est la fiche de son
+     * représentant (son propre foyer, où le mineur figure déjà comme
+     * personne à charge).
+     */
+    public function titulaireKyc(): self
+    {
+        if (! $this->kycDelegueAuRepresentant()) {
+            return $this;
+        }
+
+        $representant = $this->representants->first();
+
+        return static::where('user_id', $representant->user_id)->first() ?? $this;
+    }
+
+    /**
      * Vrai si ce user a le droit de consulter/modifier cette fiche client.
      * Courtier : toujours. Conseiller : son client, ou tous si droit accordé.
      * Apporteur : son client apporté. Client : sa propre fiche.
@@ -154,8 +185,9 @@ class Client extends Model
     {
         $oneYearAgo = now()->subYear();
 
-        $kycDone = $this->kyc()->exists();
-        $kycDate = $this->kyc?->updated_at;
+        $kycTitulaire = $this->titulaireKyc();
+        $kycDone = $kycTitulaire->kyc()->exists();
+        $kycDate = $kycTitulaire->kyc?->updated_at;
 
         $patDone = $this->patrimoineElements()->exists();
         $patDate = $this->patrimoineElements->max('updated_at');
@@ -195,7 +227,7 @@ class Client extends Model
      */
     public function evaluerRisqueLcbFt(): array
     {
-        $kyc = $this->kyc;
+        $kyc = $this->titulaireKyc()->kyc;
         $fiscalite = $this->patrimoineFiscalite;
         $conformite = $this->conformite;
 

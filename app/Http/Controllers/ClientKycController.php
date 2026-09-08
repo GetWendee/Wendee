@@ -12,8 +12,16 @@ use Illuminate\View\View;
 
 class ClientKycController extends Controller
 {
-    public function edit(Client $client, VerificationCodeService $verification): View
+    public function edit(Client $client, VerificationCodeService $verification): View|RedirectResponse
     {
+        $titulaireKyc = $client->titulaireKyc();
+
+        if ($titulaireKyc->isNot($client)) {
+            return redirect()
+                ->route('tenant.clients.kyc.edit', $titulaireKyc)
+                ->with('status_simple', "KYC du représentant ({$titulaireKyc->prenom} {$titulaireKyc->nom}), {$client->prenom} {$client->nom} y est rattaché(e) comme personne représentée.");
+        }
+
         $client->load('kyc', 'personnesACharge');
 
         if (! VerificationClient::where('client_id', $client->id)->where('module', 'kyc')->exists()) {

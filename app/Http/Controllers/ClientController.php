@@ -185,9 +185,14 @@ class ClientController extends Controller
         // représentant. Pas de compte de connexion pour lui (mineur ou
         // personne morale), pas d'email requis.
         if ($mode === 'represente_physique') {
+            // "Parent" implique un mineur : son KYC est celui de son
+            // représentant (voir Client::kycDelegueAuRepresentant()).
+            // Tuteur/curateur/mandataire impliquent un majeur protégé :
+            // il garde sa propre fiche KYC, remplie par son représentant
+            // mais rattachée à lui, pas au foyer du représentant.
             $titulaire = Client::create([
                 'type' => 'physique',
-                'mineur' => true,
+                'mineur' => $validated['relation'] === 'parent',
                 'prenom' => $validated['titulaire_prenom'],
                 'nom' => $validated['titulaire_nom'],
                 'date_naissance' => $validated['titulaire_date_naissance'],
