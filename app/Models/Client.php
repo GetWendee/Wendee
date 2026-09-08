@@ -184,8 +184,46 @@ class Client extends Model
         return $this->hasOne(ClientConformite::class);
     }
 
+    /**
+     * Un représentant pur (tuteur, curateur, mandataire, dirigeant de
+     * société) n'est pas un client à proprement parler : il n'a pas à
+     * remplir de KYC, patrimoine ou profil investisseur pour lui-même,
+     * ces éléments concernent le titulaire qu'il représente. Rien
+     * n'empêche par ailleurs qu'il devienne client de son côté un jour.
+     *
+     * Exception : le parent/représentant légal d'un mineur, dont la fiche
+     * porte justement le KYC délégué de son enfant (voir
+     * kycDelegueAuRepresentant()) : sa propre fiche est bien un dossier
+     * à suivre.
+     */
+    public function estRepresentantPur(): bool
+    {
+        if (! $this->user_id) {
+            return false;
+        }
+
+        $representations = $this->user?->representations;
+
+        if (! $representations || $representations->isEmpty()) {
+            return false;
+        }
+
+        return ! $representations->contains(fn ($r) => $r->relation === 'parent');
+    }
+
     public function completionStatus(): array
     {
+        if ($this->estRepresentantPur()) {
+            return [
+                'items' => [
+                    'kyc' => ['done' => true, 'stale' => false],
+                    'pat' => ['done' => true, 'stale' => false],
+                    'inv' => ['done' => true, 'stale' => false],
+                ],
+                'a_jour' => true,
+            ];
+        }
+
         $oneYearAgo = now()->subYear();
 
         $kycTitulaire = $this->titulaireKyc();

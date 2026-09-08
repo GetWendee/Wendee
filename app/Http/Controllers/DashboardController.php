@@ -69,6 +69,23 @@ class DashboardController extends Controller
          * État d'avancement de chaque dossier.
          */
         $suiviClients = $clients->map(function (Client $client): array {
+            // Un représentant pur (tuteur, curateur, mandataire, dirigeant)
+            // n'a pas de KYC/patrimoine/profil investisseur à remplir pour
+            // lui-même : ce n'est pas un client, seule sa fiche identité
+            // existe. Exception : le parent d'un mineur, dont la fiche
+            // porte le KYC délégué de son enfant. Voir Client::estRepresentantPur().
+            if ($client->estRepresentantPur()) {
+                return [
+                    'client' => $client,
+                    'kyc_complet' => true,
+                    'patrimoine_complet' => true,
+                    'profil_complet' => true,
+                    'completion' => 100,
+                    'dossier_complet' => true,
+                    'anomalies' => collect(),
+                ];
+            }
+
             $limite = now()->subYear();
 
             $kycDate = $client->kyc?->signe_le;
