@@ -122,14 +122,14 @@
 .wd-mode-option:hover{
     border-color:#c9c2bb;
 }
-.wd-mode-option input{margin-right:8px;accent-color:var(--pink)}
+.wd-mode-option input{display:none}
 .wd-mode-option strong{display:block;font-size:12px;margin-bottom:3px;color:var(--dark, #1b1716)}
 .wd-mode-option span{color:var(--muted);font-size:11px}
 .wd-mode-option:has(input:checked){
     border-color:var(--pink);
     background:rgba(244,0,135,.05);
 }
-.wd-mode-option:has(input:checked) strong{
+.wd-mode-option input:checked ~ strong{
     color:var(--pink);
 }
 .wd-section-title{
@@ -423,6 +423,9 @@
         grilleIdentite.querySelectorAll('input, select').forEach(function (champ) {
             champ.disabled = reuse;
         });
+        if (titreRepresentant) {
+            titreRepresentant.style.display = reuse ? 'none' : '';
+        }
     }
     function appliquer() {
         var mode = document.querySelector('[data-mode-radio]:checked').value;
