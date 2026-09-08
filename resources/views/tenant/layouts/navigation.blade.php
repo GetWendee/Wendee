@@ -34,11 +34,6 @@
             <span>Portefeuille cabinet</span>
         </a>
         @endif
-        <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
-            <svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="3"/><circle cx="17" cy="12" r="3"/><path d="M10 12h4"/></svg>
-            <span>Mes apporteurs</span>
-            <span class="wd-soon">Bientot</span>
-        </a>
         @if(count($newAccountRoles) > 0)
         <a href="#" class="{{ request()->routeIs('tenant.users.*') ? 'active' : '' }}" data-new-account-trigger>
             <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a6 6 0 0 1 6-6M16 11v6M13 14h6"/></svg>
