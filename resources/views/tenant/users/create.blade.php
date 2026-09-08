@@ -275,12 +275,14 @@ $roleSousTitres = [
                 @endphp
                 <div class="wd-cabinet-field">
                     <label>Statut envisagé</label>
-                    <select name="statut_envisage">
-                        <option value="">Sélectionner un statut</option>
+                    <div class="wd-cabinet-checkbox-group wd-cabinet-checkbox-group-wrap">
                         @foreach($statutEnvisageOptions as $statut)
-                        <option value="{{ $statut }}" {{ old('statut_envisage') === $statut ? 'selected' : '' }}>{{ $statut }}</option>
+                        <label class="wd-cabinet-checkbox">
+                            <input type="radio" name="statut_envisage" value="{{ $statut }}" {{ old('statut_envisage') === $statut ? 'checked' : '' }}>
+                            <span>{{ $statut }}</span>
+                        </label>
                         @endforeach
-                    </select>
+                    </div>
                     @error('statut_envisage')
                     <div class="wd-field-error">{{ $message }}</div>
                     @enderror
