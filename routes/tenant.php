@@ -5,10 +5,12 @@ declare(strict_types=1);
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientDocumentController;
 use App\Http\Controllers\ClientKycController;
+use App\Http\Controllers\ClientKycMoraleController;
 use App\Http\Controllers\SireneLookupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatrimoineController;
 use App\Http\Controllers\ProfilInvestisseurController;
+use App\Http\Controllers\ProfilInvestisseurMoraleController;
 use App\Http\Controllers\PortefeuilleCabinetController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\RevenuController;
@@ -152,6 +154,12 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::get('/investisseur/{client}', [ProfilInvestisseurController::class, 'edit'])->name('clients.profil.edit');
         Route::put('/investisseur/{client}', [ProfilInvestisseurController::class, 'update'])->name('clients.profil.update');
         Route::get('/investisseur/{client}/pdf', [ClientController::class, 'telechargerProfilInvestisseurPdf'])->name('clients.profil.pdf');
+
+        // Personne morale : formulaires séparés (voir claude/kyc-personne-morale.md).
+        Route::get('/kyc-societe/{client}', [ClientKycMoraleController::class, 'edit'])->name('clients.kyc-morale.edit');
+        Route::put('/kyc-societe/{client}', [ClientKycMoraleController::class, 'update'])->name('clients.kyc-morale.update');
+        Route::get('/investisseur-societe/{client}', [ProfilInvestisseurMoraleController::class, 'edit'])->name('clients.profil-investisseur-morale.edit');
+        Route::put('/investisseur-societe/{client}', [ProfilInvestisseurMoraleController::class, 'update'])->name('clients.profil-investisseur-morale.update');
 
         Route::get('/rendez-vous', [RendezVousController::class, 'index'])->name('rendez-vous.index');
         Route::get('/rendez-vous/calendriers', [CalendarConnectionController::class, 'index'])->name('calendrier.index');

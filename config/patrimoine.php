@@ -144,4 +144,38 @@ return [
         'indivision' => 'Indivision',
     ],
 
+    // Natures réservées aux personnes physiques (produits/statuts qu'une
+    // société n'a légalement pas le droit de détenir), masquées du
+    // formulaire patrimoine quand le client est une personne morale. Le
+    // circuit personne physique n'est pas concerné, cette liste n'est lue
+    // que si le composant reçoit pourSociete=true.
+    'exclues_personne_morale' => [
+        'actif_financier' => [
+            'compte_sur_livret_csl', 'livret_de_developpement_durable_et_solidaire',
+            'livret_a', 'livret_depargne_populaire_lep', 'livrets_jeune', 'cel', 'pel',
+            'pep_bancaire', 'pea', 'peapme',
+            'contrat_dassurancevie_multisupports', 'pep_assurance_vie_multisupports',
+            'per', 'peepei', 'percopercoi', 'perp',
+            'contrat_loi_madelin', 'contrat_article_83', 'contrat_article_82',
+            'contrat_prefonretraite',
+        ],
+        'actif_non_financier' => [
+            'bien_dusage', 'residence_principale', 'residence_secondaire', 'autre_bien_dusage',
+            'location_meublee_non_professionnelle_lmnp',
+            'location_meublee_non_professionnelle_lmnp_loi_bouvard',
+        ],
+        'passif' => [
+            'emprunt_sur_residence_principale', 'emprunt_sur_residence_secondaire',
+            'credit_a_la_consommation', 'credit_auto', 'credit_renouvelable',
+            'pret_personnel', 'pret_etudiant', 'dette_fiscale',
+        ],
+        'revenu' => [
+            'salaires_traitements', 'pensions_retraites', 'rentes_viageres', 'allocations',
+        ],
+        'charge' => [
+            'impot_revenu', 'ifi', 'pension_alimentaire_versee', 'frais_scolarite_garde',
+            'cotisations_sociales_retraite',
+        ],
+    ],
+
 ];

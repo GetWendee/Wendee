@@ -14,8 +14,14 @@ use Illuminate\View\View;
 
 class ProfilInvestisseurController extends Controller
 {
-    public function edit(Client $client, VerificationCodeService $verification): View
+    public function edit(Client $client, VerificationCodeService $verification): View|RedirectResponse
     {
+        // Une société n'a pas le même profil investisseur qu'une personne
+        // physique (pas de questionnaire scoré, voir claude/kyc-personne-morale.md).
+        if ($client->estMorale()) {
+            return redirect()->route('tenant.clients.profil-investisseur-morale.edit', $client);
+        }
+
         $client->load('profilInvestisseur');
 
         $reponses = $client->profilInvestisseur->reponses ?? [];

@@ -7,10 +7,17 @@
     'detentionLabel' => 'Type de détention',
     'detentionPropreLabel' => 'Propre',
     'periodiciteMontant' => false,
+    'pourSociete' => false,
 ])
 
 @php
     $natures = config("patrimoine.natures.$categorie", []);
+
+    if ($pourSociete) {
+        $exclues = config("patrimoine.exclues_personne_morale.$categorie", []);
+        $natures = array_diff_key($natures, array_flip($exclues));
+    }
+
     $natureKeys = array_keys($natures);
     $typesPret = config('patrimoine.types_pret', []);
     $bienOptions = config('patrimoine.bien', []);

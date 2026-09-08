@@ -948,4 +948,15 @@ return [
         'zimbabwe' => 'Zimbabwe (ZW)',
         'aland_islands' => 'Îles Åland (AX)',
     ],
+
+    'connaissance_niveau' => [
+        'mauvaise' => 'Mauvaise',
+        'moyenne' => 'Moyenne',
+        'bonne' => 'Bonne',
+    ],
+
+    'oui_non_kyc_morale' => [
+        'oui' => 'Oui',
+        'non' => 'Non',
+    ],
 ];

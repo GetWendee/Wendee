@@ -14,6 +14,12 @@ class ClientKycController extends Controller
 {
     public function edit(Client $client, VerificationCodeService $verification): View|RedirectResponse
     {
+        // Une société n'a pas le même KYC qu'une personne physique (voir
+        // claude/kyc-personne-morale.md) : formulaire et contrôleur séparés.
+        if ($client->estMorale()) {
+            return redirect()->route('tenant.clients.kyc-morale.edit', $client);
+        }
+
         $titulaireKyc = $client->titulaireKyc();
 
         if ($titulaireKyc->isNot($client)) {
