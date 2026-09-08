@@ -105,6 +105,7 @@ class DossierEnrolement extends Model
     {
         return [
             'date_naissance' => 'date',
+            'statut_demande' => 'array',
             'societe_capital_social' => 'decimal:2',
             'domaines' => 'array',
             'statuts_reglementaires_actuels' => 'array',

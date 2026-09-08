@@ -278,7 +278,7 @@ $roleSousTitres = [
                     <div class="wd-cabinet-checkbox-group wd-cabinet-checkbox-group-wrap">
                         @foreach($statutEnvisageOptions as $statut)
                         <label class="wd-cabinet-checkbox">
-                            <input type="radio" name="statut_envisage" value="{{ $statut }}" {{ old('statut_envisage') === $statut ? 'checked' : '' }}>
+                            <input type="checkbox" name="statut_envisage[]" value="{{ $statut }}" {{ in_array($statut, old('statut_envisage', [])) ? 'checked' : '' }}>
                             <span>{{ $statut }}</span>
                         </label>
                         @endforeach

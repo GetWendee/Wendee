@@ -39,7 +39,7 @@ $badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en 
         <a href="{{ route('tenant.back-office-enrolement.show', $dossier) }}" class="wd-row">
             <div>
                 <div class="wd-row-nom">{{ $dossier->user->name }}</div>
-                <div class="wd-row-meta">{{ $dossier->statut_demande ?: 'Statut non précisé' }}</div>
+                <div class="wd-row-meta">{{ $dossier->statut_demande ? implode(', ', $dossier->statut_demande) : 'Statut non précisé' }}</div>
             </div>
             <span class="wd-badge wd-badge-{{ $dossier->statut }}">{{ $badgeLabels[$dossier->statut] ?? $dossier->statut }}</span>
         </a>

@@ -50,7 +50,8 @@ class UserAccountController extends Controller
             'nom' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'telephone' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
-            'statut_envisage' => ['required_if:role,conseiller', 'nullable', 'string', 'max:255'],
+            'statut_envisage' => ['required_if:role,conseiller', 'nullable', 'array'],
+            'statut_envisage.*' => ['string', 'max:255'],
             'apporteur_forme_juridique' => ['nullable', 'string', 'in:ei,eurl,sasu,sas,sarl,sa,snc,scp'],
             'apporteur_denomination_sociale' => ['nullable', 'string', 'max:255'],
             'apporteur_date_creation' => ['nullable', 'date'],
@@ -148,7 +149,7 @@ class UserAccountController extends Controller
             \App\Models\DossierEnrolement::create([
                 'user_id' => $newUser->id,
                 'statut' => 'invited',
-                'statut_demande' => $validated['statut_envisage'] ?? null,
+                'statut_demande' => $validated['statut_envisage'] ?? [],
             ]);
         }
 
