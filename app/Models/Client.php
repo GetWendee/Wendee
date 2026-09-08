@@ -180,6 +180,25 @@ class Client extends Model
         return $this->hasMany(PatrimoineElement::class);
     }
 
+    // KYC/profil investisseur propres à une personne morale, distincts de
+    // kyc()/profilInvestisseur() qui restent le circuit personne physique
+    // inchangé. patrimoineElements() reste commun aux deux (mêmes natures,
+    // filtrées par type côté formulaire).
+    public function kycMorale(): HasOne
+    {
+        return $this->hasOne(KycMorale::class);
+    }
+
+    public function profilInvestisseurMorale(): HasOne
+    {
+        return $this->hasOne(ProfilInvestisseurMorale::class);
+    }
+
+    public function intervenants(): HasMany
+    {
+        return $this->hasMany(Intervenant::class);
+    }
+
     public function personnesACharge(): HasMany
     {
         return $this->hasMany(ClientPersonneACharge::class);
