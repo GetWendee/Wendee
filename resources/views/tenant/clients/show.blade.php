@@ -4,10 +4,21 @@
     $viewRole = Auth::user()?->effectiveRole();
     $profil = $client->profilInvestisseur;
 
-    $initiales = mb_strtoupper(
-        mb_substr($client->prenom ?? '', 0, 1) .
-        mb_substr($client->nom ?? '', 0, 1)
-    );
+    $initiales = $client->estMorale()
+        ? mb_strtoupper(mb_substr($client->raison_sociale ?? '', 0, 2))
+        : mb_strtoupper(
+            mb_substr($client->prenom ?? '', 0, 1) .
+            mb_substr($client->nom ?? '', 0, 1)
+        );
+
+    $labelsRelation = [
+        'parent' => 'représentant légal',
+        'tuteur' => 'tuteur',
+        'curateur' => 'curateur',
+        'mandataire' => 'mandataire',
+        'gerant' => 'gérant',
+        'president' => 'président',
+    ];
 
     $formatEuro = fn($value) =>
         number_format((float) $value, 0, ',', ' ') . ' €';
@@ -2391,9 +2402,15 @@ html,body{
 
 <div>
 <div class="wd-eyebrow">Client · portefeuille privé</div>
-<h1>{{ $client->prenom }} {{ $client->nom }}</h1>
+<h1>{{ $client->nomAffichage() }}</h1>
 <div class="wd-hero-meta">
 Dossier client · suivi patrimonial
+@if($client->representants->isNotEmpty())
+· Représenté par
+@foreach($client->representants as $representant)
+{{ $representant->user->name ?? 'représentant' }} ({{ $labelsRelation[$representant->relation] ?? $representant->relation }}){{ ! $loop->last ? ',' : '' }}
+@endforeach
+@endif
 </div>
 </div>
 

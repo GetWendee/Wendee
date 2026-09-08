@@ -234,6 +234,7 @@ class ClientController extends Controller
             'profilInvestisseur',
             'conseiller',
             'apporteur',
+            'representants.user',
         ]);
 
         $compatibilitesPlacements = $compatibility->evaluate(
