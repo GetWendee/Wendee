@@ -64,14 +64,33 @@ class ClientController extends Controller
     public function create(): View|RedirectResponse
     {
         $cabinet = CabinetProfile::query()->first();
+        $user = auth()->user();
 
-        if (! $cabinet || ! CabinetCompletionChecker::isComplete($cabinet, auth()->user())) {
+        if (! $cabinet || ! CabinetCompletionChecker::isComplete($cabinet, $user)) {
             return redirect()->route('tenant.cabinet')
                 ->with('cabinet_gate_redirect', true)
                 ->with('status', "Complétez d'abord les informations essentielles de votre cabinet avant de créer un compte.");
         }
 
-        return view('tenant.clients.create');
+        // Représentants déjà rattachés à au moins un titulaire (mineur,
+        // majeur protégé ou société), pour permettre d'en réutiliser un au
+        // lieu d'en recréer un a chaque nouveau titulaire (ex : un curateur
+        // professionnel qui suit plusieurs majeurs protégés).
+        $representantsQuery = Client::query()
+            ->whereHas('user', fn ($q) => $q->where('role', 'client')->has('representations'))
+            ->orderBy('nom');
+
+        if ($user->effectiveRole() === 'conseiller' && ! $user->voitTousLesClients()) {
+            $representantsQuery->where('conseiller_id', $user->id);
+        } elseif ($user->effectiveRole() === 'apporteur') {
+            $representantsQuery->where('apporteur_id', $user->id);
+        }
+
+        $representantsExistants = $representantsQuery->get(['id', 'user_id', 'prenom', 'nom', 'email']);
+
+        return view('tenant.clients.create', [
+            'representantsExistants' => $representantsExistants,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -86,17 +105,23 @@ class ClientController extends Controller
 
         $mode = $request->input('mode', 'soi_meme');
 
+        // Réutiliser un représentant déjà existant (sélectionné dans la
+        // liste) rend les champs identité/email facultatifs : ils ne
+        // servent qu'à créer un nouveau représentant.
+        $reuseExistant = $mode !== 'soi_meme' && filled($request->input('representant_existant_id'));
+
         $rules = [
             'mode' => ['required', 'in:soi_meme,represente_physique,represente_morale'],
+            'representant_existant_id' => ['nullable', 'integer', 'exists:users,id'],
             'civilite' => ['nullable', 'string', 'in:M.,Mme'],
-            'prenom' => ['required', 'string', 'max:255'],
-            'nom' => ['required', 'string', 'max:255'],
+            'prenom' => [$reuseExistant ? 'nullable' : 'required', 'string', 'max:255'],
+            'nom' => [$reuseExistant ? 'nullable' : 'required', 'string', 'max:255'],
             'nom_jeune_fille' => ['nullable', 'string', 'max:255'],
             'date_naissance' => ['nullable', 'date'],
             'telephone_mobile' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
             'telephone_domicile' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
             'email' => array_filter([
-                'required', 'email', 'max:255',
+                $reuseExistant ? 'nullable' : 'required', 'email', 'max:255',
                 $mode === 'soi_meme' ? 'unique:users,email' : null,
             ]),
             'adresse' => ['nullable', 'string', 'max:255'],
@@ -151,16 +176,21 @@ class ClientController extends Controller
 
         // Le représentant : celui qui se connecte et remplit les
         // formulaires, qu'il agisse pour lui-même ou pour un tiers. Pour
-        // une représentation (curateur, tuteur, dirigeant...), l'email
-        // peut correspondre a un représentant déjà existant, par exemple
-        // un curateur professionnel qui représente déjà un autre majeur
-        // protégé : on réutilise alors son compte au lieu d'en créer un
-        // second, ce qui échouerait de toute façon sur l'unicité de
-        // l'email. Les champs identité saisis dans ce formulaire ne sont
-        // dans ce cas pas utilisés pour modifier le compte existant.
-        $representantExistant = $mode !== 'soi_meme'
-            ? User::where('email', $validated['email'])->first()
-            : null;
+        // une représentation (curateur, tuteur, dirigeant...), on réutilise
+        // un représentant déjà existant s'il a été choisi dans la liste, ou
+        // sinon s'il est détecté par email, par exemple un curateur
+        // professionnel qui représente déjà un autre majeur protégé : on
+        // réutilise alors son compte au lieu d'en créer un second, ce qui
+        // échouerait de toute façon sur l'unicité de l'email. Les champs
+        // identité saisis dans ce formulaire ne sont dans ce cas pas
+        // utilisés pour modifier le compte existant.
+        $representantExistant = null;
+
+        if ($mode !== 'soi_meme' && ! empty($validated['representant_existant_id'])) {
+            $representantExistant = User::find($validated['representant_existant_id']);
+        } elseif ($mode !== 'soi_meme' && ! empty($validated['email'])) {
+            $representantExistant = User::where('email', $validated['email'])->first();
+        }
 
         if ($representantExistant && $representantExistant->role !== 'client') {
             return back()

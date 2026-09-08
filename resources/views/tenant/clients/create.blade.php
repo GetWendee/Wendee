@@ -160,8 +160,24 @@
                     <span>Gérant, président, mandataire social...</span>
                 </label>
             </div>
+            <div class="wd-cabinet-information-grid" data-mode-bloc="represente_physique,represente_morale" hidden>
+                <div class="wd-cabinet-field">
+                    <label>Représentant déjà existant (optionnel)</label>
+                    <select name="representant_existant_id" data-representant-existant>
+                        <option value="">Nouveau représentant</option>
+                        @foreach ($representantsExistants as $r)
+                            <option value="{{ $r->user_id }}" {{ (string) old('representant_existant_id') === (string) $r->user_id ? 'selected' : '' }}>
+                                {{ trim($r->prenom.' '.$r->nom) }} ({{ $r->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('representant_existant_id')
+                    <div class="wd-field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
             <div class="wd-section-title" data-titre-representant>Le client</div>
-            <div class="wd-cabinet-information-grid">
+            <div class="wd-cabinet-information-grid" data-representant-identite-grid>
                 <div class="wd-cabinet-field wd-c2">
                     <label>Civilité</label>
                     <select name="civilite" data-civilite>
@@ -377,16 +393,26 @@
     var radios = document.querySelectorAll('[data-mode-radio]');
     var blocs = document.querySelectorAll('[data-mode-bloc]');
     var titreRepresentant = document.querySelector('[data-titre-representant]');
+    var selectReuse = document.querySelector('[data-representant-existant]');
+    var grilleIdentite = document.querySelector('[data-representant-identite-grid]');
     if (! radios.length) { return; }
     var libellesTitre = {
         soi_meme: 'Le client',
         represente_physique: 'Le représentant (celui qui se connecte)',
         represente_morale: 'Le représentant (celui qui se connecte)'
     };
+    function appliquerReuse() {
+        if (! selectReuse || ! grilleIdentite) { return; }
+        var reuse = ! selectReuse.disabled && selectReuse.value !== '';
+        grilleIdentite.hidden = reuse;
+        grilleIdentite.querySelectorAll('input, select').forEach(function (champ) {
+            champ.disabled = reuse;
+        });
+    }
     function appliquer() {
         var mode = document.querySelector('[data-mode-radio]:checked').value;
         blocs.forEach(function (bloc) {
-            var actif = bloc.getAttribute('data-mode-bloc') === mode;
+            var actif = bloc.getAttribute('data-mode-bloc').split(',').indexOf(mode) !== -1;
             bloc.hidden = ! actif;
             bloc.querySelectorAll('input, select').forEach(function (champ) {
                 champ.disabled = ! actif;
@@ -395,6 +421,10 @@
         if (titreRepresentant) {
             titreRepresentant.textContent = libellesTitre[mode] || libellesTitre.soi_meme;
         }
+        appliquerReuse();
+    }
+    if (selectReuse) {
+        selectReuse.addEventListener('change', appliquerReuse);
     }
     radios.forEach(function (radio) {
         radio.addEventListener('change', appliquer);
