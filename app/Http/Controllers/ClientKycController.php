@@ -36,8 +36,11 @@ class ClientKycController extends Controller
 
         // Mineurs représentés par ce client (via la table representants),
         // pas encore ajoutés dans ses personnes à charge : proposés en
-        // suggestion plutôt que de les faire ressaisir à la main.
-        $enfantsDejaAjoutes = $client->personnesACharge->pluck('titulaire_id')->filter();
+        // suggestion plutôt que de les faire ressaisir à la main. Le
+        // rapprochement se fait par titulaire_id ET par nom/prénom/date de
+        // naissance, pour ne pas re-proposer un enfant déjà saisi à la main
+        // avant que ce lien n'existe.
+        $enfantsDejaAjoutes = $client->personnesACharge;
 
         $enfantsRepresentesSuggestions = $client->user
             ? $client->user->representations()
@@ -45,7 +48,18 @@ class ClientKycController extends Controller
                 ->with('titulaire')
                 ->get()
                 ->pluck('titulaire')
-                ->reject(fn ($titulaire) => $enfantsDejaAjoutes->contains($titulaire->id))
+                ->unique('id')
+                ->reject(function ($titulaire) use ($enfantsDejaAjoutes) {
+                    return $enfantsDejaAjoutes->contains(function ($personne) use ($titulaire) {
+                        if ($personne->titulaire_id === $titulaire->id) {
+                            return true;
+                        }
+
+                        return mb_strtolower(trim($personne->prenom)) === mb_strtolower(trim($titulaire->prenom))
+                            && mb_strtolower(trim($personne->nom)) === mb_strtolower(trim($titulaire->nom))
+                            && optional($personne->date_naissance)->isSameDay($titulaire->date_naissance);
+                    });
+                })
                 ->values()
             : collect();
 
