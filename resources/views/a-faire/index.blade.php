@@ -90,6 +90,7 @@
                                     </div>
                                 </form>
                             </div>
+                            @include('a-faire.pieces-jointes', ['tache' => $tache])
                         </div>
                     @empty
                         <p class="text-sm text-gray-500">Rien à faire pour l'instant.</p>
@@ -103,7 +104,7 @@
                 </div>
                 <div class="space-y-3">
                     @forelse ($faites as $tache)
-                        <div class="bg-gray-50 shadow-sm rounded-lg p-5">
+                        <div x-data="{}" class="bg-gray-50 shadow-sm rounded-lg p-5">
                             <div class="flex justify-between items-start">
                                 <h4 class="font-semibold text-gray-500 line-through">{{ $tache->titre }}</h4>
                                 @if($tache->page_module)
@@ -125,6 +126,7 @@
                                     <button type="submit" class="px-3 py-1.5 text-xs font-semibold rounded-md border border-red-200 text-red-700 bg-red-50">Supprimer définitivement</button>
                                 </form>
                             </div>
+                            @include('a-faire.pieces-jointes', ['tache' => $tache])
                         </div>
                     @empty
                         <p class="text-sm text-gray-500">Aucune tâche terminée.</p>

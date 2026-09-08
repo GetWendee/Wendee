@@ -37,6 +37,9 @@ foreach (config('tenancy.central_domains') as $domain) {
             Route::put('/a-faire/{tache}', [TacheController::class, 'update'])->name('a-faire.update');
             Route::patch('/a-faire/{tache}/toggle', [TacheController::class, 'toggleFait'])->name('a-faire.toggle');
             Route::delete('/a-faire/{tache}', [TacheController::class, 'destroy'])->name('a-faire.destroy');
+            Route::post('/a-faire/{tache}/pieces-jointes', [TacheController::class, 'storePieceJointe'])->name('a-faire.pieces-jointes.store');
+            Route::get('/a-faire/pieces-jointes/{pieceJointe}', [TacheController::class, 'showPieceJointe'])->name('a-faire.pieces-jointes.show');
+            Route::delete('/a-faire/pieces-jointes/{pieceJointe}', [TacheController::class, 'destroyPieceJointe'])->name('a-faire.pieces-jointes.destroy');
             Route::get('/mails', function () {
                 return view('mails.index');
             })->name('mails.index');

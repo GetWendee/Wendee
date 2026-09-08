@@ -2,8 +2,10 @@
 declare(strict_types=1);
 namespace App\Http\Controllers;
 use App\Models\Tache;
+use App\Models\TachePieceJointe;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 class TacheController extends Controller
 {
@@ -21,8 +23,8 @@ class TacheController extends Controller
     public function index(): View
     {
         return view('a-faire.index', [
-            'aFaire' => Tache::where('fait', false)->latest()->get(),
-            'faites' => Tache::where('fait', true)->latest()->get(),
+            'aFaire' => Tache::with('piecesJointes')->where('fait', false)->latest()->get(),
+            'faites' => Tache::with('piecesJointes')->where('fait', true)->latest()->get(),
             'modules' => self::MODULES,
         ]);
     }
@@ -58,5 +60,32 @@ class TacheController extends Controller
     {
         $tache->delete();
         return redirect()->route('a-faire.index')->with('status_simple', 'Tâche supprimée.');
+    }
+    public function storePieceJointe(Request $request, Tache $tache): RedirectResponse
+    {
+        $validated = $request->validate([
+            'fichier' => ['required', 'file', 'max:10240', 'mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,txt'],
+        ]);
+        $fichier = $validated['fichier'];
+        $path = $fichier->store('taches/' . $tache->id, 'local');
+        TachePieceJointe::create([
+            'tache_id' => $tache->id,
+            'fichier_path' => $path,
+            'nom_original' => $fichier->getClientOriginalName(),
+            'mime_type' => $fichier->getMimeType(),
+            'taille' => $fichier->getSize(),
+        ]);
+        return redirect()->route('a-faire.index')->with('status_simple', 'Pièce jointe ajoutée.');
+    }
+    public function showPieceJointe(TachePieceJointe $pieceJointe): \Symfony\Component\HttpFoundation\Response
+    {
+        abort_unless(Storage::disk('local')->exists($pieceJointe->fichier_path), 404);
+        return Storage::disk('local')->response($pieceJointe->fichier_path, $pieceJointe->nom_original);
+    }
+    public function destroyPieceJointe(TachePieceJointe $pieceJointe): RedirectResponse
+    {
+        Storage::disk('local')->delete($pieceJointe->fichier_path);
+        $pieceJointe->delete();
+        return redirect()->route('a-faire.index')->with('status_simple', 'Pièce jointe supprimée.');
     }
 }
