@@ -34,10 +34,19 @@
             <span>Créer un utilisateur</span>
         </a>
         @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() === 'apporteur')
+        <a class="{{ request()->routeIs('tenant.clients.create') ? 'active' : '' }}" href="{{ route('tenant.clients.create') }}">
+            <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a6 6 0 0 1 6-6M16 11v6M13 14h6"/></svg>
+            <span>Créer un client</span>
+        </a>
+        @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur')
         <a href="{{ route('tenant.rendez-vous.index') }}" class="{{ request()->routeIs('tenant.rendez-vous.*') ? 'active' : '' }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
             <span>Rendez-vous</span>
         </a>
+        @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur')
         <div class="wd-nav-section">Activité</div>
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
         <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
@@ -75,6 +84,7 @@
             <span class="wd-soon">Bientot</span>
         </a>
         @endif
+        @endif
         <div class="wd-nav-section">Compte</div>
         @php
         $dossierConseiller = Auth::check() && Auth::user()->role === 'conseiller' ? Auth::user()->dossierEnrolement : null;
@@ -89,22 +99,25 @@
             @endif
         </a>
         @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() === 'apporteur')
+        <a href="#" class="disabled" aria-disabled="true" tabindex="-1">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <span>Mon dossier</span>
+            <span class="wd-soon">Bientot</span>
+        </a>
+        @endif
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
         <a class="{{ request()->routeIs('tenant.back-office-enrolement.*') ? 'active' : '' }}" href="{{ route('tenant.back-office-enrolement.index') }}">
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
             <span>Dossiers d'enrôlement</span>
         </a>
         @endif
-        @if(Auth::check() && Auth::user()->effectiveRole() === 'apporteur')
-        <a class="{{ request()->routeIs('tenant.profil.rib.*') ? 'active' : '' }}" href="{{ route('tenant.profil.rib.edit') }}">
-            <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>
-            <span>Mon RIB</span>
-        </a>
-        @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur')
         <a class="{{ request()->routeIs('tenant.cabinet') ? 'active' : '' }}" href="{{ route('tenant.cabinet') }}">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
             <span>Paramètres</span>
         </a>
+        @endif
         <a class="{{ request()->routeIs('tenant.profil.*') ? 'active' : '' }}" href="{{ route('tenant.profil.edit') }}">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             <span>Profil</span>
@@ -231,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
             @elseif($mobileRole === 'apporteur')
             <a class="{{ request()->routeIs('tenant.clients.create') ? 'active' : '' }}" href="{{ route('tenant.clients.create') }}">
                 <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a6 6 0 0 1 6-6M16 11v6M13 14h6"/></svg>
-                <span>Créer un utilisateur</span>
+                <span>Créer un client</span>
             </a>
             @endif
             @if($mobileRole === 'courtier' || $mobileRole === 'conseiller')

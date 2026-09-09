@@ -156,7 +156,10 @@ class Client extends Model
         return match ($user->effectiveRole()) {
             'courtier' => true,
             'conseiller' => $this->conseiller_id === $user->id || $user->voitTousLesClients(),
-            'apporteur' => $this->apporteur_id === $user->id,
+            // L'apporteur voit ses clients dans son portefeuille (nom,
+            // statut, montants) mais n'a pas accès au dossier patrimonial
+            // complet : KYC, patrimoine, analyse, mission, conformité...
+            'apporteur' => false,
             // Un utilisateur 'client' voit sa propre fiche, ou celle de tout
             // titulaire qu'il représente (mineur, majeur protégé, société).
             'client' => $this->user_id === $user->id

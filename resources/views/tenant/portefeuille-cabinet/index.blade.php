@@ -299,12 +299,20 @@
                                 $status = $client->completionStatus();
                                 $statutApporteur = $wdRole === 'apporteur' ? $client->statutApporteur() : null;
                             @endphp
+                            @if($wdRole === 'apporteur')
+                            <div data-portfolio-card
+                               data-role="client"
+                               @if($statutApporteur) data-statut-apporteur="{{ $statutApporteur['key'] }}" @endif
+                               data-name="{{ strtolower($client->prenom.' '.$client->nom) }}"
+                               class="relative block overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+                            @else
                             <a href="{{ route('tenant.clients.show', $client) }}"
                                data-portfolio-card
                                data-role="client"
                                @if($statutApporteur) data-statut-apporteur="{{ $statutApporteur['key'] }}" @endif
                                data-name="{{ strtolower($client->prenom.' '.$client->nom) }}"
                                class="group relative block overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+                            @endif
                                 <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="w-12 h-12 rounded-2xl bg-white text-gray-600 flex items-center justify-center text-base font-semibold shrink-0">
@@ -369,7 +377,11 @@
                                         </div>
                                     @endif
                                 </div>
+                            @if($wdRole === 'apporteur')
+                            </div>
+                            @else
                             </a>
+                            @endif
                         @endforeach
                     </div>
 
