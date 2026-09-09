@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\CabinetProfile;
 use App\Models\DossierEnrolement;
+use App\Models\DossierJustificatif;
 use App\Services\ConventionMandatService;
 use App\Services\DossierEnrolementComplianceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
@@ -151,6 +153,32 @@ class BackOfficeEnrolementController extends Controller
         $dossier->user()->update(['activation_pending' => false]);
 
         return redirect()->route('tenant.back-office-enrolement.show', $dossier)->with('status', 'Convention signée, conseiller activé.');
+    }
+
+    public function showJustificatif(Request $request, DossierJustificatif $justificatif): \Symfony\Component\HttpFoundation\Response
+    {
+        $viewer = $request->user();
+        $dossier = $justificatif->dossier;
+
+        abort_unless($viewer->effectiveRole() === 'courtier', 403);
+        abort_unless($dossier->user->parent_id === $viewer->id, 403);
+        abort_unless(Storage::disk('local')->exists($justificatif->fichier_path), 404);
+
+        return Storage::disk('local')->response($justificatif->fichier_path, $justificatif->nom_original);
+    }
+
+    public function destroyJustificatif(Request $request, DossierJustificatif $justificatif): RedirectResponse
+    {
+        $viewer = $request->user();
+        $dossier = $justificatif->dossier;
+
+        abort_unless($viewer->effectiveRole() === 'courtier', 403);
+        abort_unless($dossier->user->parent_id === $viewer->id, 403);
+
+        Storage::disk('local')->delete($justificatif->fichier_path);
+        $justificatif->delete();
+
+        return redirect()->route('tenant.back-office-enrolement.show', $dossier)->with('status', 'Justificatif supprimé.');
     }
 
     public function telechargerConventionPdf(Request $request, DossierEnrolement $dossier): \Symfony\Component\HttpFoundation\Response

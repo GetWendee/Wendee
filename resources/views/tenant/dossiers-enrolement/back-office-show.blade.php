@@ -77,16 +77,56 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
     </section>
     @endif
 
-    <section class="wd-block">
+    <section class="wd-block" x-data="{ modalOpen: false, modalUrl: '', modalIsImage: false, modalLabel: '', modalDeleteUrl: '' }">
         <div class="wd-section-title">Justificatifs</div>
         @forelse($dossier->justificatifs as $justificatif)
-        <div class="wd-just-row">
+        @php
+        $ext = strtolower(pathinfo($justificatif->nom_original ?: $justificatif->fichier_path, PATHINFO_EXTENSION));
+        $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+        @endphp
+        <div class="wd-just-row" style="cursor:pointer;"
+            @click="
+                modalOpen = true;
+                modalUrl = '{{ route('tenant.back-office-enrolement.justificatifs.show', $justificatif) }}';
+                modalIsImage = {{ $isImage ? 'true' : 'false' }};
+                modalLabel = @js(($typesJustificatifs[$justificatif->type] ?? $justificatif->type) . ' v' . $justificatif->version);
+                modalDeleteUrl = '{{ route('tenant.back-office-enrolement.justificatifs.destroy', $justificatif) }}';
+            "
+        >
             <span>{{ $typesJustificatifs[$justificatif->type] ?? $justificatif->type }} v{{ $justificatif->version }}</span>
             <span style="color:#817b76;">{{ $justificatif->nom_original }}</span>
         </div>
         @empty
         <p style="color:#817b76;font-size:12px;">Aucun justificatif déposé.</p>
         @endforelse
+
+        <div x-show="modalOpen" x-cloak class="wd-newaccount-overlay" @click.self="modalOpen = false">
+            <div class="wd-newaccount-modal" style="max-width:640px;">
+                <div class="wd-newaccount-head">
+                    <div>
+                        <div class="wd-eyebrow">Justificatif</div>
+                        <h3 x-text="modalLabel" style="font-size:16px;"></h3>
+                    </div>
+                    <button type="button" class="wd-newaccount-close" @click="modalOpen = false" aria-label="Fermer">&times;</button>
+                </div>
+                <div style="margin-top:16px;max-height:60vh;overflow:auto;">
+                    <template x-if="modalIsImage">
+                        <img :src="modalUrl" style="max-width:100%;border-radius:8px;">
+                    </template>
+                    <template x-if="!modalIsImage">
+                        <iframe :src="modalUrl" style="width:100%;height:60vh;border:1px solid #ded9d4;border-radius:8px;"></iframe>
+                    </template>
+                </div>
+                <div class="wd-actions" style="margin-top:16px;">
+                    <a :href="modalUrl" target="_blank" class="wd-btn wd-btn-outline">Ouvrir dans un nouvel onglet</a>
+                    <form method="POST" :action="modalDeleteUrl" onsubmit="return confirm('Supprimer définitivement ce justificatif ?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="wd-btn wd-btn-red">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </section>
 
     @if(in_array($dossier->statut, ['pending_validation', 'onboarding']))

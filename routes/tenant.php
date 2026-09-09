@@ -93,6 +93,8 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::post('/dossiers-enrolement/{dossier}/valider', [BackOfficeEnrolementController::class, 'valider'])->name('back-office-enrolement.valider');
         Route::post('/dossiers-enrolement/{dossier}/marquer-signe', [BackOfficeEnrolementController::class, 'marquerSigne'])->name('back-office-enrolement.marquer-signe');
         Route::get('/dossiers-enrolement/{dossier}/convention.pdf', [BackOfficeEnrolementController::class, 'telechargerConventionPdf'])->name('back-office-enrolement.convention-pdf');
+        Route::get('/dossiers-enrolement/justificatifs/{justificatif}', [BackOfficeEnrolementController::class, 'showJustificatif'])->name('back-office-enrolement.justificatifs.show');
+        Route::delete('/dossiers-enrolement/justificatifs/{justificatif}', [BackOfficeEnrolementController::class, 'destroyJustificatif'])->name('back-office-enrolement.justificatifs.destroy');
         Route::get('/profil', [TenantProfileController::class, 'edit'])->name('profil.edit');
         Route::put('/profil', [TenantProfileController::class, 'update'])->name('profil.update');
         Route::get('/mon-rib', [UserAccountController::class, 'editRib'])->name('profil.rib.edit');
