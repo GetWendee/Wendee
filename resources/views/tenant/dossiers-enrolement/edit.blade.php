@@ -59,6 +59,18 @@ html,body{margin:0!important;background:#f3f1ee!important}
 $modeExercice = old('mode_exercice', $dossier->mode_exercice);
 $badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en cours', 'pending_validation' => 'En validation', 'contract_pending' => 'Convention à signer', 'active' => 'Actif', 'rejected' => 'Non validé pour le moment'];
 $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending', 'active']);
+$refusePoints = $dossier->refuse_points ?? [];
+$sectionChecks = [
+    'identite' => ['identite'],
+    'orias' => ['orias'],
+    'capacite' => ['capacite_professionnelle', 'honorabilite', 'formation_continue'],
+    'rcp' => ['rcp', 'garantie_financiere'],
+    'procedures' => ['lcbft', 'reclamations', 'rgpd'],
+    'documents' => ['documents'],
+];
+$sectionAlerte = fn (string $section) => count(array_intersect($sectionChecks[$section] ?? [], $refusePoints)) > 0
+    ? ' style="background:#fbeceb;"'
+    : '';
 @endphp
 <div class="wd-wrap">
     <section class="wd-head">
@@ -83,13 +95,13 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
 
     @if($dossier->statut === 'rejected')
     <section class="wd-user-success" style="background:#fbeceb;border-color:#f5d3d3;color:#b94d4d;">
-        <div style="font-weight:800;margin-bottom:8px;">Non validé pour le moment</div>
-        @if(!empty($dossier->refuse_points))
-        <ul style="margin:0 0 10px 18px;padding:0;color:#242424;font-weight:400;">
-            @foreach($dossier->refuse_points as $point)
-            <li style="margin-bottom:4px;">{{ $point }}</li>
+        <div style="font-weight:800;margin-bottom:8px;">Modifications demandées</div>
+        @if(!empty($refusePoints))
+        <div style="color:#242424;margin-bottom:10px;">
+            @foreach($refusePoints as $key)
+            {{ $dossier->checks_conformite[$key]['label'] ?? $key }}<br>
             @endforeach
-        </ul>
+        </div>
         @endif
         @if($dossier->refuse_motif)
         <div style="background:#fff;border:1px solid #f5d3d3;border-radius:8px;padding:12px 14px;color:#151515;font-weight:700;margin-bottom:10px;">{{ $dossier->refuse_motif }}</div>
@@ -103,7 +115,7 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
         @method('PUT')
         <fieldset @if($readonly) disabled @endif style="border:0;padding:0;margin:0;">
 
-        <section class="wd-user-form">
+        <section class="wd-user-form"{!! $sectionAlerte('identite') !!}>
             <div class="wd-section-title">1. Identité</div>
             <div class="wd-section-sub">Exercice individuel ou en société.</div>
             <div class="wd-cabinet-information-grid">
@@ -221,7 +233,7 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
             </div>
         </section>
 
-        <section class="wd-user-form">
+        <section class="wd-user-form"{!! $sectionAlerte('orias') !!}>
             <div class="wd-section-title">3. Immatriculation ORIAS</div>
             <div class="wd-cabinet-information-grid">
                 <div class="wd-cabinet-field wd-c3">
@@ -261,7 +273,7 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
             </div>
         </section>
 
-        <section class="wd-user-form">
+        <section class="wd-user-form"{!! $sectionAlerte('capacite') !!}>
             <div class="wd-section-title">4. Capacité professionnelle et honorabilité</div>
             <div class="wd-cabinet-information-grid">
                 <div class="wd-cabinet-field">
@@ -347,7 +359,7 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
             </div>
         </section>
 
-        <section class="wd-user-form">
+        <section class="wd-user-form"{!! $sectionAlerte('rcp') !!}>
             <div class="wd-section-title">5. RCP et garantie financière</div>
             <div class="wd-cabinet-information-grid">
                 <div class="wd-cabinet-field wd-c3">
@@ -444,7 +456,7 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
             </div>
         </section>
 
-        <section class="wd-user-form">
+        <section class="wd-user-form"{!! $sectionAlerte('procedures') !!}>
             <div class="wd-section-title">7. Procédures et engagements</div>
             <div class="wd-cabinet-information-grid">
                 <div class="wd-cabinet-field">
@@ -468,7 +480,7 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
         </fieldset>
     </form>
 
-    <section class="wd-user-form">
+    <section class="wd-user-form"{!! $sectionAlerte('documents') !!}>
         <div class="wd-section-title">Justificatifs</div>
         <div class="wd-section-sub">Pièce d'identité, attestation ORIAS, diplôme, RCP, garantie financière, Kbis.</div>
         @forelse($dossier->justificatifs as $justificatif)

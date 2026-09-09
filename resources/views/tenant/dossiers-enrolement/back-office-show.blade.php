@@ -110,7 +110,7 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
             </form>
         </div>
 
-        <div x-data="{ showModal: false, selected: @js(collect($dossier->checks_conformite ?? [])->filter(fn ($c) => in_array($c['statut'] ?? 'ok', ['attention', 'bloquant']))->pluck('label')->values()) }">
+        <div x-data="{ showModal: false, selected: @js(collect($dossier->checks_conformite ?? [])->filter(fn ($c) => in_array($c['statut'] ?? 'ok', ['attention', 'bloquant']))->keys()->values()) }">
             <div class="wd-field">
                 <form method="POST" action="{{ route('tenant.back-office-enrolement.refuser', $dossier) }}" id="refuser-form-{{ $dossier->id }}">
                     @csrf
@@ -141,9 +141,9 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
                         <button type="button" class="wd-newaccount-close" @click="showModal = false" aria-label="Fermer">&times;</button>
                     </div>
                     <div class="wd-pj-check-list">
-                        @foreach($dossier->checks_conformite as $check)
+                        @foreach($dossier->checks_conformite as $key => $check)
                         <label class="wd-pj-check">
-                            <input type="checkbox" name="refuse_points[]" value="{{ $check['label'] }}" x-model="selected" form="refuser-form-{{ $dossier->id }}">
+                            <input type="checkbox" name="refuse_points[]" value="{{ $key }}" x-model="selected" form="refuser-form-{{ $dossier->id }}">
                             <span class="wd-pastille wd-pastille-{{ $check['statut'] }}"></span>
                             <span>{{ $check['label'] }}</span>
                         </label>
@@ -181,13 +181,13 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
 
     @if($dossier->statut === 'rejected')
     <section class="wd-block">
-        <div class="wd-section-title">Non validé pour le moment</div>
+        <div class="wd-section-title">Modifications demandées</div>
         @if(!empty($dossier->refuse_points))
-        <ul style="margin:0 0 12px 18px;padding:0;font-size:13px;color:#242424;">
-            @foreach($dossier->refuse_points as $point)
-            <li style="margin-bottom:4px;">{{ $point }}</li>
+        <p style="font-size:13px;color:#242424;margin:0 0 10px;">
+            @foreach($dossier->refuse_points as $key)
+            {{ $dossier->checks_conformite[$key]['label'] ?? $key }}<br>
             @endforeach
-        </ul>
+        </p>
         @endif
         @if($dossier->refuse_motif)
         <p style="font-size:13px;color:#151515;font-weight:700;background:#f9f8f7;border:1px solid #eeeae7;border-radius:8px;padding:12px 14px;margin:0;">{{ $dossier->refuse_motif }}</p>
