@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Commission;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -93,6 +94,22 @@ class PortefeuilleCabinetController extends Controller
                 ->orderBy('nom')
                 ->orderBy('prenom')
                 ->get();
+
+            $mesGains = [
+                'douze_derniers_mois' => (float) Commission::query()
+                    ->where('apporteur_id', $user->id)
+                    ->where('statut', 'verse')
+                    ->where('verse_le', '>=', now()->subYear())
+                    ->sum('montant_commission'),
+                'en_attente' => (float) Commission::query()
+                    ->where('apporteur_id', $user->id)
+                    ->where('statut', 'fonds_recus')
+                    ->sum('montant_commission'),
+                'a_venir' => (float) Commission::query()
+                    ->where('apporteur_id', $user->id)
+                    ->where('statut', 'a_recevoir')
+                    ->sum('montant_commission'),
+            ];
         }
 
         return view('tenant.portefeuille-cabinet.index', [
@@ -100,6 +117,7 @@ class PortefeuilleCabinetController extends Controller
             'conseillers' => $conseillers,
             'apporteurs' => $apporteurs,
             'clients' => $clients,
+            'mesGains' => $mesGains ?? null,
         ]);
     }
 }

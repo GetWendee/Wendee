@@ -3,7 +3,7 @@
         $wdRole = $user->effectiveRole();
         $showConseillersTuile = $wdRole === 'courtier';
         $showApporteursTuile = in_array($wdRole, ['courtier', 'conseiller'], true);
-        $wdTuilesCount = 1 + ($showConseillersTuile ? 1 : 0) + ($showApporteursTuile ? 1 : 0);
+        $wdTuilesCount = 1 + ($showConseillersTuile ? 1 : 0) + ($showApporteursTuile ? 1 : 0) + ($mesGains ? 1 : 0);
     @endphp
     <div class="p-8 space-y-8">
 
@@ -112,6 +112,28 @@
                     dans votre portefeuille
                 </p>
             </div>
+
+            @if($mesGains)
+            <div class="bg-white rounded-3xl border border-gray-200 p-6">
+                <p class="text-sm font-semibold text-[#ff008a]">Mes gains</p>
+                <p class="text-xs text-gray-400 mt-0.5">Total de ma rémunération</p>
+
+                <div class="mt-4 space-y-3">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">12 derniers mois</span>
+                        <span class="font-semibold text-gray-900">{{ number_format($mesGains['douze_derniers_mois'], 0, ',', ' ') }} €</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm border-t border-gray-100 pt-3">
+                        <span class="text-gray-500">En attente</span>
+                        <span class="font-semibold text-gray-900">{{ number_format($mesGains['en_attente'], 0, ',', ' ') }} €</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm border-t border-gray-100 pt-3">
+                        <span class="text-gray-500">Paiement à venir</span>
+                        <span class="inline-flex rounded-lg border border-[#ff008a] px-2.5 py-1 text-sm font-semibold text-[#ff008a]">{{ number_format($mesGains['a_venir'], 0, ',', ' ') }} €</span>
+                    </div>
+                </div>
+            </div>
+            @endif
         </section>
 
         {{-- Portefeuille --}}
@@ -147,6 +169,7 @@
                         </svg>
                     </div>
 
+                    @if($wdRole !== 'apporteur')
                     <div class="wd-role-select" data-role-select>
                         <button type="button" class="wd-role-select-trigger" data-role-select-trigger>
                             <span data-role-select-label>Tous les profils</span>
@@ -163,8 +186,20 @@
                             <button type="button" class="wd-role-select-option" data-value="client">Clients</button>
                         </div>
                     </div>
+                    @endif
                 </div>
             </div>
+
+            @if($wdRole === 'apporteur')
+            <div class="px-6 pb-5 flex flex-wrap gap-2" data-statut-select>
+                <button type="button" class="wd-statut-pill active" data-statut-value="">Tous</button>
+                <button type="button" class="wd-statut-pill" data-statut-value="prospect_cree">Prospect créé</button>
+                <button type="button" class="wd-statut-pill" data-statut-value="premier_contact_qualifie">Premier contact qualifié</button>
+                <button type="button" class="wd-statut-pill" data-statut-value="proposition_envoyee">Proposition envoyée</button>
+                <button type="button" class="wd-statut-pill" data-statut-value="client_signe">Client signé</button>
+                <button type="button" class="wd-statut-pill" data-statut-value="perdu_sans_suite">Perdu / sans suite</button>
+            </div>
+            @endif
 
             <div class="p-6">
                 @if ($conseillers->isEmpty() && $apporteurs->isEmpty() && $clients->isEmpty())
@@ -260,10 +295,14 @@
                         @endif
 
                         @foreach ($clients as $client)
-                            @php $status = $client->completionStatus(); @endphp
+                            @php
+                                $status = $client->completionStatus();
+                                $statutApporteur = $wdRole === 'apporteur' ? $client->statutApporteur() : null;
+                            @endphp
                             <a href="{{ route('tenant.clients.show', $client) }}"
                                data-portfolio-card
                                data-role="client"
+                               @if($statutApporteur) data-statut-apporteur="{{ $statutApporteur['key'] }}" @endif
                                data-name="{{ strtolower($client->prenom.' '.$client->nom) }}"
                                class="group relative block overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
                                 <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
@@ -276,9 +315,20 @@
                                             <p class="wd-portfolio-name font-semibold text-gray-900 truncate group-hover:text-[#ff008a] transition">
                                                 {{ $client->prenom }} {{ $client->nom }}
                                             </p>
+                                            @if($statutApporteur)
+                                            <span @class([
+                                                'mt-1 inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider',
+                                                'bg-gray-100 text-gray-600' => in_array($statutApporteur['key'], ['prospect_cree', 'perdu_sans_suite']),
+                                                'bg-[#fff0f7] text-[#ff008a]' => in_array($statutApporteur['key'], ['premier_contact_qualifie', 'proposition_envoyee']),
+                                                'bg-[#ff008a] text-white' => $statutApporteur['key'] === 'client_signe',
+                                            ])>
+                                                {{ $statutApporteur['label'] }}
+                                            </span>
+                                            @else
                                             <span class="mt-1 inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
                                                 Client
                                             </span>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -337,11 +387,13 @@
             var roleTrigger = document.querySelector('[data-role-select-trigger]');
             var roleMenu = document.querySelector('[data-role-select-menu]');
             var roleLabel = document.querySelector('[data-role-select-label]');
+            var statutSelectEl = document.querySelector('[data-statut-select]');
             var grid = document.getElementById('wd-portfolio-grid');
             var empty = document.getElementById('wd-portfolio-empty');
-            if (! grid || ! search || ! roleSelectEl) return;
+            if (! grid || ! search) return;
 
             var currentRole = '';
+            var currentStatut = '';
             var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-portfolio-card]'));
 
             function applyFilter() {
@@ -350,8 +402,9 @@
 
                 cards.forEach(function (card) {
                     var matchesRole = ! currentRole || card.getAttribute('data-role') === currentRole;
+                    var matchesStatut = ! currentStatut || card.getAttribute('data-statut-apporteur') === currentStatut;
                     var matchesTerm = ! term || card.getAttribute('data-name').indexOf(term) !== -1;
-                    var visible = matchesRole && matchesTerm;
+                    var visible = matchesRole && matchesStatut && matchesTerm;
                     card.style.display = visible ? '' : 'none';
                     if (visible) visibleCount++;
                 });
@@ -362,6 +415,17 @@
             }
 
             search.addEventListener('input', applyFilter);
+
+            if (statutSelectEl) {
+                statutSelectEl.querySelectorAll('[data-statut-value]').forEach(function (pill) {
+                    pill.addEventListener('click', function () {
+                        currentStatut = pill.getAttribute('data-statut-value');
+                        statutSelectEl.querySelectorAll('[data-statut-value]').forEach(function (p) { p.classList.remove('active'); });
+                        pill.classList.add('active');
+                        applyFilter();
+                    });
+                });
+            }
 
             if (roleTrigger && roleMenu) {
                 roleTrigger.addEventListener('click', function (e) {
@@ -448,6 +512,10 @@
 .wd-role-select-option{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:8px;border:0;background:none;font-size:13px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit}
 .wd-role-select-option:hover{background:#fff0f7;color:#ff008a}
 .wd-role-select-option.active{background:#fff0f7;color:#ff008a}
+
+.wd-statut-pill{display:inline-flex;align-items:center;padding:7px 14px;border-radius:999px;border:1px solid #e5e7eb;background:#f9fafb;font-size:12px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap}
+.wd-statut-pill:hover{border-color:#ff008a;color:#ff008a}
+.wd-statut-pill.active{background:#ff008a;border-color:#ff008a;color:#fff}
 
 @media(max-width:640px){
 .wd-portfolio-name{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}

@@ -262,6 +262,30 @@ class Client extends Model
         return ! $representations->contains(fn ($r) => $r->relation === 'parent');
     }
 
+    /**
+     * Statut du client vu par l'apporteur (étapes de sa recommandation).
+     * Aujourd'hui, seuls "Prospect créé" et "Premier contact qualifié" sont
+     * calculables : la proposition envoyée, la signature (code de
+     * vérification de la recommandation) et le classement en dossier
+     * clôturé dépendent de modules pas encore construits. Les libellés
+     * existent déjà pour que le filtre soit prêt le jour où ces modules
+     * arrivent.
+     */
+    public function statutApporteur(): array
+    {
+        $labels = [
+            'prospect_cree' => 'Prospect créé',
+            'premier_contact_qualifie' => 'Premier contact qualifié',
+            'proposition_envoyee' => 'Proposition envoyée',
+            'client_signe' => 'Client signé',
+            'perdu_sans_suite' => 'Perdu / sans suite',
+        ];
+
+        $key = $this->kyc()->exists() ? 'premier_contact_qualifie' : 'prospect_cree';
+
+        return ['key' => $key, 'label' => $labels[$key]];
+    }
+
     public function completionStatus(): array
     {
         if ($this->estRepresentantPur()) {

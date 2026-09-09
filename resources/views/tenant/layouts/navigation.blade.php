@@ -18,11 +18,11 @@
     <div class="wd-logo"><b>W</b>endee<small>OS du conseiller patrimonial</small></div>
     <nav class="wd-nav">
         <div class="wd-nav-section">Général</div>
-        <a class="{{ request()->routeIs('tenant.dashboard') ? 'active' : '' }}" href="{{ route('tenant.dashboard') }}">
+        <a class="{{ request()->routeIs('tenant.dashboard') || (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) ? 'active' : '' }}" href="{{ Auth::check() && Auth::user()->effectiveRole() === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard') }}">
             <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
             <span>Tableau de bord</span>
         </a>
-        @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller', 'apporteur'], true))
+        @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
         <a class="{{ request()->routeIs('tenant.portefeuille.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille.index') }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>
             <span>Portefeuille</span>
@@ -213,11 +213,11 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <nav class="wd-mobile-menu-nav">
             <div class="wd-mobile-menu-section">Général</div>
-            <a class="{{ request()->routeIs('tenant.dashboard') ? 'active' : '' }}" href="{{ route('tenant.dashboard') }}">
+            <a class="{{ request()->routeIs('tenant.dashboard') || ($mobileRole === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) ? 'active' : '' }}" href="{{ $mobileRole === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard') }}">
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
                 <span>Tableau de bord</span>
             </a>
-            @if($mobileRole === 'courtier' || $mobileRole === 'conseiller' || $mobileRole === 'apporteur')
+            @if($mobileRole === 'courtier' || $mobileRole === 'conseiller')
             <a class="{{ request()->routeIs('tenant.portefeuille.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille.index') }}">
                 <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>
                 <span>Portefeuille</span>
