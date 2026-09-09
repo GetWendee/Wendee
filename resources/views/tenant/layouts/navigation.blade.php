@@ -5,7 +5,7 @@
         request()->routeIs('tenant.cabinet') => 'Cabinet · Conformité & pilotage',
         request()->routeIs('tenant.users.*') => 'Équipe · Nouveau compte',
         request()->routeIs('tenant.clients.*') => 'Portefeuille · Clients',
-        request()->routeIs('tenant.portefeuille-cabinet.*') => 'Cabinet · Portefeuille global',
+        request()->routeIs('tenant.portefeuille.*') => 'Portefeuille',
         request()->routeIs('tenant.performances.*') => 'Cabinet · Patrimoine sous gestion',
         request()->routeIs('tenant.revenus.*') => 'Cabinet · Revenus',
         request()->routeIs('tenant.commissions.*') => 'Cabinet · Commissions',
@@ -22,16 +22,10 @@
             <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
             <span>Tableau de bord</span>
         </a>
-        @if(Auth::check() && Auth::user()->effectiveRole() !== 'courtier')
-        <a class="{{ request()->routeIs('tenant.clients.*') ? 'active' : '' }}" href="{{ route('tenant.clients.index') }}">
-            <svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM3 21v-2a6 6 0 0 1 12 0v2M17 11a4 4 0 0 0 0-8M16 13a6 6 0 0 1 5 6v2"/></svg>
-            <span>Mon portefeuille</span>
-        </a>
-        @endif
-        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
-        <a class="{{ request()->routeIs('tenant.portefeuille-cabinet.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille-cabinet.index') }}">
+        @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller', 'apporteur'], true))
+        <a class="{{ request()->routeIs('tenant.portefeuille.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille.index') }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>
-            <span>Portefeuille cabinet</span>
+            <span>Portefeuille</span>
         </a>
         @endif
         @if(count($newAccountRoles) > 0)
@@ -223,15 +217,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
                 <span>Tableau de bord</span>
             </a>
-            @if($mobileRole === 'courtier')
-            <a class="{{ request()->routeIs('tenant.portefeuille-cabinet.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille-cabinet.index') }}">
+            @if($mobileRole === 'courtier' || $mobileRole === 'conseiller' || $mobileRole === 'apporteur')
+            <a class="{{ request()->routeIs('tenant.portefeuille.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille.index') }}">
                 <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>
-                <span>Portefeuille cabinet</span>
-            </a>
-            @elseif($mobileRole === 'conseiller' || $mobileRole === 'apporteur')
-            <a class="{{ request()->routeIs('tenant.clients.*') ? 'active' : '' }}" href="{{ route('tenant.clients.index') }}">
-                <svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM3 21v-2a6 6 0 0 1 12 0v2M17 11a4 4 0 0 0 0-8M16 13a6 6 0 0 1 5 6v2"/></svg>
-                <span>Mon portefeuille</span>
+                <span>Portefeuille</span>
             </a>
             @endif
             @if($mobileRole === 'courtier' || $mobileRole === 'conseiller')

@@ -18,7 +18,7 @@
                 @endif
             </div>
 
-            <a href="{{ route('tenant.portefeuille-cabinet.index') }}"
+            <a href="{{ route('tenant.portefeuille.index') }}"
                class="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-600 hover:border-[#ff008a] hover:text-[#ff008a] transition">
                 Retour au portefeuille
             </a>

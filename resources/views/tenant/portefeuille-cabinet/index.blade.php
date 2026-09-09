@@ -1,4 +1,10 @@
 <x-tenant-app-layout>
+    @php
+        $wdRole = $user->effectiveRole();
+        $showConseillersTuile = $wdRole === 'courtier';
+        $showApporteursTuile = in_array($wdRole, ['courtier', 'conseiller'], true);
+        $wdTuilesCount = 1 + ($showConseillersTuile ? 1 : 0) + ($showApporteursTuile ? 1 : 0);
+    @endphp
     <div class="p-8 space-y-8">
 
         {{-- En-tête --}}
@@ -36,7 +42,8 @@
         </section>
 
         {{-- Indicateurs --}}
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <section class="grid grid-cols-1 gap-5 @if($wdTuilesCount >= 3) md:grid-cols-3 @elseif($wdTuilesCount === 2) md:grid-cols-2 @endif">
+            @if($showConseillersTuile)
             <div class="wd-kpi-card bg-white rounded-3xl border border-gray-200 p-6">
                 <div class="flex items-center justify-between">
                     <p class="text-xs uppercase tracking-[0.18em] text-gray-400 font-semibold">
@@ -58,7 +65,9 @@
                     dans votre périmètre
                 </p>
             </div>
+            @endif
 
+            @if($showApporteursTuile)
             <div class="wd-kpi-card bg-white rounded-3xl border border-gray-200 p-6">
                 <div class="flex items-center justify-between">
                     <p class="text-xs uppercase tracking-[0.18em] text-gray-400 font-semibold">
@@ -80,6 +89,7 @@
                     dans votre réseau
                 </p>
             </div>
+            @endif
 
             <div class="wd-kpi-card bg-white rounded-3xl border border-gray-200 p-6">
                 <div class="flex items-center justify-between">
@@ -144,8 +154,12 @@
                         </button>
                         <div class="wd-role-select-menu" data-role-select-menu hidden>
                             <button type="button" class="wd-role-select-option active" data-value="">Tous les profils</button>
+                            @if($showConseillersTuile)
                             <button type="button" class="wd-role-select-option" data-value="conseiller">Conseillers</button>
+                            @endif
+                            @if($showApporteursTuile)
                             <button type="button" class="wd-role-select-option" data-value="apporteur">Apporteurs</button>
+                            @endif
                             <button type="button" class="wd-role-select-option" data-value="client">Clients</button>
                         </div>
                     </div>
@@ -165,6 +179,7 @@
                     </div>
                 @else
                     <div id="wd-portfolio-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                        @if($showConseillersTuile)
                         @foreach ($conseillers as $conseiller)
                             <a href="{{ route('tenant.users.show', $conseiller) }}"
                                data-portfolio-card
@@ -205,7 +220,9 @@
                                 </div>
                             </a>
                         @endforeach
+                        @endif
 
+                        @if($showApporteursTuile)
                         @foreach ($apporteurs as $apporteur)
                             <div data-portfolio-card
                                  data-role="apporteur"
@@ -240,6 +257,7 @@
                                 </div>
                             </div>
                         @endforeach
+                        @endif
 
                         @foreach ($clients as $client)
                             @php $status = $client->completionStatus(); @endphp

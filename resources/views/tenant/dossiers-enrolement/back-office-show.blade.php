@@ -132,42 +132,18 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
     @if(in_array($dossier->statut, ['pending_validation', 'onboarding']))
     <section class="wd-block">
         <div class="wd-section-title">Décision</div>
-        <div class="wd-actions">
-            <form method="POST" action="{{ route('tenant.back-office-enrolement.valider', $dossier) }}">
-                @csrf
-                <button type="submit" class="wd-btn wd-btn-dark">Valider l'enrôlement</button>
-            </form>
-        </div>
-
-        <div class="wd-field">
-            <form method="POST" action="{{ route('tenant.back-office-enrolement.demander-piece', $dossier) }}">
-                @csrf
-                <label>Demander une pièce complémentaire</label>
-                <textarea name="notes_back_office" placeholder="Précisez la pièce ou l'information manquante" required></textarea>
-                <div class="wd-actions">
-                    <button type="submit" class="wd-btn wd-btn-outline">Envoyer la demande</button>
-                </div>
-            </form>
-        </div>
-
         <div x-data="{ showModal: false, selected: @js(collect($dossier->checks_conformite ?? [])->filter(fn ($c) => in_array($c['statut'] ?? 'ok', ['attention', 'bloquant']))->keys()->values()) }">
             <div class="wd-field">
-                <form method="POST" action="{{ route('tenant.back-office-enrolement.refuser', $dossier) }}" id="refuser-form-{{ $dossier->id }}">
-                    @csrf
-                    <label>Refuser le dossier</label>
+                <label>Si refus, précisez les points à corriger</label>
 
-                    @if($dossier->checks_conformite)
-                    <button type="button" @click="showModal = true" class="wd-btn wd-btn-outline" style="margin-bottom:10px;">
-                        Choisir les points à corriger<span x-show="selected.length" x-text="' (' + selected.length + ')'"></span>
-                    </button>
-                    @endif
+                @if($dossier->checks_conformite)
+                <button type="button" @click="showModal = true" class="wd-btn wd-btn-outline" style="margin-bottom:10px;">
+                    Choisir les points à corriger<span x-show="selected.length" x-text="' (' + selected.length + ')'"></span>
+                </button>
+                @endif
 
-                    <textarea name="refuse_motif" placeholder="Expliquez au conseiller ce qui doit être corrigé (facultatif si vous avez choisi des points ci-dessus)"></textarea>
-                    <div style="color:#817b76;font-size:11px;margin-top:4px;">Le motif et les points choisis seront visibles par le conseiller sur son dossier. Il pourra corriger les informations et soumettre à nouveau.</div>
-                    <div class="wd-actions">
-                        <button type="submit" class="wd-btn wd-btn-red">Refuser</button>
-                    </div>
-                </form>
+                <textarea form="refuser-form-{{ $dossier->id }}" name="refuse_motif" placeholder="Expliquez au conseiller ce qui doit être corrigé (facultatif si vous avez choisi des points ci-dessus)"></textarea>
+                <div style="color:#817b76;font-size:11px;margin-top:4px;">Le motif et les points choisis seront visibles par le conseiller sur son dossier. Il pourra corriger les informations et soumettre à nouveau.</div>
             </div>
 
             @if($dossier->checks_conformite)
@@ -193,6 +169,17 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
                 </div>
             </div>
             @endif
+        </div>
+
+        <div class="wd-actions" style="margin-top:16px;">
+            <form method="POST" action="{{ route('tenant.back-office-enrolement.valider', $dossier) }}">
+                @csrf
+                <button type="submit" class="wd-btn wd-btn-dark">Valider l'enrôlement</button>
+            </form>
+            <form method="POST" action="{{ route('tenant.back-office-enrolement.refuser', $dossier) }}" id="refuser-form-{{ $dossier->id }}">
+                @csrf
+                <button type="submit" class="wd-btn wd-btn-red">Refuser le dossier</button>
+            </form>
         </div>
     </section>
     @endif

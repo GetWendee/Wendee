@@ -13,6 +13,8 @@ class PortefeuilleCabinetController extends Controller
     {
         $user = $request->user();
 
+        abort_unless(in_array($user->effectiveRole(), ['courtier', 'conseiller', 'apporteur'], true), 403);
+
         $conseillers = collect();
         $apporteurs = collect();
         $clients = collect();

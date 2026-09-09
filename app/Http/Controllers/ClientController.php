@@ -25,42 +25,6 @@ class ClientController extends Controller
         return $libelle . ' - ' . $nomClient . ' - ' . now()->format('d-m-Y') . '.pdf';
     }
 
-    public function index(Request $request): View
-    {
-        $user = $request->user();
-
-        abort_if($user && $user->effectiveRole() === 'courtier', 403);
-
-        $query = Client::query()->with('conseiller')->orderBy('nom');
-
-        if ($user->effectiveRole() === 'conseiller' && ! $user->voitTousLesClients()) {
-            $query->where('conseiller_id', $user->id);
-        } elseif ($user->effectiveRole() === 'apporteur') {
-            $query->where('apporteur_id', $user->id);
-        }
-
-        $recherche = trim((string) $request->query('q', ''));
-
-        if ($recherche !== '') {
-            $query->where(function ($q) use ($recherche) {
-                $q->where('nom', 'like', "%{$recherche}%")
-                    ->orWhere('prenom', 'like', "%{$recherche}%")
-                    ->orWhere('email', 'like', "%{$recherche}%")
-                    ->orWhere('ville', 'like', "%{$recherche}%");
-            });
-        }
-
-        $totalClients = Client::count();
-
-        $clients = $query->paginate(20)->withQueryString();
-
-        return view('tenant.clients.index', [
-            'clients' => $clients,
-            'recherche' => $recherche,
-            'totalClients' => $totalClients,
-        ]);
-    }
-
     public function create(): View|RedirectResponse
     {
         $cabinet = CabinetProfile::query()->first();

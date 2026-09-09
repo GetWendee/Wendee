@@ -16,7 +16,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Pilotage société - {{ $client->nomAffichage() }}
             </h2>
-            <a href="{{ route('tenant.clients.index') }}" class="text-sm text-gray-600 underline">
+            <a href="{{ route('tenant.portefeuille.index') }}" class="text-sm text-gray-600 underline">
                 {{ __('Retour au portefeuille clients') }}
             </a>
         </div>

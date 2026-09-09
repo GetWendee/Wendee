@@ -73,8 +73,8 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
     })->middleware(['auth', 'verified'])
       ->name('dev.view-role');
 
-        Route::get('/portefeuille-cabinet', [PortefeuilleCabinetController::class, 'index'])
-            ->name('portefeuille-cabinet.index');
+        Route::get('/portefeuille', [PortefeuilleCabinetController::class, 'index'])
+            ->name('portefeuille.index');
         Route::get('/performances', [PerformanceController::class, 'index'])->name('performances.index');
         Route::get('/revenus', [RevenuController::class, 'index'])->name('revenus.index');
         Route::get('/utilisateurs/creer', [UserAccountController::class, 'create'])->name('users.create');
@@ -102,7 +102,6 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::get('/commissions', [CommissionController::class, 'index'])->name('commissions.index');
         Route::post('/commissions/confirmer-fonds-recus', [CommissionController::class, 'confirmerFondsRecus'])->name('commissions.confirmer-fonds-recus');
         Route::post('/commissions/valider-virements', [CommissionController::class, 'validerVirements'])->name('commissions.valider-virements');
-        Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
         Route::get('/clients/creer', [ClientController::class, 'create'])->name('clients.create');
         Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
         Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');

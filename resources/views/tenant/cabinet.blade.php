@@ -260,7 +260,7 @@ backdrop-filter:blur(10px)
                     <span>utilisateur(s)</span>
                 </div>
             </a>
-            <a href="{{ route('tenant.clients.index') }}" class="wd-cabinet-resource">
+            <a href="{{ route('tenant.portefeuille.index') }}" class="wd-cabinet-resource">
                 <div class="wd-cabinet-resource-top">
                     <div class="wd-cabinet-resource-icon">
                         <svg viewBox="0 0 24 24">
