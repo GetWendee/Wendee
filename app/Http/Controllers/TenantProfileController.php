@@ -16,8 +16,19 @@ class TenantProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+
+        $factures = $user->effectiveRole() === 'apporteur'
+            ? \App\Models\Facture::query()
+                ->where('apporteur_id', $user->id)
+                ->with('client')
+                ->latest()
+                ->get()
+            : null;
+
         return view('tenant.profil', [
-            'user' => $request->user(),
+            'user' => $user,
+            'factures' => $factures,
         ]);
     }
 

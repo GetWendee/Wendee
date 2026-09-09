@@ -18,6 +18,7 @@ use App\Http\Controllers\PortefeuilleCabinetController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\RevenuController;
 use App\Http\Controllers\CommissionController;
+use App\Http\Controllers\FactureController;
 use App\Http\Controllers\CabinetProfileController;
 use App\Http\Controllers\TenantProfileController;
 use Stancl\Tenancy\Controllers\TenantAssetsController;
@@ -99,6 +100,9 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::put('/profil', [TenantProfileController::class, 'update'])->name('profil.update');
         Route::get('/mon-rib', [UserAccountController::class, 'editRib'])->name('profil.rib.edit');
         Route::put('/mon-rib', [UserAccountController::class, 'updateRib'])->name('profil.rib.update');
+        Route::post('/factures', [FactureController::class, 'store'])->name('factures.store');
+        Route::get('/factures/{facture}', [FactureController::class, 'show'])->name('factures.show');
+        Route::delete('/factures/{facture}', [FactureController::class, 'destroy'])->name('factures.destroy');
         Route::get('/commissions', [CommissionController::class, 'index'])->name('commissions.index');
         Route::post('/commissions/confirmer-fonds-recus', [CommissionController::class, 'confirmerFondsRecus'])->name('commissions.confirmer-fonds-recus');
         Route::post('/commissions/valider-virements', [CommissionController::class, 'validerVirements'])->name('commissions.valider-virements');

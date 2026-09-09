@@ -7,6 +7,10 @@
     @endphp
     <div class="p-8 space-y-8">
 
+        @if(session('status'))
+        <div style="margin-bottom:-8px;padding:12px 16px;border-radius:8px;background:#fdf2f8;color:#a3195b;font-size:13px;border:1px solid #f6c9e1;">{{ session('status') }}</div>
+        @endif
+
         {{-- En-tête --}}
         <section class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
@@ -24,6 +28,12 @@
             </div>
 
             <div class="flex flex-wrap gap-3">
+                @if($wdRole === 'apporteur')
+                    <button type="button" class="wd-new-client wd-new-client-outline" data-facture-modal-trigger>
+                        <span class="wd-new-client-plus">+</span>
+                        <span>Ajouter une facture</span>
+                    </button>
+                @endif
                 @php
                     $newAccountRoles = $user->creatableUserRoles();
                 @endphp
@@ -463,6 +473,161 @@
         })();
         </script>
 
+        @if($wdRole === 'apporteur')
+        <div class="wd-newaccount-overlay" data-facture-modal hidden>
+            <div class="wd-newaccount-modal" style="max-width:520px;">
+                <div class="wd-newaccount-head">
+                    <div>
+                        <div class="wd-eyebrow">Ajouter une facture</div>
+                        <h3>Déposer votre facture</h3>
+                    </div>
+                    <button type="button" class="wd-newaccount-close" data-facture-modal-close aria-label="Fermer">&times;</button>
+                </div>
+
+                <form method="POST" action="{{ route('tenant.factures.store') }}" enctype="multipart/form-data" style="margin-top:18px;">
+                    @csrf
+                    <input type="hidden" name="client_id" data-facture-client-id value="">
+
+                    <label class="wd-facture-label">Lier à un client (facultatif)</label>
+                    <div class="wd-facture-search-wrap">
+                        <input type="text" class="wd-facture-search-input" placeholder="Rechercher un client..." autocomplete="off" data-facture-search>
+                        <div class="wd-facture-search-results" data-facture-search-results hidden></div>
+                        <div class="wd-facture-selected" data-facture-selected hidden>
+                            <span data-facture-selected-name></span>
+                            <button type="button" data-facture-selected-clear aria-label="Retirer">&times;</button>
+                        </div>
+                    </div>
+
+                    <label class="wd-facture-label" style="margin-top:16px;">Fichier de la facture</label>
+                    <div class="wd-facture-dropzone" data-facture-dropzone>
+                        <input type="file" name="fichier" accept=".pdf,.jpg,.jpeg,.png" data-facture-input hidden>
+                        <div data-facture-dropzone-empty>
+                            <p>Glissez votre facture ici</p>
+                            <p class="wd-facture-dropzone-sub">ou <span data-facture-browse>parcourez vos fichiers</span> (PDF, JPG, PNG, 10 Mo max)</p>
+                        </div>
+                        <div class="wd-facture-dropzone-file" data-facture-dropzone-file hidden>
+                            <span data-facture-filename></span>
+                            <button type="button" data-facture-file-clear aria-label="Retirer">&times;</button>
+                        </div>
+                    </div>
+                    @error('fichier')<div class="wd-field-error">{{ $message }}</div>@enderror
+
+                    <button type="submit" class="wd-facture-submit" style="margin-top:20px;">Envoyer la facture</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+        (function () {
+            var trigger = document.querySelector('[data-facture-modal-trigger]');
+            var overlay = document.querySelector('[data-facture-modal]');
+            if (! trigger || ! overlay) return;
+            var closeBtn = document.querySelector('[data-facture-modal-close]');
+
+            trigger.addEventListener('click', function () { overlay.hidden = false; });
+            if (closeBtn) closeBtn.addEventListener('click', function () { overlay.hidden = true; });
+            overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.hidden = true; });
+
+            var clients = @json($clients->map(fn ($c) => ['id' => $c->id, 'name' => trim($c->prenom.' '.$c->nom)])->values());
+            var searchInput = document.querySelector('[data-facture-search]');
+            var resultsBox = document.querySelector('[data-facture-search-results]');
+            var selectedBox = document.querySelector('[data-facture-selected]');
+            var selectedName = document.querySelector('[data-facture-selected-name]');
+            var selectedClear = document.querySelector('[data-facture-selected-clear]');
+            var clientIdInput = document.querySelector('[data-facture-client-id]');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    var term = searchInput.value.trim().toLowerCase();
+                    resultsBox.innerHTML = '';
+                    if (! term) { resultsBox.hidden = true; return; }
+                    var matches = clients.filter(function (c) { return c.name.toLowerCase().indexOf(term) !== -1; }).slice(0, 8);
+                    if (! matches.length) { resultsBox.hidden = true; return; }
+                    matches.forEach(function (c) {
+                        var item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'wd-facture-search-item';
+                        item.textContent = c.name;
+                        item.addEventListener('click', function () {
+                            clientIdInput.value = c.id;
+                            selectedName.textContent = c.name;
+                            selectedBox.hidden = false;
+                            searchInput.value = '';
+                            searchInput.hidden = true;
+                            resultsBox.hidden = true;
+                        });
+                        resultsBox.appendChild(item);
+                    });
+                    resultsBox.hidden = false;
+                });
+            }
+
+            if (selectedClear) {
+                selectedClear.addEventListener('click', function () {
+                    clientIdInput.value = '';
+                    selectedBox.hidden = true;
+                    searchInput.hidden = false;
+                });
+            }
+
+            var dropzone = document.querySelector('[data-facture-dropzone]');
+            var fileInput = document.querySelector('[data-facture-input]');
+            var browseTrigger = document.querySelector('[data-facture-browse]');
+            var emptyState = document.querySelector('[data-facture-dropzone-empty]');
+            var fileState = document.querySelector('[data-facture-dropzone-file]');
+            var filenameEl = document.querySelector('[data-facture-filename]');
+            var fileClear = document.querySelector('[data-facture-file-clear]');
+
+            function showFile(file) {
+                filenameEl.textContent = file.name;
+                emptyState.hidden = true;
+                fileState.hidden = false;
+            }
+
+            if (browseTrigger) {
+                browseTrigger.addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
+            }
+            if (dropzone) {
+                dropzone.addEventListener('click', function (e) {
+                    if (! fileState.hidden) return;
+                    fileInput.click();
+                });
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    if (fileInput.files.length) showFile(fileInput.files[0]);
+                });
+            }
+
+            if (fileClear) {
+                fileClear.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    fileInput.value = '';
+                    emptyState.hidden = false;
+                    fileState.hidden = true;
+                });
+            }
+
+            if (dropzone) {
+                ['dragover', 'dragleave', 'drop'].forEach(function (evt) {
+                    dropzone.addEventListener(evt, function (e) { e.preventDefault(); e.stopPropagation(); });
+                });
+                dropzone.addEventListener('dragover', function () { dropzone.classList.add('wd-facture-dropzone-active'); });
+                dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('wd-facture-dropzone-active'); });
+                dropzone.addEventListener('drop', function (e) {
+                    dropzone.classList.remove('wd-facture-dropzone-active');
+                    var files = e.dataTransfer.files;
+                    if (files.length) {
+                        fileInput.files = files;
+                        showFile(files[0]);
+                    }
+                });
+            }
+        })();
+        </script>
+        @endif
+
     </div>
 <style>
 .wd-new-client{
@@ -535,6 +700,33 @@
 .wd-kpi-value{font-size:22px!important;margin-top:8px!important}
 .wd-role-select-trigger{min-width:0}
 }
+
+.wd-new-client-outline{background:#fff;border:1px solid #242424;color:#242424!important;box-shadow:none}
+.wd-new-client-outline:hover{background:#f9fafb;box-shadow:none;transform:none}
+.wd-new-client-outline .wd-new-client-plus{background:#242424}
+
+.wd-facture-label{display:block;color:#9a928d;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.wd-facture-search-wrap{position:relative}
+.wd-facture-search-input{width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;color:#242424;background:#fff;font-family:inherit}
+.wd-facture-search-input:focus{outline:none;border-color:#f40087}
+.wd-facture-search-input[hidden]{display:none}
+.wd-facture-search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:20;background:#fff;border:1px solid #ded9d4;border-radius:8px;box-shadow:0 12px 30px rgba(17,24,39,.12);max-height:200px;overflow-y:auto}
+.wd-facture-search-results[hidden]{display:none}
+.wd-facture-search-item{display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;font-size:13px;color:#242424;cursor:pointer;font-family:inherit}
+.wd-facture-search-item:hover{background:#fdf2f8;color:#f40087}
+.wd-facture-selected{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid #ded9d4;border-radius:7px;background:#fdf2f8;font-size:13px;font-weight:600;color:#242424}
+.wd-facture-selected[hidden]{display:none}
+.wd-facture-selected button{background:none;border:0;font-size:16px;color:#817b76;cursor:pointer;line-height:1}
+.wd-facture-dropzone{margin-top:8px;border:1.5px dashed #ded9d4;border-radius:10px;padding:24px 16px;text-align:center;cursor:pointer;transition:border-color .15s ease,background .15s ease}
+.wd-facture-dropzone:hover,.wd-facture-dropzone-active{border-color:#f40087;background:#fdf2f8}
+.wd-facture-dropzone p{margin:0;font-size:13px;color:#242424}
+.wd-facture-dropzone-sub{margin-top:4px!important;font-size:11px!important;color:#817b76!important}
+.wd-facture-dropzone-sub span{color:#f40087;font-weight:700;text-decoration:underline}
+.wd-facture-dropzone-file{display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:600;color:#242424}
+.wd-facture-dropzone-file button{background:none;border:0;font-size:16px;color:#817b76;cursor:pointer;line-height:1}
+.wd-field-error{margin-top:6px;color:#b94d4d;font-size:11px}
+.wd-facture-submit{padding:11px 22px;border:0;border-radius:8px;background:#242424;color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer}
+.wd-facture-submit:hover{background:#151515}
 </style>
 
 </x-tenant-app-layout>
