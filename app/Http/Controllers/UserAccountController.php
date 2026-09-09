@@ -242,6 +242,6 @@ class UserAccountController extends Controller
             'rib_soumis_le' => now(),
         ]);
 
-        return redirect()->route('tenant.profil.rib.edit')->with('status', 'RIB enregistré, en attente de validation par le courtier.');
+        return redirect()->route('tenant.profil.edit')->with('status', 'RIB enregistré, en attente de validation par le courtier.');
     }
 }

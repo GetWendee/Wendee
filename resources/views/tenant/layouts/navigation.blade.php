@@ -118,12 +118,6 @@
             <span>Paramètres</span>
         </a>
         @endif
-        @if(Auth::check() && Auth::user()->effectiveRole() === 'apporteur')
-        <a class="{{ request()->routeIs('tenant.profil.rib.*') ? 'active' : '' }}" href="{{ route('tenant.profil.rib.edit') }}">
-            <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>
-            <span>Mon RIB</span>
-        </a>
-        @endif
         <a class="{{ request()->routeIs('tenant.profil.*') ? 'active' : '' }}" href="{{ route('tenant.profil.edit') }}">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             <span>Profil</span>

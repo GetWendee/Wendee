@@ -4,14 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\PatrimoineElement;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         $user = $request->user();
+
+        if ($user->effectiveRole() === 'apporteur') {
+            return redirect()->route('tenant.portefeuille.index');
+        }
 
         /*
          * Le dashboard est celui du conseiller connecté.
