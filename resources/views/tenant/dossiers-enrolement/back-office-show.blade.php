@@ -38,6 +38,16 @@ html,body{margin:0!important;background:#f3f1ee!important}
 .wd-field textarea{width:100%;border:1px solid #ded9d4;border-radius:7px;padding:9px 11px;font-size:13px;color:#242424;font-family:inherit;min-height:70px}
 .wd-just-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #eeeae7;font-size:12px}
 .wd-just-row:last-child{border-bottom:0}
+.wd-modal-overlay{position:fixed;inset:0;background:rgba(21,21,21,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.wd-modal{background:#fff;border-radius:10px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;padding:22px}
+.wd-modal-title{font-size:14px;font-weight:800;color:#151515;margin-bottom:14px}
+.wd-modal-check{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #eeeae7;font-size:13px;cursor:pointer}
+.wd-modal-check:last-child{border-bottom:0}
+.wd-pastille{display:inline-block;width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+.wd-pastille-ok{background:#4d8760}
+.wd-pastille-attention{background:#b8860b}
+.wd-pastille-bloquant{background:#b94d4d}
+.wd-pastille-na{background:#c9c3be}
 </style>
 @php
 $badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en cours', 'pending_validation' => 'En validation', 'contract_pending' => 'Convention à signer', 'active' => 'Actif', 'rejected' => 'Non validé pour le moment'];
@@ -101,15 +111,46 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
             </form>
         </div>
 
-        <div class="wd-field">
-            <form method="POST" action="{{ route('tenant.back-office-enrolement.refuser', $dossier) }}">
+        <div class="wd-field" x-data="{ showModal: false, selected: @js(collect($dossier->checks_conformite ?? [])->filter(fn ($c) => ($c['statut'] ?? 'ok') !== 'ok')->pluck('label')->values()) }">
+            <form method="POST" action="{{ route('tenant.back-office-enrolement.refuser', $dossier) }}" @submit="
+                if (selected.length) {
+                    const liste = selected.map(s => '- ' + s).join('\n');
+                    const libre = $refs.motifTextarea.value.trim();
+                    $refs.motifTextarea.value = liste + (libre ? '\n\n' + libre : '');
+                }
+            ">
                 @csrf
                 <label>Non valider pour le moment</label>
-                <textarea name="refuse_motif" placeholder="Expliquez au conseiller ce qui doit être corrigé" required></textarea>
+
+                @if($dossier->checks_conformite)
+                <button type="button" @click="showModal = true" class="wd-btn wd-btn-outline" style="margin-bottom:10px;">
+                    Choisir les points à corriger<span x-show="selected.length" x-text="' (' + selected.length + ')'"></span>
+                </button>
+                @endif
+
+                <textarea name="refuse_motif" x-ref="motifTextarea" placeholder="Expliquez au conseiller ce qui doit être corrigé" required></textarea>
                 <div style="color:#817b76;font-size:11px;margin-top:4px;">Le motif sera visible par le conseiller sur son dossier. Il pourra corriger les informations et soumettre à nouveau.</div>
                 <div class="wd-actions">
                     <button type="submit" class="wd-btn wd-btn-red">Non valider</button>
                 </div>
+
+                @if($dossier->checks_conformite)
+                <div x-show="showModal" x-cloak class="wd-modal-overlay" @click.self="showModal = false">
+                    <div class="wd-modal">
+                        <div class="wd-modal-title">Points à corriger</div>
+                        @foreach($dossier->checks_conformite as $check)
+                        <label class="wd-modal-check">
+                            <input type="checkbox" value="{{ $check['label'] }}" x-model="selected">
+                            <span class="wd-pastille wd-pastille-{{ $check['statut'] }}"></span>
+                            <span>{{ $check['label'] }}</span>
+                        </label>
+                        @endforeach
+                        <div class="wd-actions">
+                            <button type="button" @click="showModal = false" class="wd-btn wd-btn-dark">Valider la sélection</button>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </form>
         </div>
     </section>
