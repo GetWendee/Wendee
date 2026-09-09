@@ -82,10 +82,17 @@
         </a>
         @endif
         <div class="wd-nav-section">Compte</div>
-        @if(Auth::check() && Auth::user()->role === 'conseiller' && Auth::user()->dossierEnrolement)
+        @php
+        $dossierConseiller = Auth::check() && Auth::user()->role === 'conseiller' ? Auth::user()->dossierEnrolement : null;
+        $dossierNecessiteAttention = $dossierConseiller && ($dossierConseiller->statut === 'rejected' || ($dossierConseiller->statut === 'onboarding' && ! empty($dossierConseiller->notes_back_office)));
+        @endphp
+        @if($dossierConseiller)
         <a class="{{ request()->routeIs('tenant.dossier-enrolement.*') ? 'active' : '' }}" href="{{ route('tenant.dossier-enrolement.edit') }}">
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
             <span>Mon dossier</span>
+            @if($dossierNecessiteAttention)
+            <span class="wd-nav-dot"></span>
+            @endif
         </a>
         @endif
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')

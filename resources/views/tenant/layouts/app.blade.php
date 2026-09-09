@@ -34,6 +34,7 @@
         .wd-nav a.disabled svg{color:rgba(255,255,255,.20)}
         .wd-nav a.disabled:hover{background:transparent}
         .wd-soon{margin-left:auto;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.30);background:rgba(255,255,255,.08);padding:2px 6px;border-radius:999px;flex:0 0 auto}
+        .wd-nav-dot{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#f04438;flex:0 0 auto}
         .wd-bottom-nav{margin-top:auto;border-top:1px solid #302a28;padding-top:14px}
         .wd-bottom-nav a,.wd-bottom-nav button{display:block;width:100%;padding:9px 10px;color:#8e8681;font-size:9px;text-transform:uppercase;letter-spacing:.12em;text-align:left;background:none;border:0;cursor:pointer;font-family:inherit}
         .wd-main{margin-left:232px;min-height:100vh;padding-top:68px}

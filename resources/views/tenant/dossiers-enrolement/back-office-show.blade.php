@@ -112,13 +112,7 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
 
         <div x-data="{ showModal: false, selected: @js(collect($dossier->checks_conformite ?? [])->filter(fn ($c) => in_array($c['statut'] ?? 'ok', ['attention', 'bloquant']))->pluck('label')->values()) }">
             <div class="wd-field">
-                <form method="POST" action="{{ route('tenant.back-office-enrolement.refuser', $dossier) }}" @submit="
-                    if (selected.length) {
-                        const liste = selected.map(s => '- ' + s).join('\n');
-                        const libre = $refs.motifTextarea.value.trim();
-                        $refs.motifTextarea.value = liste + (libre ? '\n\n' + libre : '');
-                    }
-                ">
+                <form method="POST" action="{{ route('tenant.back-office-enrolement.refuser', $dossier) }}" id="refuser-form-{{ $dossier->id }}">
                     @csrf
                     <label>Refuser le dossier</label>
 
@@ -128,8 +122,8 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
                     </button>
                     @endif
 
-                    <textarea name="refuse_motif" x-ref="motifTextarea" placeholder="Expliquez au conseiller ce qui doit être corrigé" required></textarea>
-                    <div style="color:#817b76;font-size:11px;margin-top:4px;">Le motif sera visible par le conseiller sur son dossier. Il pourra corriger les informations et soumettre à nouveau.</div>
+                    <textarea name="refuse_motif" placeholder="Expliquez au conseiller ce qui doit être corrigé (facultatif si vous avez choisi des points ci-dessus)"></textarea>
+                    <div style="color:#817b76;font-size:11px;margin-top:4px;">Le motif et les points choisis seront visibles par le conseiller sur son dossier. Il pourra corriger les informations et soumettre à nouveau.</div>
                     <div class="wd-actions">
                         <button type="submit" class="wd-btn wd-btn-red">Refuser</button>
                     </div>
@@ -149,7 +143,7 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
                     <div class="wd-pj-check-list">
                         @foreach($dossier->checks_conformite as $check)
                         <label class="wd-pj-check">
-                            <input type="checkbox" value="{{ $check['label'] }}" x-model="selected">
+                            <input type="checkbox" name="refuse_points[]" value="{{ $check['label'] }}" x-model="selected" form="refuser-form-{{ $dossier->id }}">
                             <span class="wd-pastille wd-pastille-{{ $check['statut'] }}"></span>
                             <span>{{ $check['label'] }}</span>
                         </label>
@@ -188,7 +182,16 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
     @if($dossier->statut === 'rejected')
     <section class="wd-block">
         <div class="wd-section-title">Non validé pour le moment</div>
-        <p style="font-size:13px;color:#242424;">{{ $dossier->refuse_motif }}</p>
+        @if(!empty($dossier->refuse_points))
+        <ul style="margin:0 0 12px 18px;padding:0;font-size:13px;color:#242424;">
+            @foreach($dossier->refuse_points as $point)
+            <li style="margin-bottom:4px;">{{ $point }}</li>
+            @endforeach
+        </ul>
+        @endif
+        @if($dossier->refuse_motif)
+        <p style="font-size:13px;color:#151515;font-weight:700;background:#f9f8f7;border:1px solid #eeeae7;border-radius:8px;padding:12px 14px;margin:0;">{{ $dossier->refuse_motif }}</p>
+        @endif
     </section>
     @endif
 </div>

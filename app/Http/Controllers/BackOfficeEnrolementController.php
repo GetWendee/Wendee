@@ -79,13 +79,18 @@ class BackOfficeEnrolementController extends Controller
         abort_unless($dossier->user->parent_id === $viewer->id, 403);
 
         $validated = $request->validate([
-            'refuse_motif' => ['required', 'string', 'max:2000'],
+            'refuse_motif' => ['nullable', 'string', 'max:2000'],
+            'refuse_points' => ['nullable', 'array'],
+            'refuse_points.*' => ['string', 'max:255'],
         ]);
+
+        abort_if(empty($validated['refuse_motif']) && empty($validated['refuse_points']), 422, 'Merci de préciser au moins un point ou un motif.');
 
         $dossier->update([
             'statut' => 'rejected',
             'decision_cabinet' => 'refuse',
-            'refuse_motif' => $validated['refuse_motif'],
+            'refuse_motif' => $validated['refuse_motif'] ?? null,
+            'refuse_points' => $validated['refuse_points'] ?? [],
             'valide_par_id' => $viewer->id,
             'valide_le' => now(),
         ]);

@@ -83,9 +83,18 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
 
     @if($dossier->statut === 'rejected')
     <section class="wd-user-success" style="background:#fbeceb;border-color:#f5d3d3;color:#b94d4d;">
-        <div style="font-weight:800;margin-bottom:4px;">Non validé pour le moment</div>
-        <div>{{ $dossier->refuse_motif ?: "Le cabinet n'a pas encore validé ce dossier." }}</div>
-        <div style="margin-top:6px;color:#242424;">Vous pouvez corriger les informations ci-dessous puis soumettre à nouveau le dossier.</div>
+        <div style="font-weight:800;margin-bottom:8px;">Non validé pour le moment</div>
+        @if(!empty($dossier->refuse_points))
+        <ul style="margin:0 0 10px 18px;padding:0;color:#242424;font-weight:400;">
+            @foreach($dossier->refuse_points as $point)
+            <li style="margin-bottom:4px;">{{ $point }}</li>
+            @endforeach
+        </ul>
+        @endif
+        @if($dossier->refuse_motif)
+        <div style="background:#fff;border:1px solid #f5d3d3;border-radius:8px;padding:12px 14px;color:#151515;font-weight:700;margin-bottom:10px;">{{ $dossier->refuse_motif }}</div>
+        @endif
+        <div style="color:#242424;font-weight:400;">Vous pouvez corriger les informations ci-dessous puis soumettre à nouveau le dossier.</div>
     </section>
     @endif
 
