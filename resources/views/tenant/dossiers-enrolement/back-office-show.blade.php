@@ -40,7 +40,7 @@ html,body{margin:0!important;background:#f3f1ee!important}
 .wd-just-row:last-child{border-bottom:0}
 </style>
 @php
-$badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en cours', 'pending_validation' => 'En validation', 'contract_pending' => 'Convention à signer', 'active' => 'Actif', 'rejected' => 'Refusé'];
+$badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en cours', 'pending_validation' => 'En validation', 'contract_pending' => 'Convention à signer', 'active' => 'Actif', 'rejected' => 'Non validé pour le moment'];
 $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestation ORIAS', 'diplome' => 'Diplôme', 'rcp' => 'Attestation RCP', 'garantie_financiere' => 'Attestation de garantie financière', 'kbis' => 'Extrait Kbis'];
 @endphp
 <div class="wd-wrap">
@@ -104,10 +104,11 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
         <div class="wd-field">
             <form method="POST" action="{{ route('tenant.back-office-enrolement.refuser', $dossier) }}">
                 @csrf
-                <label>Refuser le dossier</label>
-                <textarea name="refuse_motif" placeholder="Motif du refus" required></textarea>
+                <label>Non valider pour le moment</label>
+                <textarea name="refuse_motif" placeholder="Expliquez au conseiller ce qui doit être corrigé" required></textarea>
+                <div style="color:#817b76;font-size:11px;margin-top:4px;">Le motif sera visible par le conseiller sur son dossier. Il pourra corriger les informations et soumettre à nouveau.</div>
                 <div class="wd-actions">
-                    <button type="submit" class="wd-btn wd-btn-red">Refuser</button>
+                    <button type="submit" class="wd-btn wd-btn-red">Non valider</button>
                 </div>
             </form>
         </div>
@@ -138,7 +139,7 @@ $typesJustificatifs = ['identite' => "Pièce d'identité", 'orias' => 'Attestati
 
     @if($dossier->statut === 'rejected')
     <section class="wd-block">
-        <div class="wd-section-title">Motif de refus</div>
+        <div class="wd-section-title">Non validé pour le moment</div>
         <p style="font-size:13px;color:#242424;">{{ $dossier->refuse_motif }}</p>
     </section>
     @endif

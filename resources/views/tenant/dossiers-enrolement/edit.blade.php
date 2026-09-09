@@ -57,7 +57,7 @@ html,body{margin:0!important;background:#f3f1ee!important}
 </style>
 @php
 $modeExercice = old('mode_exercice', $dossier->mode_exercice);
-$badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en cours', 'pending_validation' => 'En validation', 'contract_pending' => 'Convention à signer', 'active' => 'Actif', 'rejected' => 'Refusé'];
+$badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en cours', 'pending_validation' => 'En validation', 'contract_pending' => 'Convention à signer', 'active' => 'Actif', 'rejected' => 'Non validé pour le moment'];
 $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending', 'active']);
 @endphp
 <div class="wd-wrap">
@@ -78,6 +78,14 @@ $readonly = in_array($dossier->statut, ['pending_validation', 'contract_pending'
     @if($readonly)
     <section class="wd-user-success" style="background:#eaf1fb;border-color:#d3e2f5;color:#2f5fa8;">
         Ce dossier est en cours de validation par le cabinet, il n'est plus modifiable.
+    </section>
+    @endif
+
+    @if($dossier->statut === 'rejected')
+    <section class="wd-user-success" style="background:#fbeceb;border-color:#f5d3d3;color:#b94d4d;">
+        <div style="font-weight:800;margin-bottom:4px;">Non validé pour le moment</div>
+        <div>{{ $dossier->refuse_motif ?: "Le cabinet n'a pas encore validé ce dossier." }}</div>
+        <div style="margin-top:6px;color:#242424;">Vous pouvez corriger les informations ci-dessous puis soumettre à nouveau le dossier.</div>
     </section>
     @endif
 

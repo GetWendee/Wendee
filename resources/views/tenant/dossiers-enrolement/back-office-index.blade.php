@@ -25,7 +25,7 @@ html,body{margin:0!important;background:#f3f1ee!important}
 .wd-empty{padding:40px 20px;text-align:center;color:#817b76;font-size:13px}
 </style>
 @php
-$badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en cours', 'pending_validation' => 'En validation', 'contract_pending' => 'Convention à signer', 'active' => 'Actif', 'rejected' => 'Refusé'];
+$badgeLabels = ['invited' => 'Invitation envoyée', 'onboarding' => 'Dossier en cours', 'pending_validation' => 'En validation', 'contract_pending' => 'Convention à signer', 'active' => 'Actif', 'rejected' => 'Non validé pour le moment'];
 @endphp
 <div class="wd-wrap">
     <section class="wd-head">
