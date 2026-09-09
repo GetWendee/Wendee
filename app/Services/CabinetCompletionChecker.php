@@ -57,22 +57,28 @@ class CabinetCompletionChecker
             }
         }
 
-        $objectifsData = $user->objectifs ?? [];
-
-        $objectifsFields = [
-            'client_semaine' => 'Clients / semaine',
-            'rdv_semaine' => 'RDV / semaine',
-            'collectes_semaine' => 'Collectes / semaine',
-            'taux_transformation' => 'Taux de transformation',
-            'revenu_mensuel' => 'Revenu mensuel',
-            'revenu_annuel' => 'Revenu annuel',
-        ];
-
+        // Les objectifs personnels ne sont éditables que depuis la page
+        // Cabinet, elle-même réservée au courtier. Un conseiller ou un
+        // apporteur n'a aucun moyen de les renseigner : ce contrôle ne le
+        // concerne donc pas, sous peine de le bloquer indéfiniment.
         $objectifs = [];
 
-        foreach ($objectifsFields as $field => $label) {
-            if (blank($objectifsData[$field] ?? null)) {
-                $objectifs[] = ['label' => $label, 'anchor' => 'objectifs-cabinet', 'tab' => null];
+        if ($user->effectiveRole() === 'courtier') {
+            $objectifsData = $user->objectifs ?? [];
+
+            $objectifsFields = [
+                'client_semaine' => 'Clients / semaine',
+                'rdv_semaine' => 'RDV / semaine',
+                'collectes_semaine' => 'Collectes / semaine',
+                'taux_transformation' => 'Taux de transformation',
+                'revenu_mensuel' => 'Revenu mensuel',
+                'revenu_annuel' => 'Revenu annuel',
+            ];
+
+            foreach ($objectifsFields as $field => $label) {
+                if (blank($objectifsData[$field] ?? null)) {
+                    $objectifs[] = ['label' => $label, 'anchor' => 'objectifs-cabinet', 'tab' => null];
+                }
             }
         }
 
@@ -87,5 +93,20 @@ class CabinetCompletionChecker
     public static function isComplete(CabinetProfile $cabinet, User $user): bool
     {
         return self::status($cabinet, $user)['complete'];
+    }
+
+    /**
+     * Redirection standard quand le cabinet/les objectifs ne sont pas
+     * complets. Le courtier est renvoyé vers la page Cabinet (qu'il peut
+     * modifier) ; les autres rôles n'y ont pas accès et sont renvoyés vers
+     * le tableau de bord, avec le même message d'explication.
+     */
+    public static function gateRedirect(User $user): \Illuminate\Http\RedirectResponse
+    {
+        $route = $user->effectiveRole() === 'courtier' ? 'tenant.cabinet' : 'tenant.dashboard';
+
+        return redirect()->route($route)
+            ->with('cabinet_gate_redirect', true)
+            ->with('status', "Complétez d'abord les informations essentielles de votre cabinet avant de créer un compte.");
     }
 }

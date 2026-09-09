@@ -31,9 +31,7 @@ class ClientController extends Controller
         $user = auth()->user();
 
         if (! $cabinet || ! CabinetCompletionChecker::isComplete($cabinet, $user)) {
-            return redirect()->route('tenant.cabinet')
-                ->with('cabinet_gate_redirect', true)
-                ->with('status', "Complétez d'abord les informations essentielles de votre cabinet avant de créer un compte.");
+            return CabinetCompletionChecker::gateRedirect($user);
         }
 
         // Représentants déjà rattachés à au moins un titulaire (mineur,
@@ -87,9 +85,7 @@ class ClientController extends Controller
         $cabinet = CabinetProfile::query()->first();
 
         if (! $cabinet || ! CabinetCompletionChecker::isComplete($cabinet, $request->user())) {
-            return redirect()->route('tenant.cabinet')
-                ->with('cabinet_gate_redirect', true)
-                ->with('status', "Complétez d'abord les informations essentielles de votre cabinet avant de créer un compte.");
+            return CabinetCompletionChecker::gateRedirect($request->user());
         }
 
         $mode = $request->input('mode', 'soi_meme');

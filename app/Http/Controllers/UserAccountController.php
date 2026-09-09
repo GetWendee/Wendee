@@ -18,9 +18,7 @@ class UserAccountController extends Controller
         $cabinet = CabinetProfile::query()->first();
 
         if (! $cabinet || ! CabinetCompletionChecker::isComplete($cabinet, $request->user())) {
-            return redirect()->route('tenant.cabinet')
-                ->with('cabinet_gate_redirect', true)
-                ->with('status', "Complétez d'abord les informations essentielles de votre cabinet avant de créer un compte.");
+            return CabinetCompletionChecker::gateRedirect($request->user());
         }
 
         $roles = $request->user()->creatableUserRoles();
@@ -39,9 +37,7 @@ class UserAccountController extends Controller
         $cabinet = CabinetProfile::query()->first();
 
         if (! $cabinet || ! CabinetCompletionChecker::isComplete($cabinet, $creator)) {
-            return redirect()->route('tenant.cabinet')
-                ->with('cabinet_gate_redirect', true)
-                ->with('status', "Complétez d'abord les informations essentielles de votre cabinet avant de créer un compte.");
+            return CabinetCompletionChecker::gateRedirect($creator);
         }
 
         $validated = $request->validate([

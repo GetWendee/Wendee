@@ -112,6 +112,10 @@ backdrop-filter:blur(10px)
 
 <div class="wd-wrap">
 
+@if(session('status'))
+<div style="margin-bottom:18px;padding:12px 16px;border-radius:8px;background:#fdf2f8;color:#a3195b;font-size:13px;border:1px solid #f6c9e1;">{{ session('status') }}</div>
+@endif
+
 <section class="wd-head">
 <div>
 <div class="wd-eyebrow">Contrôle du portefeuille</div>
