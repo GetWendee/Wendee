@@ -2485,6 +2485,74 @@ html,body{
 </style>
 <div class="wd-wrap">
 
+<section class="wd-hero {{ $dossierStatus['a_jour'] ? 'wd-hero-conforme' : 'wd-hero-non-conforme' }}">
+
+<div class="wd-hero-main">
+
+<div class="wd-identity">
+
+<div class="wd-avatar">{{ $initiales }}</div>
+
+<div>
+<div class="wd-eyebrow">Client · portefeuille privé</div>
+<h1>{{ $client->prenom }} {{ $client->nom }}</h1>
+<div class="wd-hero-meta">
+Dossier client · suivi patrimonial
+</div>
+</div>
+
+</div>
+
+<div class="wd-actions">
+
+<a class="wd-btn"
+href="{{ route('tenant.clients.edit', $client) }}">
+Modifier
+</a>
+
+
+
+</div>
+
+</div>
+
+<div class="wd-hero-foot">
+
+<div>
+<span>Téléphone</span>
+<strong>{{ $formatTelephone($client->telephone_mobile) }}</strong>
+</div>
+
+<div>
+<span>Email</span>
+<strong>{{ $client->email ?: '-' }}</strong>
+</div>
+
+@if($viewRole === 'courtier')
+
+<div>
+<span>Conseiller</span>
+<strong>{{ $client->conseiller?->name ?: '-' }}</strong>
+</div>
+
+@elseif($viewRole === 'conseiller' && $client->apporteur)
+
+<div>
+<span>Apporteur</span>
+<strong>{{ $client->apporteur->name }}</strong>
+</div>
+
+@endif
+
+<div>
+<span>Dernière mise à jour</span>
+<strong>{{ $client->updated_at?->translatedFormat('d F Y') }}</strong>
+</div>
+
+</div>
+
+</section>
+
 <nav class="wd-tabs">
 
 <a href="{{ route('tenant.dashboard') }}">
@@ -2521,13 +2589,13 @@ Conformité
 </nav>
 
 
-<div style="display:flex;gap:12px;justify-content:flex-end;margin:22px 0 0;">
+<div style="display:flex;gap:12px;justify-content:flex-start;margin:22px 0 0;">
 @if($recommandationDisponible)
 <a href="{{ route('tenant.clients.recommandation-patrimoniale', $client) }}" class="wd-recommandation-button">
 Recommandation
 </a>
 @else
-<span class="wd-recommandation-button-disabled">
+<span class="wd-recommandation-button-disabled" title="La recommandation patrimoniale nécessite une suggestion de prestations générée au préalable.">
 Recommandation
 </span>
 @endif
@@ -2536,7 +2604,7 @@ Recommandation
 Plan d'action
 </a>
 @else
-<span class="wd-recommandation-button-disabled">
+<span class="wd-recommandation-button-disabled" title="Le plan d'action nécessite une recommandation patrimoniale complétée au préalable.">
 Plan d'action
 </span>
 @endif

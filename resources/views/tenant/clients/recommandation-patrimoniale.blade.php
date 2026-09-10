@@ -92,7 +92,7 @@
 .wd-modal-card{width:100%;max-width:92vw;}
 }
 </style>
-<div style="display:flex;gap:12px;justify-content:flex-end;margin:22px 0 0;">
+<div style="display:flex;gap:12px;justify-content:flex-start;margin:22px 0 0;">
     <a href="{{ route('tenant.clients.aide-decision', $client) }}" class="wd-recommandation-button">
         Retour analyse
     </a>
@@ -101,7 +101,7 @@
         Plan d'action
     </a>
     @else
-    <span class="wd-recommandation-button-disabled">
+    <span class="wd-recommandation-button-disabled" title="Le plan d'action nécessite une recommandation patrimoniale complétée au préalable.">
         Plan d'action
     </span>
     @endif
