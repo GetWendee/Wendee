@@ -1,11 +1,14 @@
 <x-tenant-app-layout>
 @include('tenant.clients.partials.header-tabs', ['active' => 'plan-action'])
 <style>
-.wd-reco-card{background:#242424;color:#fff;border-radius:14px;padding:22px 26px;border-top:3px solid var(--pink);display:flex;align-items:center;gap:16px;}
-.wd-reco-icon{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.08);display:grid;place-items:center;flex:0 0 auto;}
-.wd-reco-card h2{margin:0;font-size:16px;}
-.wd-reco-card p{margin:4px 0 0;color:#c9c2be;font-size:12px;}
 .wd-reco-body{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-top:18px;}
+.wd-analysis-intro{margin-bottom:22px;}
+.wd-analysis-kicker{margin:0 0 7px;color:#80A29A;font-size:10px;line-height:1;font-weight:800;letter-spacing:.16em;text-transform:uppercase;}
+.wd-analysis-title{margin:0;color:#252D2A;font-size:27px;line-height:1.18;font-weight:700;letter-spacing:-.035em;}
+.wd-analysis-subtitle{max-width:900px;margin:8px 0 0;color:#7A8581;font-size:12px;line-height:1.6;}
+.wd-recommandation-button{flex:0 0 auto;min-width:190px;height:40px;padding:0 20px;border:1px solid rgba(255,255,255,.10);border-top:2px solid #FF3399;border-radius:8px;background:#242424;color:#ffffff;font-size:9px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;}
+.wd-recommandation-button:hover{box-shadow:0 0 0 2px rgba(255,51,153,.10);transform:translateY(-1px);}
+.wd-recommandation-button-disabled{flex:0 0 auto;min-width:190px;height:40px;padding:0 20px;border:1px solid #D2D8D5;border-top:2px solid #C8CFCC;border-radius:8px;background:#E2E5E4;color:#929A97;font-size:9px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;cursor:not-allowed;display:inline-flex;align-items:center;justify-content:center;}
 .wd-reco-date{color:var(--muted);font-size:12px;margin:0 0 20px;}
 .wd-reco-question{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 10px;}
 .wd-reco-textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;padding:14px;font:inherit;font-size:13px;color:var(--ink);resize:vertical;}
@@ -43,19 +46,24 @@
 .wd-modal-btn-confirm:hover{box-shadow:0 0 0 2px rgba(255,51,153,.15);}
 @keyframes wd-modal-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 @media(max-width:600px){
-.wd-reco-card{padding:16px 18px;flex-wrap:wrap;}
 .wd-reco-body,.wd-reco-result{padding:18px;}
 .wd-reco-result-head{flex-wrap:wrap;gap:10px;align-items:flex-start;}
 .wd-modal-card{width:100%;max-width:92vw;}
 }
 </style>
-<section class="wd-section">
-    <div class="wd-reco-card">
-        <div class="wd-reco-icon">🧭</div>
-        <div>
-            <h2>Générer le plan d'action</h2>
-            <p>Basé sur le KYC, le patrimoine, le profil investisseur et la recommandation patrimoniale du client</p>
-        </div>
+<div style="display:flex;gap:12px;justify-content:flex-end;margin:22px 0 0;">
+    <a href="{{ route('tenant.clients.aide-decision', $client) }}" class="wd-recommandation-button">
+        Retour analyse
+    </a>
+    <a href="{{ route('tenant.clients.recommandation-patrimoniale', $client) }}" class="wd-recommandation-button">
+        Retour recommandation
+    </a>
+</div>
+<section class="wd-section wd-analysis-content">
+    <div class="wd-analysis-intro">
+        <p class="wd-analysis-kicker">Aide à la décision</p>
+        <h2 class="wd-analysis-title">Générer le plan d'action</h2>
+        <p class="wd-analysis-subtitle">Basé sur le KYC, le patrimoine, le profil investisseur et la recommandation patrimoniale du client</p>
     </div>
     <div class="wd-reco-body">
         @if(session('status'))

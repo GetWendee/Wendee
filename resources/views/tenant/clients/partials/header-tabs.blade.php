@@ -175,6 +175,7 @@ html,body{
 }
 </style>
 <div class="wd-wrap">
+@unless(in_array($active ?? null, ['recommandation', 'plan-action'], true))
 <section class="wd-hero {{ $dossierStatus['a_jour'] ? 'wd-hero-conforme' : 'wd-hero-non-conforme' }}">
 <div class="wd-hero-main">
 <div class="wd-identity">
@@ -219,6 +220,7 @@ Modifier
 </div>
 </div>
 </section>
+@endunless
 <nav class="wd-tabs">
 <a href="{{ route('tenant.dashboard') }}" class="{{ ($active ?? null) === 'dashboard' ? 'active' : '' }}">
 Tableau de bord
