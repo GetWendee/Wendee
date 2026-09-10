@@ -174,6 +174,8 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::get('/recommandation-patrimoniale/{client}', [ClientController::class, 'recommandationPatrimoniale'])->name('clients.recommandation-patrimoniale');
         Route::post('/recommandation-patrimoniale/{client}', [ClientController::class, 'genererRecommandation'])->name('clients.recommandation-patrimoniale.generer');
         Route::get('/recommandation-patrimoniale/{client}/pdf', [ClientController::class, 'telechargerRecommandationPdf'])->name('clients.recommandation-patrimoniale.pdf');
+        Route::get('/recommandation-patrimoniale/{client}/pdf/voir', [ClientController::class, 'voirRecommandationPdfEnLigne'])->name('clients.recommandation-patrimoniale.pdf.voir');
+        Route::post('/recommandation-patrimoniale/{client}/valider', [ClientController::class, 'validerRecommandation'])->name('clients.recommandation-patrimoniale.valider');
         Route::put('/recommandation-patrimoniale/{client}/lettre/{analysis}', [ClientController::class, 'modifierRecommandationContenu'])->name('clients.recommandation-patrimoniale.modifier');
         Route::get('/plan-action/{client}', [ClientController::class, 'planAction'])->name('clients.plan-action');
         Route::post('/plan-action/{client}', [ClientController::class, 'genererPlanAction'])->name('clients.plan-action.generer');

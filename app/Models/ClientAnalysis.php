@@ -23,6 +23,9 @@ class ClientAnalysis extends Model
         'started_at',
         'completed_at',
         'error_message',
+        'validation_code',
+        'validation_code_envoye_le',
+        'valide_le',
     ];
 
     protected function casts(): array
@@ -32,6 +35,8 @@ class ClientAnalysis extends Model
             'result_json' => 'array',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
+            'validation_code_envoye_le' => 'datetime',
+            'valide_le' => 'datetime',
         ];
     }
 

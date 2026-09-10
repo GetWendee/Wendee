@@ -65,6 +65,11 @@
 .wd-reco-editor .ql-editor h2.section-title{font-size:14px;font-weight:800;margin:16px 0 8px;}
 .wd-reco-editor .ql-editor h2.section-title .section-number{display:inline-block;min-width:20px;margin-right:8px;}
 .wd-reco-editor-form{display:flex;justify-content:flex-end;margin-top:14px;}
+.wd-reco-client-pdf-wrap{display:flex;gap:20px;align-items:flex-start;}
+.wd-reco-pdf-frame{flex:1 1 auto;width:100%;min-height:720px;border:1px solid var(--line);border-radius:10px;}
+.wd-reco-validation{flex:0 0 280px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:18px;}
+.wd-reco-validation-form{display:flex;flex-direction:column;gap:14px;margin-top:12px;}
+@media(max-width:900px){.wd-reco-client-pdf-wrap{flex-direction:column;}.wd-reco-validation{flex:1 1 auto;width:100%;box-sizing:border-box;}}
 .wd-reco-save{min-width:220px;}
 .wd-modal-overlay{position:fixed;inset:0;background:rgba(23,21,20,.55);z-index:9999;align-items:center;justify-content:center;}
 .wd-modal-card{background:#fff;border-radius:14px;padding:24px 26px;width:320px;box-shadow:0 20px 50px rgba(0,0,0,.25);}
@@ -253,14 +258,39 @@
                 </button>
                 @endif
             </div>
-            <div id="wd-reco-editor" class="wd-reco-editor">{!! $htmlContenu !!}</div>
             @if($viewRole !== 'client')
+            <div id="wd-reco-editor" class="wd-reco-editor">{!! $htmlContenu !!}</div>
             <form method="POST" action="{{ route('tenant.clients.recommandation-patrimoniale.modifier', ['client' => $client, 'analysis' => $recommandation->id]) }}" class="wd-reco-editor-form">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="contenu_html" id="wd-reco-hidden">
                 <button type="submit" class="wd-reco-submit wd-reco-save">Enregistrer les modifications</button>
             </form>
+            @elseif($recommandation->valide_le)
+            <div class="wd-reco-flash wd-reco-flash-success">Vous avez validé cette recommandation le {{ $recommandation->valide_le->translatedFormat('d F Y à H:i') }}.</div>
+            <iframe src="{{ route('tenant.clients.recommandation-patrimoniale.pdf.voir', $client) }}" class="wd-reco-pdf-frame"></iframe>
+            @elseif($recommandation->validation_code)
+            <div class="wd-reco-client-pdf-wrap">
+                <iframe src="{{ route('tenant.clients.recommandation-patrimoniale.pdf.voir', $client) }}" class="wd-reco-pdf-frame"></iframe>
+                <div class="wd-reco-validation">
+                    <p class="wd-reco-question">Validation de la recommandation</p>
+                    <p class="wd-reco-hint">Un code vous a été envoyé par email. Saisissez-le ci-dessous pour valider.</p>
+                    <form method="POST" action="{{ route('tenant.clients.recommandation-patrimoniale.valider', $client) }}" class="wd-reco-validation-form">
+                        @csrf
+                        <input type="text" name="code" class="wd-modal-input" placeholder="Code reçu par email" maxlength="10" autocomplete="off" required>
+                        <label class="wd-cabinet-checkbox">
+                            <input type="checkbox" name="accepte" value="1" required>
+                            <span class="wd-cabinet-checkbox-box">
+                                <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <span>J'accepte cette recommandation patrimoniale</span>
+                        </label>
+                        <button type="submit" class="wd-reco-submit">Valider</button>
+                    </form>
+                </div>
+            </div>
+            @else
+            <p class="wd-reco-date">Votre conseiller vous enverra prochainement votre recommandation patrimoniale.</p>
             @endif
         </div>
     </section>
@@ -276,7 +306,7 @@
             <span class="wd-cabinet-checkbox-box">
                 <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
             </span>
-            <span>Envoyer aussi une copie par email au client</span>
+            <span>Joindre le PDF à l'email envoyé au client (un email avec le code de validation part dans tous les cas)</span>
         </label>
         <div class="wd-modal-actions">
             <button type="button" id="wd-modal-lieu-cancel" class="wd-modal-btn-cancel">Annuler</button>

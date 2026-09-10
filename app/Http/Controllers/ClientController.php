@@ -591,15 +591,24 @@ class ClientController extends Controller
 
         $filename = $this->nommerFichierPdf('Recommandation patrimoniale', $client);
 
-        if ($request->boolean('envoyer_email') && $client->email) {
+        if ($client->email) {
+            $code = strtoupper(\Illuminate\Support\Str::random(5));
+
+            $recommandation->update([
+                'validation_code' => $code,
+                'validation_code_envoye_le' => now(),
+                'valide_le' => null,
+            ]);
+
             try {
                 \Illuminate\Support\Facades\Mail::to($client->email)->send(
                     new \App\Mail\RecommandationPatrimonialeMail(
                         $client,
                         $cabinet,
                         $conseiller,
-                        $pdf->output(),
-                        $filename
+                        $code,
+                        $request->boolean('envoyer_email') ? $pdf->output() : null,
+                        $request->boolean('envoyer_email') ? $filename : null
                     )
                 );
             } catch (\Throwable $e) {
@@ -610,6 +619,95 @@ class ClientController extends Controller
         }
 
         return $pdf->download($filename);
+    }
+
+    public function voirRecommandationPdfEnLigne(
+        \Illuminate\Http\Request $request,
+        Client $client
+    ): \Symfony\Component\HttpFoundation\Response
+    {
+        $recommandation = $client->analyses()
+            ->where('type', 'recommandation')
+            ->where('status', 'completed')
+            ->latest('completed_at')
+            ->first();
+
+        abort_unless($recommandation, 404);
+
+        $cabinet = \App\Models\CabinetProfile::query()->first();
+        $conseiller = $client->conseiller;
+
+        $nomClient = trim(
+            ($client->civilite ? $client->civilite . ' ' : '')
+            . $client->prenom . ' ' . $client->nom
+        );
+
+        $corpsHtml = $recommandation->result_json['lettre_mission_html']
+            ?? \App\Services\AI\RecommandationAnalysisService::convertirMarkdownEnHtml(
+                $recommandation->result_json['lettre_mission'] ?? $recommandation->raw_response ?? ''
+            );
+
+        $data = [
+            'client' => $client,
+            'cabinet' => $cabinet,
+            'recommandation' => $recommandation,
+            'nomClient' => $nomClient,
+            'nomConseiller' => $conseiller?->name ?? auth()->user()->name,
+            'telConseiller' => $conseiller?->telephone_mobile,
+            'mailConseiller' => $conseiller?->email,
+            'lieuSignature' => $client->kyc?->lieu_signature ?: $cabinet?->ville,
+            'dateGeneration' => now()->translatedFormat('d F Y'),
+            'corpsHtml' => $corpsHtml,
+            'fontRegular' => base_path('resources/fonts/Montserrat-Regular.ttf'),
+            'fontMedium' => base_path('resources/fonts/Montserrat-Medium.ttf'),
+            'fontSemiBold' => base_path('resources/fonts/Montserrat-SemiBold.ttf'),
+            'fontBold' => base_path('resources/fonts/Montserrat-Bold.ttf'),
+            'logoPath' => $cabinet?->logo ? storage_path('app/public/' . $cabinet->logo) : null,
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'tenant.clients.pdf.recommandation-patrimoniale',
+            $data
+        );
+
+        return $pdf->stream($this->nommerFichierPdf('Recommandation patrimoniale', $client));
+    }
+
+    public function validerRecommandation(
+        \Illuminate\Http\Request $request,
+        Client $client
+    ): \Illuminate\Http\RedirectResponse
+    {
+        abort_unless($request->user()?->effectiveRole() === 'client', 403);
+
+        $recommandation = $client->analyses()
+            ->where('type', 'recommandation')
+            ->where('status', 'completed')
+            ->latest('completed_at')
+            ->first();
+
+        abort_unless($recommandation && $recommandation->validation_code, 404);
+
+        $validated = $request->validate([
+            'code' => ['required', 'string'],
+            'accepte' => ['required', 'accepted'],
+        ]);
+
+        if (strtoupper(trim($validated['code'])) !== $recommandation->validation_code) {
+            return back()->with('error', 'Le code saisi est incorrect.');
+        }
+
+        $recommandation->update(['valide_le' => now()]);
+
+        $destinataire = $client->conseiller;
+
+        if ($destinataire) {
+            $destinataire->notify(new \App\Notifications\RecommandationValideeNotification($client));
+        }
+
+        return redirect()
+            ->route('tenant.clients.recommandation-patrimoniale', $client)
+            ->with('status', 'Recommandation validée, merci.');
     }
 
 

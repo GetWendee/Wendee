@@ -17,8 +17,9 @@ class RecommandationPatrimonialeMail extends Mailable
         public Client $client,
         public ?CabinetProfile $cabinet,
         public ?User $conseiller,
-        public string $pdfContent,
-        public string $filename,
+        public string $code,
+        public ?string $pdfContent = null,
+        public ?string $filename = null,
     ) {
     }
 
@@ -26,16 +27,23 @@ class RecommandationPatrimonialeMail extends Mailable
     {
         $nomCabinet = $this->cabinet?->nom_commercial ?: 'Wendee';
 
-        return $this->subject('Votre recommandation patrimoniale - ' . $nomCabinet)
+        $mail = $this->subject('Votre recommandation patrimoniale - ' . $nomCabinet)
             ->view('emails.recommandation-patrimoniale')
             ->with([
                 'client' => $this->client,
                 'cabinet' => $this->cabinet,
                 'conseiller' => $this->conseiller,
                 'nomCabinet' => $nomCabinet,
-            ])
-            ->attachData($this->pdfContent, $this->filename, [
+                'code' => $this->code,
+                'pdfJoint' => $this->pdfContent !== null,
+            ]);
+
+        if ($this->pdfContent !== null && $this->filename !== null) {
+            $mail->attachData($this->pdfContent, $this->filename, [
                 'mime' => 'application/pdf',
             ]);
+        }
+
+        return $mail;
     }
 }
