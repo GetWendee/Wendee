@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'client.access' => \App\Http\Middleware\EnsureClientAccess::class,
         ]);
 
+        $middleware->web(append: [\App\Http\Middleware\EnsureCompteNonBloque::class]);
+
         $middleware->redirectGuestsTo(function (Request $request) {
             if (function_exists('tenant') && tenant()) {
                 return route('tenant.login', absolute: false);

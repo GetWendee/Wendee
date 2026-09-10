@@ -12,6 +12,8 @@
     <section class="wd-user-success">Profil mis à jour.</section>
     @elseif (session('status') === 'facture-supprimee')
     <section class="wd-user-success">Facture supprimée.</section>
+    @elseif (session('status') === 'demande-changement-email-envoyee')
+    <section class="wd-user-success">Un e-mail de confirmation a été envoyé à votre adresse actuelle. Le changement ne sera effectif qu'après validation.</section>
     @elseif (session('status'))
     <section class="wd-user-success">{{ session('status') }}</section>
     @endif
@@ -33,6 +35,27 @@
                 </div>
             </div>
             <button type="submit" class="wd-profil-submit">Enregistrer</button>
+        </form>
+    </div>
+
+    <div class="wd-profil-form">
+        <h2 class="wd-profil-subhead">Changer d'adresse e-mail</h2>
+        <p class="wd-profil-hint">Un e-mail de confirmation sera envoyé à votre adresse actuelle avant tout changement.</p>
+        <form method="POST" action="{{ route('tenant.profil.email.demander') }}">
+            @csrf
+            <div class="wd-cabinet-information-grid">
+                <div class="wd-cabinet-field wd-c3">
+                    <label for="mot_de_passe_actuel">Mot de passe actuel</label>
+                    <input type="password" id="mot_de_passe_actuel" name="mot_de_passe_actuel" required autocomplete="current-password">
+                    @error('mot_de_passe_actuel')<div class="wd-field-error">{{ $message }}</div>@enderror
+                </div>
+                <div class="wd-cabinet-field wd-c3">
+                    <label for="nouvel_email">Nouvelle adresse e-mail</label>
+                    <input type="email" id="nouvel_email" name="nouvel_email" required autocomplete="email">
+                    @error('nouvel_email')<div class="wd-field-error">{{ $message }}</div>@enderror
+                </div>
+            </div>
+            <button type="submit" class="wd-profil-submit">Envoyer la demande</button>
         </form>
     </div>
 

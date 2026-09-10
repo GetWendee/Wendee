@@ -18,6 +18,14 @@ class DashboardController extends Controller
             return redirect()->route('tenant.portefeuille.index');
         }
 
+        if ($user->effectiveRole() === 'client') {
+            $client = $user->client;
+
+            abort_unless($client, 403);
+
+            return redirect()->route('tenant.clients.show', $client);
+        }
+
         /*
          * Le dashboard est celui du conseiller connecté.
          *

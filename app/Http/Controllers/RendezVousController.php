@@ -6,6 +6,7 @@ use App\Models\CalendarConnection;
 use App\Models\Client;
 use App\Models\RendezVous;
 use App\Models\User;
+use App\Notifications\DemandeRendezVousNotification;
 use App\Services\Calendar\AvailabilityService;
 use App\Services\Calendar\GoogleCalendarService;
 use Carbon\Carbon;
@@ -37,6 +38,27 @@ class RendezVousController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
+
+        if ($user->effectiveRole() === 'client') {
+            $client = $user->client;
+
+            abort_unless($client, 403);
+
+            $rendezVousAVenir = RendezVous::query()
+                ->where('client_id', $client->id)
+                ->where('statut', '!=', 'annule')
+                ->where('starts_at', '>=', now())
+                ->orderBy('starts_at')
+                ->get();
+
+            $rendezVousPasses = RendezVous::query()
+                ->where('client_id', $client->id)
+                ->where('starts_at', '<', now())
+                ->orderByDesc('starts_at')
+                ->get();
+
+            return view('tenant.rendez-vous.client', compact('rendezVousAVenir', 'rendezVousPasses', 'client'));
+        }
 
         abort_unless($user && in_array($user->effectiveRole(), ['courtier', 'conseiller'], true), 403);
 
@@ -341,6 +363,33 @@ class RendezVousController extends Controller
         }
 
         return back()->with('status', 'Rendez-vous enregistré.');
+    }
+
+    /**
+     * Le client demande un rendez-vous à son conseiller (pas de créneau
+     * choisi, juste une demande avec sujet + urgence, à traiter côté
+     * conseiller via le centre de notifications).
+     */
+    public function demanderRendezVous(Request $request, Client $client): RedirectResponse
+    {
+        abort_unless($request->user()?->effectiveRole() === 'client', 403);
+
+        $validated = $request->validate([
+            'urgent' => ['required', 'boolean'],
+            'sujet' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $destinataire = $client->conseiller;
+
+        abort_unless($destinataire, 404);
+
+        $destinataire->notify(new DemandeRendezVousNotification(
+            $client,
+            (bool) $validated['urgent'],
+            $validated['sujet'],
+        ));
+
+        return back()->with('status', 'demande-rdv-envoyee');
     }
 
     public function annuler(RendezVous $rendezVous): RedirectResponse

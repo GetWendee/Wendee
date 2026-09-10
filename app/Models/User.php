@@ -77,6 +77,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Fiche client associée à ce compte, quand ce user a le rôle client.
+     */
+    public function client(): HasOne
+    {
+        return $this->hasOne(Client::class, 'user_id');
+    }
+
+    /**
      * Titulaires (mineurs, personnes morales...) pour lesquels ce user a
      * un pouvoir de représentation, via la table representants.
      */

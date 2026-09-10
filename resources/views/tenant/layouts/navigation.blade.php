@@ -46,7 +46,7 @@
             <span>Rendez-vous</span>
         </a>
         @endif
-        @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur')
+        @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur' && Auth::user()->effectiveRole() !== 'client')
         <div class="wd-nav-section">Activité</div>
         @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
         <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
@@ -112,7 +112,7 @@
             <span>Dossiers d'enrôlement</span>
         </a>
         @endif
-        @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur')
+        @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur' && Auth::user()->effectiveRole() !== 'client')
         <a class="{{ request()->routeIs('tenant.cabinet') ? 'active' : '' }}" href="{{ route('tenant.cabinet') }}">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
             <span>Paramètres</span>
@@ -192,6 +192,53 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <header class="wd-topbar">
     <div class="wd-crumb">{{ $wdCrumb }}</div>
+    @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
+    <div class="wd-notif" x-data="{ open: false }" x-on:click.outside="open = false">
+        <button type="button" class="wd-notif-bell" x-on:click="open = !open" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            @php $wdNbNonLues = Auth::user()->unreadNotifications->count(); @endphp
+            @if($wdNbNonLues > 0)
+            <span class="wd-notif-badge">{{ $wdNbNonLues > 9 ? '9+' : $wdNbNonLues }}</span>
+            @endif
+        </button>
+        <div class="wd-notif-dropdown" x-show="open" x-cloak x-transition>
+            <div class="wd-notif-head">Notifications</div>
+            @forelse(Auth::user()->notifications()->latest()->take(10)->get() as $wdNotif)
+            <a href="{{ route('tenant.notifications.lire', $wdNotif) }}" class="wd-notif-item {{ $wdNotif->read_at ? '' : 'wd-notif-item-unread' }}">
+                <div class="wd-notif-item-title">
+                    @if($wdNotif->data['urgent'] ?? false)<span class="wd-notif-urgent">Urgent</span>@endif
+                    @if(($wdNotif->data['type'] ?? null) === 'interet_prestation')
+                        Intérêt — {{ $wdNotif->data['titre'] ?? '' }} ({{ $wdNotif->data['client_nom'] ?? '' }})
+                    @else
+                        Demande de RDV — {{ $wdNotif->data['client_nom'] ?? '' }}
+                    @endif
+                </div>
+                @if(! empty($wdNotif->data['sujet']))
+                <div class="wd-notif-item-sujet">{{ \Illuminate\Support\Str::limit($wdNotif->data['sujet'], 80) }}</div>
+                @endif
+                <div class="wd-notif-item-date">{{ $wdNotif->created_at->diffForHumans() }}</div>
+            </a>
+            @empty
+            <div class="wd-notif-empty">Aucune notification.</div>
+            @endforelse
+        </div>
+    </div>
+    <style>
+    .wd-notif{position:relative}
+    .wd-notif-bell{position:relative;background:none;border:0;cursor:pointer;color:#4a4542;padding:8px;display:flex;align-items:center;justify-content:center}
+    .wd-notif-badge{position:absolute;top:2px;right:2px;background:#f40087;color:#fff;font-size:9px;font-weight:800;border-radius:999px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+    .wd-notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:340px;max-height:420px;overflow-y:auto;background:#fff;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.18);z-index:1500}
+    .wd-notif-head{padding:14px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;border-bottom:1px solid #eeeae7}
+    .wd-notif-item{display:block;padding:12px 16px;border-bottom:1px solid #f3f1ee;text-decoration:none;color:inherit}
+    .wd-notif-item:hover{background:#f7f5f3}
+    .wd-notif-item-unread{background:#fdf2f8}
+    .wd-notif-item-title{font-size:13px;font-weight:700;color:#151515;margin-bottom:3px}
+    .wd-notif-urgent{display:inline-block;background:#b94d4d;color:#fff;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:1px 6px;margin-right:6px}
+    .wd-notif-item-sujet{font-size:12px;color:#66605c;margin-bottom:4px}
+    .wd-notif-item-date{font-size:10.5px;color:#a89f99}
+    .wd-notif-empty{padding:16px;font-size:12.5px;color:#817b76;text-align:center}
+    </style>
+    @endif
     <div class="wd-who">
         <div><strong>{{ Auth::user()->name }}</strong><small>{{ ucfirst(Auth::user()->role) }}</small></div>
         <div class="wd-top-avatar">{{ strtoupper(substr(Auth::user()->name,0,1)) }}</div>

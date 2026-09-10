@@ -68,5 +68,25 @@
             @endisset
             {{ $slot }}
         </main>
+        @auth
+        <form id="wd-logout-force" method="POST" action="{{ route('tenant.logout') }}" style="display:none;">
+            @csrf
+        </form>
+        <script>
+        (function() {
+            function verifierStatutCompte() {
+                fetch('{{ route('tenant.compte.statut') }}', { headers: { 'Accept': 'application/json' } })
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(data) {
+                        if (data && data.bloque) {
+                            document.getElementById('wd-logout-force').submit();
+                        }
+                    })
+                    .catch(function() {});
+            }
+            setInterval(verifierStatutCompte, 15000);
+        })();
+        </script>
+        @endauth
     </body>
 </html>

@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use App\Services\AI\SuggestionAnalysisService;
+use App\Notifications\InteretPrestationNotification;
 
 class ClientController extends Controller
 {
@@ -626,6 +627,23 @@ class ClientController extends Controller
         return view('tenant.clients.mission', [
             'client' => $client,
         ]);
+    }
+
+    public function manifesterInteret(Request $request, Client $client): RedirectResponse
+    {
+        abort_unless($request->user()?->effectiveRole() === 'client', 403);
+
+        $validated = $request->validate([
+            'titre' => ['required', 'string', 'max:255'],
+        ]);
+
+        $destinataire = $client->conseiller;
+
+        abort_unless($destinataire, 404);
+
+        $destinataire->notify(new InteretPrestationNotification($client, $validated['titre']));
+
+        return back()->with('status', 'interet-envoye');
     }
 
     public function contratsClients(
