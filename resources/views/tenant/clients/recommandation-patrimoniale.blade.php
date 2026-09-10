@@ -290,8 +290,17 @@
         confirmBtn.addEventListener('click', function () {
             var lieu = input.value.trim();
             var url = btn.dataset.pdfUrl + (lieu ? '?lieu=' + encodeURIComponent(lieu) : '');
-            window.location.href = url;
             overlay.style.display = 'none';
+            // Déclenche le téléchargement dans un iframe caché (sans quitter
+            // la page), puis redirige vers Plan d'action une fois le
+            // téléchargement lancé.
+            var iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url;
+            document.body.appendChild(iframe);
+            setTimeout(function () {
+                window.location.href = "{{ route('tenant.clients.plan-action', $client) }}";
+            }, 800);
         });
         input.addEventListener('input', function () {
             var q = input.value.trim();
