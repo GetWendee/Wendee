@@ -2418,18 +2418,28 @@ Dossier client · suivi patrimonial
 
 <div class="wd-actions">
 
+@unless($viewRole === 'client')
 <a class="wd-btn"
 href="{{ route('tenant.clients.edit', $client) }}">
 Modifier
 </a>
+@endunless
 
+@if($viewRole === 'client')
+<a href="{{ route('tenant.rendez-vous.index') }}" class="wd-btn">
+Mes rendez-vous
+</a>
+<button type="button" x-data x-on:click="$dispatch('ouvrir-mes-rdv')" style="width:38px;height:38px;border-radius:50%;background:#f40087;color:#fff;border:none;font-size:19px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex:0 0 auto;">
++
+</button>
+@else
 <button type="button" class="wd-btn" x-data x-on:click="$dispatch('ouvrir-mes-rdv')">
 Mes rendez-vous
 </button>
-
 <button type="button" x-data x-on:click="$dispatch('ouvrir-rdv')" style="width:38px;height:38px;border-radius:50%;background:#f40087;color:#fff;border:none;font-size:19px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex:0 0 auto;">
 +
 </button>
+@endif
 
 </div>
 
@@ -2679,16 +2689,44 @@ function rdvPopup(urlDisponibilites, urlStore) {
 
 </section>
 
-<div x-data="{ visible: false }" x-on:ouvrir-mes-rdv.window="visible = true">
+<div x-data="{ visible: @js(session('status') === 'demande-rdv-envoyee'), envoye: @js(session('status') === 'demande-rdv-envoyee') }" x-on:ouvrir-mes-rdv.window="visible = true">
 <template x-teleport="body">
     <div class="wd-rdv-overlay" x-show="visible" x-cloak>
         <div style="background:#fff;border-radius:16px;padding:28px;max-width:460px;width:92%;max-height:80vh;overflow-y:auto;" x-on:click.outside="visible = false">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-                <h2 style="font-size:17px;font-weight:800;color:#151515;">Mes rendez-vous</h2>
+<h2 style="font-size:17px;font-weight:800;color:#151515;">{{ $viewRole === 'client' ? 'Demander un rendez-vous' : 'Mes rendez-vous' }}</h2>
                 <button type="button" x-on:click="visible = false" style="background:none;border:none;font-size:20px;cursor:pointer;color:#817b76;">&times;</button>
             </div>
 
-            @forelse($rendezVousAVenir as $rdv)
+            @if($viewRole === 'client')
+
+            <template x-if="!envoye">
+                <form method="POST" action="{{ route('tenant.clients.rendez-vous.demander', $client) }}">
+                    @csrf
+                    <input type="hidden" name="urgent" value="0">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#151515;margin-bottom:14px;">
+                        <input type="checkbox" name="urgent" value="1" style="width:16px;height:16px;">
+                        C'est urgent
+                    </label>
+
+                    <label style="display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a928d;margin-bottom:8px;">Sujet</label>
+                    <textarea name="sujet" required rows="4" style="width:100%;border:1px solid #ded9d4;border-radius:8px;padding:10px 12px;font-size:13px;color:#151515;margin-bottom:16px;font-family:inherit;" placeholder="Expliquez brièvement l'objet de votre demande"></textarea>
+
+                    <button type="submit" style="width:100%;background:#242424;color:#fff;border:none;border-radius:8px;padding:12px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;">
+                        Demander un rendez-vous
+                    </button>
+                </form>
+            </template>
+
+            <template x-if="envoye">
+                <p style="font-size:13.5px;color:#151515;">
+                    Votre demande a bien été envoyée. Votre conseiller reviendra vers vous rapidement.
+                </p>
+            </template>
+
+@else
+
+@forelse($rendezVousAVenir as $rdv)
             <div
                 x-data="rdvLigne(@js([
                     'id' => $rdv->id,
@@ -2760,6 +2798,8 @@ function rdvPopup(urlDisponibilites, urlStore) {
             @empty
             <p style="font-size:12.5px;color:#817b76;">Aucun rendez-vous à venir.</p>
             @endforelse
+
+@endif
         </div>
     </div>
 </template>
@@ -2802,9 +2842,11 @@ Conformité
 
 <nav class="wd-subtabs">
 
+@unless($viewRole === 'client' && $dossierComplet)
 <button type="button" class="wd-btn-dark" data-dossier-trigger>
-{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}
+{{ $viewRole === 'client' ? 'Remplir les formulaires' : ($dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires') }}
 </button>
+@endunless
 
 <div class="wd-subtabs-links">
 
@@ -2823,23 +2865,29 @@ Conformité
 <div class="wd-newaccount-head">
 <div>
 <div class="wd-eyebrow">Dossier client</div>
-<h3>{{ $dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires' }}</h3>
+<h3>{{ $viewRole === 'client' ? 'Remplir les formulaires' : ($dossierComplet ? 'Modifier les formulaires' : 'Compléter les formulaires') }}</h3>
 </div>
 <button type="button" class="wd-newaccount-close" data-dossier-close aria-label="Fermer">&times;</button>
 </div>
 <div class="wd-newaccount-choices">
+@unless($viewRole === 'client' && $dossierStatus['items']['kyc']['done'])
 <a href="{{ route('tenant.clients.kyc.edit', $client) }}" class="wd-newaccount-choice">
 <span class="wd-newaccount-choice-title">KYC</span>
 <span class="wd-newaccount-choice-desc">Recueil de connaissance client.</span>
 </a>
+@endunless
+@unless($viewRole === 'client' && $dossierStatus['items']['pat']['done'])
 <a href="{{ route('tenant.clients.patrimoine.edit', $client) }}" class="wd-newaccount-choice">
 <span class="wd-newaccount-choice-title">Patrimoine</span>
 <span class="wd-newaccount-choice-desc">Analyse patrimoniale du client.</span>
 </a>
+@endunless
+@unless($viewRole === 'client' && $dossierStatus['items']['inv']['done'])
 <a href="{{ route('tenant.clients.profil.edit', $client) }}" class="wd-newaccount-choice">
 <span class="wd-newaccount-choice-title">Profil investisseur</span>
 <span class="wd-newaccount-choice-desc">Profil de risque et objectifs.</span>
 </a>
+@endunless
 </div>
 </div>
 </div>
@@ -2855,11 +2903,13 @@ Conformité
 <div class="wd-eyebrow">KYC</div>
 <h2>Recueil de connaissance</h2>
 </div>
+@unless($viewRole === 'client' && $dossierStatus['items']['kyc']['done'])
 <a
 href="{{ route('tenant.clients.kyc.edit', $client) }}"
 class="wd-btn-dark">
-Modifier le KYC
+{{ $viewRole === 'client' ? 'Remplir le KYC' : 'Modifier le KYC' }}
 </a>
+@endunless
 </div>
 
 <div class="wd-panel wd-kyc-progress">
@@ -2870,6 +2920,12 @@ Modifier le KYC
 </div>
 </div>
 
+<div x-data="{ open: false }">
+<button type="button" x-on:click="open = !open" style="display:flex;align-items:center;gap:8px;background:none;border:none;padding:10px 0;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#817b76;cursor:pointer;">
+<span x-text="open ? 'Masquer le détail' : 'Afficher le détail'"></span>
+<svg width="12" height="12" viewBox="0 0 24 24" style="transition:transform .15s ease;" x-bind:style="open ? 'transform:rotate(180deg);' : 'transform:rotate(0deg);'"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+<div x-show="open" x-cloak>
 @if(!empty($donneesClient))
 <div class="wd-kyc-data">
 @foreach($donneesClient as $categorie => $items)
@@ -2896,6 +2952,8 @@ Modifier le KYC
 @else
 <p class="wd-donnees-empty">Aucune donnée KYC renseignée pour le moment.</p>
 @endif
+</div>
+</div>
 
 </section>
 
@@ -2967,11 +3025,13 @@ Modifier le KYC
         <h2>Vue patrimoniale</h2>
     </div>
     <div style="display:flex;gap:10px;">
+@unless($viewRole === 'client' && $dossierStatus['items']['pat']['done'])
     <a
     href="{{ route('tenant.clients.patrimoine.edit', $client) }}"
     class="wd-btn-dark">
-    Modifier le patrimoine
+    {{ $viewRole === 'client' ? 'Remplir le patrimoine' : 'Modifier le patrimoine' }}
     </a>
+@endunless
     </div>
 </div>
 
@@ -3522,11 +3582,13 @@ Modifier le KYC
 </div>
 
 <div style="display:flex;gap:10px;">
+@unless($viewRole === 'client' && $dossierStatus['items']['inv']['done'])
 <a
 href="{{ route('tenant.clients.profil.edit', $client) }}"
 class="wd-btn-dark">
-Modifier le profil investisseur
+{{ $viewRole === 'client' ? 'Remplir le profil investisseur' : 'Modifier le profil investisseur' }}
 </a>
+@endunless
 </div>
 
 </div>

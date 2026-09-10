@@ -20,6 +20,7 @@ use App\Http\Controllers\RevenuController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\CabinetProfileController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TenantProfileController;
 use Stancl\Tenancy\Controllers\TenantAssetsController;
 use App\Http\Controllers\UserAccountController;
@@ -56,6 +57,21 @@ Route::get('/cabinet/', [CabinetProfileController::class, 'index'])
 Route::put('/cabinet/', [CabinetProfileController::class, 'update'])
     ->middleware(['auth', 'verified'])
     ->name('cabinet.update');
+
+Route::get('/notifications/{notification}/lire', [NotificationController::class, 'lire'])
+    ->middleware(['auth', 'verified'])
+    ->name('notifications.lire');
+
+Route::post('/notifications/tout-marquer-lu', [NotificationController::class, 'toutMarquerLu'])
+    ->middleware(['auth', 'verified'])
+    ->name('notifications.tout-marquer-lu');
+
+Route::get('/profil/changement-email/{demande}/valider', [TenantProfileController::class, 'validerChangementEmail'])
+    ->middleware('signed')
+    ->name('profil.email.valider');
+Route::get('/profil/changement-email/{demande}/refuser', [TenantProfileController::class, 'refuserChangementEmail'])
+    ->middleware('signed')
+    ->name('profil.email.refuser');
 
 Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
 
@@ -100,6 +116,8 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::put('/profil', [TenantProfileController::class, 'update'])->name('profil.update');
         Route::get('/mon-rib', [UserAccountController::class, 'editRib'])->name('profil.rib.edit');
         Route::put('/mon-rib', [UserAccountController::class, 'updateRib'])->name('profil.rib.update');
+        Route::post('/profil/changement-email', [TenantProfileController::class, 'demanderChangementEmail'])->name('profil.email.demander');
+        Route::get('/compte/statut', [TenantProfileController::class, 'statutCompte'])->name('compte.statut');
         Route::post('/factures', [FactureController::class, 'store'])->name('factures.store');
         Route::get('/factures/{facture}', [FactureController::class, 'show'])->name('factures.show');
         Route::delete('/factures/{facture}', [FactureController::class, 'destroy'])->name('factures.destroy');
@@ -111,6 +129,7 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
         Route::get('/aide-decision/{client}', [ClientController::class, 'aideDecision'])->name('clients.aide-decision');
         Route::get('/mission/{client}', [ClientController::class, 'mission'])->name('clients.mission');
+        Route::post('/mission/{client}/interet', [ClientController::class, 'manifesterInteret'])->name('clients.mission.interet');
         Route::get('/contrats-clients/{client}', [ClientController::class, 'contratsClients'])->name('clients.contrats-clients');
         Route::get('/conformites-clients/{client}', [ClientController::class, 'conformitesClients'])->name('clients.conformites-clients');
         Route::get('/conformites-clients/{client}/bibliotheque/recherche', [ClientController::class, 'rechercherDocumentsBibliotheque'])->name('clients.documents-bibliotheque.recherche');
@@ -199,6 +218,7 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::delete('/rendez-vous/calendriers/{connection}', [CalendarConnectionController::class, 'destroy'])->name('calendrier.destroy');
         Route::get('/rendez-vous/disponibilites', [RendezVousController::class, 'disponibilites'])->name('rendez-vous.disponibilites');
         Route::post('/clients/{client}/rendez-vous', [RendezVousController::class, 'store'])->name('clients.rendez-vous.store');
+        Route::post('/clients/{client}/demande-rendez-vous', [RendezVousController::class, 'demanderRendezVous'])->name('clients.rendez-vous.demander');
         Route::post('/rendez-vous/{rendezVous}/annuler', [RendezVousController::class, 'annuler'])->name('rendez-vous.annuler');
         Route::post('/rendez-vous/{rendezVous}/decaler', [RendezVousController::class, 'decaler'])->name('rendez-vous.decaler');
     });
