@@ -48,7 +48,7 @@
         @endif
         @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur' && Auth::user()->effectiveRole() !== 'client')
         <div class="wd-nav-section">Activité</div>
-        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
+        @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
         <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
             <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>
             <span>Patrimoine sous gestion</span>
@@ -60,7 +60,7 @@
             <span class="wd-soon">Bientot</span>
         </a>
         @endif
-        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
+        @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
         <a class="{{ request()->routeIs('tenant.revenus.*') ? 'active' : '' }}" href="{{ route('tenant.revenus.index') }}">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-.9-1.8-1.5-3.2-1.5C10 7 9 8 9 9.3c0 1.5 1.4 2.1 3 2.7 1.7.6 3 1.3 3 2.8 0 1.3-1.1 2.2-3 2.2-1.4 0-2.6-.5-3.5-1.5M12 5v14"/></svg>
             <span>Revenus</span>
@@ -72,7 +72,7 @@
             <span class="wd-soon">Bientot</span>
         </a>
         @endif
-        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
+        @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
         <a class="{{ request()->routeIs('tenant.commissions.*') ? 'active' : '' }}" href="{{ route('tenant.commissions.index') }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M17 14h.01M9 12h6"/></svg>
             <span>Commissions</span>
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <span>Rendez-vous</span>
             </a>
             @endif
-            @if($mobileRole === 'courtier')
+            @if($mobileRole === 'courtier' || $mobileRole === 'conseiller')
             <div class="wd-mobile-menu-section">Activité</div>
             <a class="{{ request()->routeIs('tenant.performances.*') ? 'active' : '' }}" href="{{ route('tenant.performances.index') }}">
                 <svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V9M19 20V4"/></svg>

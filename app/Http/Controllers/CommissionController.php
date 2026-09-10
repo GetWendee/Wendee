@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\CommissionVerseeMail;
 use App\Models\Commission;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -15,28 +16,38 @@ class CommissionController extends Controller
     {
         $user = $request->user();
 
-        abort_unless($user && $user->effectiveRole() === 'courtier', 403);
+        abort_unless($user && in_array($user->effectiveRole(), ['courtier', 'conseiller'], true), 403);
+
+        $isCourtier = $user->effectiveRole() === 'courtier';
+
+        $apporteurIds = $isCourtier
+            ? null
+            : User::query()->where('role', 'apporteur')->where('parent_id', $user->id)->pluck('id');
 
         $aRecevoir = Commission::query()
             ->where('statut', 'a_recevoir')
+            ->when(! $isCourtier, fn ($query) => $query->whereIn('apporteur_id', $apporteurIds))
             ->with(['apporteur', 'client'])
             ->orderBy('created_at')
             ->get();
 
         $virementsAFaire = Commission::query()
             ->where('statut', 'fonds_recus')
+            ->when(! $isCourtier, fn ($query) => $query->whereIn('apporteur_id', $apporteurIds))
             ->with(['apporteur', 'client'])
             ->orderBy('fonds_recus_le')
             ->get();
 
         $derniersPaiements = Commission::query()
             ->where('statut', 'verse')
+            ->when(! $isCourtier, fn ($query) => $query->whereIn('apporteur_id', $apporteurIds))
             ->with(['apporteur', 'client'])
             ->orderByDesc('verse_le')
             ->limit(15)
             ->get();
 
         return view('tenant.commissions.index', [
+            'isCourtier' => $isCourtier,
             'aRecevoir' => $aRecevoir,
             'virementsAFaire' => $virementsAFaire,
             'derniersPaiements' => $derniersPaiements,

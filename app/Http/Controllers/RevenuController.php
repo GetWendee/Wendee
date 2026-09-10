@@ -22,15 +22,19 @@ class RevenuController extends Controller
     {
         $user = $request->user();
 
-        abort_unless($user && $user->effectiveRole() === 'courtier', 403);
+        abort_unless($user && in_array($user->effectiveRole(), ['courtier', 'conseiller'], true), 403);
+
+        $isCourtier = $user->effectiveRole() === 'courtier';
 
         $periode = in_array($request->query('periode'), ['mois', 'trimestre', 'annee'], true)
             ? $request->query('periode')
             : 'trimestre';
 
-        $conseillers = collect([$user])->merge(
-            User::query()->where('role', 'conseiller')->where('parent_id', $user->id)->orderBy('name')->get()
-        );
+        $conseillers = $isCourtier
+            ? collect([$user])->merge(
+                User::query()->where('role', 'conseiller')->where('parent_id', $user->id)->orderBy('name')->get()
+            )
+            : collect([$user]);
 
         $clients = Client::query()
             ->whereIn('conseiller_id', $conseillers->pluck('id'))
@@ -92,6 +96,7 @@ class RevenuController extends Controller
         $evolution = $this->evolutionHebdomadaire($revenuTotal);
 
         return view('tenant.revenus.index', [
+            'isCourtier' => $isCourtier,
             'periode' => $periode,
             'revenuTotal' => $revenuTotal,
             'revenuMoyenDossier' => $revenuMoyenDossier,
