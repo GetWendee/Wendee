@@ -370,6 +370,10 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client): RedirectResponse
     {
+        $emailUniqueRule = $client->user_id
+            ? 'unique:users,email,' . $client->user_id
+            : 'unique:users,email';
+
         $validated = $request->validate([
             'civilite' => ['nullable', 'string', 'in:M.,Mme'],
             'prenom' => ['required', 'string', 'max:255'],
@@ -378,7 +382,7 @@ class ClientController extends Controller
             'date_naissance' => ['nullable', 'date'],
             'telephone_mobile' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
             'telephone_domicile' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{10}$/'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['required', 'email', 'max:255', $emailUniqueRule],
             'adresse' => ['nullable', 'string', 'max:255'],
             'code_postal' => ['nullable', 'string', 'max:10'],
             'ville' => ['nullable', 'string', 'max:255'],
@@ -386,6 +390,13 @@ class ClientController extends Controller
         ]);
 
         $client->update($validated);
+
+        // L'email de contact du client et l'email de connexion de son
+        // compte doivent rester synchronisés, pour éviter qu'il se
+        // retrouve avec deux adresses différentes sans le savoir.
+        if ($client->user_id) {
+            User::where('id', $client->user_id)->update(['email' => $validated['email']]);
+        }
 
         return redirect()->route('tenant.clients.show', $client)->with('status', 'Client mis à jour.');
     }

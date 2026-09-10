@@ -275,15 +275,27 @@
 
                 <div class="wendee-options">
 
-                    <label class="wendee-remember">
-                        <input
-                            id="remember"
-                            type="checkbox"
-                            name="remember"
-                        >
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <label class="wendee-remember">
+                            <input
+                                id="remember"
+                                type="checkbox"
+                                name="remember"
+                            >
 
-                        <span>Se souvenir de moi</span>
-                    </label>
+                            <span>Se souvenir de moi</span>
+                        </label>
+
+                        <label class="wendee-remember">
+                            <input
+                                id="se_souvenir_appareil"
+                                type="checkbox"
+                                name="se_souvenir_appareil"
+                            >
+
+                            <span>Se souvenir de cet appareil</span>
+                        </label>
+                    </div>
 
                     @if (Route::has('tenant.password.request'))
                         <a

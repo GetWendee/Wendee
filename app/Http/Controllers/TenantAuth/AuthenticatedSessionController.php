@@ -8,6 +8,7 @@ use App\Services\DeviceLoginChallengeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -26,6 +27,27 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $user = $request->authenticateOnce();
+
+        // Case "Se souvenir de cet appareil" cochée : on enregistre
+        // directement l'appareil comme connu et on saute la vérification,
+        // sans passer par le challenge email.
+        if ($request->boolean('se_souvenir_appareil')) {
+            Auth::login($user, $request->boolean('remember'));
+
+            $request->session()->regenerate();
+
+            $rawToken = DeviceLoginChallengeService::enregistrerAppareilConnu($user, $request);
+
+            Cookie::queue(Cookie::make(
+                DeviceLoginChallengeService::COOKIE_NAME,
+                $rawToken,
+                60 * 24 * 365 * 2 // 2 ans
+            ));
+
+            return redirect()->intended(
+                route('tenant.dashboard', absolute: false)
+            );
+        }
 
         $appareilConnu = DeviceLoginChallengeService::appareilConnu(
             $user,
