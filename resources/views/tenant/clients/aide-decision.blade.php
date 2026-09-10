@@ -2797,6 +2797,7 @@ Plan d'action
         </div>
 
 
+        @if($viewRole !== 'client')
         <form
             method="POST"
             action="{{ route('tenant.clients.aide-decision.suggestion', $client) }}"
@@ -2813,6 +2814,7 @@ Plan d'action
             </button>
 
         </form>
+        @endif
 
     </div>
 

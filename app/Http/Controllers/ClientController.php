@@ -591,6 +591,24 @@ class ClientController extends Controller
 
         $filename = $this->nommerFichierPdf('Recommandation patrimoniale', $client);
 
+        if ($request->boolean('envoyer_email') && $client->email) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($client->email)->send(
+                    new \App\Mail\RecommandationPatrimonialeMail(
+                        $client,
+                        $cabinet,
+                        $conseiller,
+                        $pdf->output(),
+                        $filename
+                    )
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error(
+                    'Echec envoi email recommandation patrimoniale : ' . $e->getMessage()
+                );
+            }
+        }
+
         return $pdf->download($filename);
     }
 

@@ -1,6 +1,7 @@
 <x-tenant-app-layout>
 @include('tenant.clients.partials.header-tabs', ['active' => 'recommandation'])
 @php
+    $viewRole = Auth::user()?->effectiveRole();
     $prestations = $cabinet->prestations ?? [];
     $missionTypes = [
         [
@@ -125,6 +126,7 @@
         <p class="wd-reco-date">
             Date de la recommandation : {{ now()->translatedFormat('d F Y') }}
         </p>
+        @if($viewRole !== 'client')
         <form method="POST" action="{{ route('tenant.clients.recommandation-patrimoniale.generer', $client) }}" data-reco-form>
             @csrf
             <p class="wd-reco-question">
@@ -219,6 +221,9 @@
                 <p class="wd-reco-hint">Cochez au moins une prestation et renseignez son honoraire pour activer la génération.</p>
             </div>
         </form>
+        @else
+        <p class="wd-reco-date">Aucune action disponible dans cet espace.</p>
+        @endif
     </div>
 </section>
 @if($recommandation && $recommandation->status === 'completed')
@@ -242,17 +247,21 @@
             <div class="wd-reco-result-head">
                 <span class="wd-reco-result-eyebrow">Dernière lettre de mission générée</span>
                 <span class="wd-reco-result-date">{{ $recommandation->completed_at?->translatedFormat('d F Y à H:i') }}</span>
+                @if($viewRole !== 'client')
                 <button type="button" id="wd-reco-pdf-btn" class="wd-reco-submit" data-pdf-url="{{ route('tenant.clients.recommandation-patrimoniale.pdf', $client) }}" data-lieu-defaut="{{ $client->kyc?->lieu_signature ?: $cabinet?->ville }}">
                     Télécharger en PDF
                 </button>
+                @endif
             </div>
             <div id="wd-reco-editor" class="wd-reco-editor">{!! $htmlContenu !!}</div>
+            @if($viewRole !== 'client')
             <form method="POST" action="{{ route('tenant.clients.recommandation-patrimoniale.modifier', ['client' => $client, 'analysis' => $recommandation->id]) }}" class="wd-reco-editor-form">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="contenu_html" id="wd-reco-hidden">
                 <button type="submit" class="wd-reco-submit wd-reco-save">Enregistrer les modifications</button>
             </form>
+            @endif
         </div>
     </section>
     <div id="wd-modal-lieu" class="wd-modal-overlay" style="display:none;">
@@ -262,6 +271,13 @@
         <div class="wd-modal-title">Lieu de signature</div>
         <input type="text" id="wd-modal-lieu-input" class="wd-modal-input" placeholder="Ville..." autocomplete="off">
         <div id="wd-modal-lieu-suggestions" class="wd-modal-suggestions"></div>
+        <label class="wd-cabinet-checkbox" style="margin-top:14px;">
+            <input type="checkbox" id="wd-modal-lieu-envoyer-email">
+            <span class="wd-cabinet-checkbox-box">
+                <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span>Envoyer aussi une copie par email au client</span>
+        </label>
         <div class="wd-modal-actions">
             <button type="button" id="wd-modal-lieu-cancel" class="wd-modal-btn-cancel">Annuler</button>
             <button type="button" id="wd-modal-lieu-confirm" class="wd-modal-btn-confirm">Télécharger</button>
@@ -289,7 +305,11 @@
         });
         confirmBtn.addEventListener('click', function () {
             var lieu = input.value.trim();
-            var url = btn.dataset.pdfUrl + (lieu ? '?lieu=' + encodeURIComponent(lieu) : '');
+            var envoyerEmail = document.getElementById('wd-modal-lieu-envoyer-email');
+            var params = [];
+            if (lieu) { params.push('lieu=' + encodeURIComponent(lieu)); }
+            if (envoyerEmail && envoyerEmail.checked) { params.push('envoyer_email=1'); }
+            var url = btn.dataset.pdfUrl + (params.length ? '?' + params.join('&') : '');
             overlay.style.display = 'none';
             // Déclenche le téléchargement dans un iframe caché (sans quitter
             // la page), puis redirige vers Plan d'action une fois le
@@ -336,9 +356,13 @@
             var editor = new Quill('#wd-reco-editor', { theme: 'snow' });
             var form = document.querySelector('.wd-reco-editor-form');
             var hidden = document.getElementById('wd-reco-hidden');
-            form.addEventListener('submit', function () {
-                hidden.value = editor.root.innerHTML;
-            });
+            if (form && hidden) {
+                form.addEventListener('submit', function () {
+                    hidden.value = editor.root.innerHTML;
+                });
+            } else {
+                editor.enable(false);
+            }
         })();
     </script>
 @elseif($recommandation && $recommandation->status === 'failed')

@@ -1,5 +1,8 @@
 <x-tenant-app-layout>
 @include('tenant.clients.partials.header-tabs', ['active' => 'plan-action'])
+@php
+    $viewRole = Auth::user()?->effectiveRole();
+@endphp
 <style>
 .wd-reco-body{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-top:18px;}
 .wd-analysis-intro{margin-bottom:22px;}
@@ -75,6 +78,7 @@
         <p class="wd-reco-date">
             Date du plan d'action : {{ now()->translatedFormat('d F Y') }}
         </p>
+        @if($viewRole !== 'client')
         <form method="POST" action="{{ route('tenant.clients.plan-action.generer', $client) }}">
             @csrf
             <p class="wd-reco-question">
@@ -92,6 +96,9 @@
                 </button>
             </div>
         </form>
+        @else
+        <p class="wd-reco-date">Aucune action disponible dans cet espace.</p>
+        @endif
     </div>
 </section>
 @if($planAction && $planAction->status === 'completed')
@@ -115,17 +122,21 @@
             <div class="wd-reco-result-head">
                 <span class="wd-reco-result-eyebrow">Dernier plan d'action généré</span>
                 <span class="wd-reco-result-date">{{ $planAction->completed_at?->translatedFormat('d F Y à H:i') }}</span>
+                @if($viewRole !== 'client')
                 <button type="button" id="wd-plan-pdf-btn" class="wd-reco-submit" data-pdf-url="{{ route('tenant.clients.plan-action.pdf', $client) }}" data-lieu-defaut="{{ $client->kyc?->lieu_signature ?: $cabinet?->ville }}">
                     Télécharger en PDF
                 </button>
+                @endif
             </div>
             <div id="wd-plan-editor" class="wd-reco-editor">{!! $htmlContenu !!}</div>
+            @if($viewRole !== 'client')
             <form method="POST" action="{{ route('tenant.clients.plan-action.modifier', ['client' => $client, 'analysis' => $planAction->id]) }}" class="wd-reco-editor-form">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="contenu_html" id="wd-plan-hidden">
                 <button type="submit" class="wd-reco-submit wd-reco-save">Enregistrer les modifications</button>
             </form>
+            @endif
         </div>
     </section>
     <div id="wd-modal-lieu" class="wd-modal-overlay" style="display:none;">
@@ -200,9 +211,13 @@
             var editor = new Quill('#wd-plan-editor', { theme: 'snow' });
             var form = document.querySelector('.wd-reco-editor-form');
             var hidden = document.getElementById('wd-plan-hidden');
-            form.addEventListener('submit', function () {
-                hidden.value = editor.root.innerHTML;
-            });
+            if (form && hidden) {
+                form.addEventListener('submit', function () {
+                    hidden.value = editor.root.innerHTML;
+                });
+            } else {
+                editor.enable(false);
+            }
         })();
     </script>
 @elseif($planAction && $planAction->status === 'failed')
