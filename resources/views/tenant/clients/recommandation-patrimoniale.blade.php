@@ -38,11 +38,14 @@
 .wd-reco-mission-pricing{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 .wd-reco-suggestion{font-size:12px;color:var(--muted);}
 .wd-reco-suggestion-muted{font-style:italic;}
-.wd-reco-amount{width:120px;border:1px solid var(--line);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--ink);}
+.wd-reco-amount{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--ink);}
 .wd-reco-amount:focus{outline:none;border-color:var(--pink);}
-.wd-reco-percent-row{display:flex;align-items:center;gap:8px;}
-.wd-reco-times{color:var(--muted);font-size:12px;}
-.wd-reco-amount-small{width:90px;}
+.wd-reco-percent-row{display:flex;align-items:flex-end;gap:8px;}
+.wd-reco-times{color:var(--muted);font-size:12px;padding-bottom:9px;}
+.wd-reco-amount-small{width:100%;}
+.wd-reco-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;}
+.wd-reco-field-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.wd-reco-hint{margin:10px 0 0;font-size:11px;color:var(--muted);text-align:right;}
 .wd-reco-total{margin-top:18px;font-size:13px;font-weight:700;color:var(--ink);}
 .wd-reco-total-note{display:block;margin-top:4px;font-size:11px;font-weight:400;color:var(--muted);}
 .wd-reco-actions{margin-top:24px;display:flex;justify-content:flex-end;}
@@ -144,20 +147,23 @@
                             </span>
                             <span>{{ $mission['label'] }}</span>
                         </label>
-                        <div class="wd-reco-mission-pricing" data-mission-pricing hidden>
+                        <div class="wd-reco-mission-pricing" data-mission-pricing style="display:none;">
                             @if(($presta['mode'] ?? null) === 'forfait')
                                 <span class="wd-reco-suggestion">
                                     Suggestion cabinet : {{ number_format((float) ($presta['forfait'] ?? 0), 2, ',', ' ') }} €
                                 </span>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    name="montants[{{ $mission['key'] }}]"
-                                    value="{{ $presta['forfait'] ?? '' }}"
-                                    class="wd-reco-amount"
-                                    data-mission-amount
-                                    data-mode="forfait"
-                                >
+                                <div class="wd-reco-field">
+                                    <span class="wd-reco-field-label">Montant (€)</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        name="montants[{{ $mission['key'] }}]"
+                                        value="{{ $presta['forfait'] ?? '' }}"
+                                        class="wd-reco-amount"
+                                        data-mission-amount
+                                        data-mode="forfait"
+                                    >
+                                </div>
                             @elseif(($presta['mode'] ?? null) === 'pourcentage')
                                 <span class="wd-reco-suggestion">
                                     Suggestion cabinet :
@@ -168,24 +174,29 @@
                                     @endif
                                 </span>
                                 <div class="wd-reco-percent-row">
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        name="montants[{{ $mission['key'] }}]"
-                                        placeholder="Montant"
-                                        class="wd-reco-amount"
-                                        data-mission-montant
-                                    >
+                                    <div class="wd-reco-field">
+                                        <span class="wd-reco-field-label">Montant (€)</span>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            name="montants[{{ $mission['key'] }}]"
+                                            placeholder="0"
+                                            class="wd-reco-amount"
+                                            data-mission-montant
+                                        >
+                                    </div>
                                     <span class="wd-reco-times">×</span>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        name="taux[{{ $mission['key'] }}]"
-                                        value="{{ $presta['pourcentage'] ?? '' }}"
-                                        placeholder="Taux %"
-                                        class="wd-reco-amount wd-reco-amount-small"
-                                        data-mission-taux
-                                    >
+                                    <div class="wd-reco-field">
+                                        <span class="wd-reco-field-label">Taux (%)</span>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            name="taux[{{ $mission['key'] }}]"
+                                            value="{{ $presta['pourcentage'] ?? '' }}"
+                                            class="wd-reco-amount wd-reco-amount-small"
+                                            data-mission-taux
+                                        >
+                                    </div>
                                 </div>
                             @else
                                 <span class="wd-reco-suggestion wd-reco-suggestion-muted">
@@ -201,10 +212,11 @@
                 Total : <span data-reco-total>0,00</span> €
             </p>
 
-            <div class="wd-reco-actions">
+            <div class="wd-reco-actions" style="flex-direction:column;align-items:flex-end;">
                 <button type="submit" class="wd-reco-submit" data-reco-submit disabled>
                     Recommandation
                 </button>
+                <p class="wd-reco-hint">Cochez au moins une prestation et renseignez son honoraire pour activer la génération.</p>
             </div>
         </form>
     </div>
@@ -341,7 +353,7 @@
             var toggle = block.querySelector('[data-mission-toggle]');
             var pricing = block.querySelector('[data-mission-pricing]');
             if (!toggle) return;
-            pricing.hidden = !toggle.checked;
+            pricing.style.display = toggle.checked ? 'flex' : 'none';
             if (!toggle.checked) return;
 
             var forfaitInput = block.querySelector('[data-mission-amount]');
