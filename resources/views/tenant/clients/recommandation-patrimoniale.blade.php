@@ -141,7 +141,7 @@
                     @php $presta = $prestations[$mission['index']] ?? []; @endphp
                     <div class="wd-reco-mission-block" data-mission>
                         <label class="wd-cabinet-checkbox">
-                            <input type="checkbox" name="missions[]" value="{{ $mission['key'] }}" data-mission-toggle>
+                            <input type="radio" name="missions[]" value="{{ $mission['key'] }}" data-mission-toggle>
                             <span class="wd-cabinet-checkbox-box">
                                 <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                             </span>
