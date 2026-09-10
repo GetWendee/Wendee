@@ -21,16 +21,19 @@
     ];
 @endphp
 <style>
-.wd-reco-card{background:#242424;color:#fff;border-radius:14px;padding:22px 26px;border-top:3px solid var(--pink);display:flex;align-items:center;gap:16px;}
-.wd-reco-icon{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.08);display:grid;place-items:center;flex:0 0 auto;}
-.wd-reco-card h2{margin:0;font-size:16px;}
-.wd-reco-card p{margin:4px 0 0;color:#c9c2be;font-size:12px;}
 .wd-reco-body{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-top:18px;}
+.wd-analysis-intro{margin-bottom:22px;}
+.wd-analysis-kicker{margin:0 0 7px;color:#80A29A;font-size:10px;line-height:1;font-weight:800;letter-spacing:.16em;text-transform:uppercase;}
+.wd-analysis-title{margin:0;color:#252D2A;font-size:27px;line-height:1.18;font-weight:700;letter-spacing:-.035em;}
+.wd-analysis-subtitle{max-width:900px;margin:8px 0 0;color:#7A8581;font-size:12px;line-height:1.6;}
+.wd-recommandation-button{flex:0 0 auto;min-width:190px;height:40px;padding:0 20px;border:1px solid rgba(255,255,255,.10);border-top:2px solid #FF3399;border-radius:8px;background:#242424;color:#ffffff;font-size:9px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;}
+.wd-recommandation-button:hover{box-shadow:0 0 0 2px rgba(255,51,153,.10);transform:translateY(-1px);}
+.wd-recommandation-button-disabled{flex:0 0 auto;min-width:190px;height:40px;padding:0 20px;border:1px solid #D2D8D5;border-top:2px solid #C8CFCC;border-radius:8px;background:#E2E5E4;color:#929A97;font-size:9px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;cursor:not-allowed;display:inline-flex;align-items:center;justify-content:center;}
 .wd-reco-date{color:var(--muted);font-size:12px;margin:0 0 20px;}
 .wd-reco-question{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 10px;}
 .wd-reco-textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;padding:14px;font:inherit;font-size:13px;color:var(--ink);resize:vertical;}
 .wd-reco-textarea:focus{outline:none;border-color:var(--pink);}
-.wd-reco-missions{margin:24px 0 0;display:flex;flex-direction:column;gap:12px;}
+.wd-reco-missions{margin:24px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start;}
 .wd-reco-mission-block{border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
 .wd-reco-mission-pricing{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 .wd-reco-suggestion{font-size:12px;color:var(--muted);}
@@ -45,6 +48,7 @@
 .wd-reco-actions{margin-top:24px;display:flex;justify-content:flex-end;}
 .wd-reco-submit{min-width:190px;height:40px;padding:0 20px;border:1px solid rgba(255,255,255,.10);border-top:2px solid var(--pink);border-radius:8px;background:#242424;color:#fff;font-size:9px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;}
 .wd-reco-submit:hover{box-shadow:0 0 0 2px rgba(255,51,153,.10);}
+.wd-reco-submit:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;}
 .wd-reco-flash{margin-bottom:18px;padding:10px 14px;border-radius:8px;font-size:12px;}
 .wd-reco-flash-success{background:#eef7ef;color:var(--green);border:1px solid #cfe8d2;}
 .wd-reco-flash-error{background:#fbecec;color:var(--red);border:1px solid #f0c9c9;}
@@ -82,19 +86,31 @@
 .wd-cabinet-checkbox:has(input:checked) .wd-cabinet-checkbox-box{border-color:#242424;background:#242424;}
 .wd-cabinet-checkbox:has(input:checked) .wd-cabinet-checkbox-box svg{display:block;}
 @media(max-width:600px){
-.wd-reco-card{padding:16px 18px;flex-wrap:wrap;}
 .wd-reco-body,.wd-reco-result{padding:18px;}
+.wd-reco-missions{grid-template-columns:1fr;}
 .wd-reco-result-head{flex-wrap:wrap;gap:10px;align-items:flex-start;}
 .wd-modal-card{width:100%;max-width:92vw;}
 }
 </style>
-<section class="wd-section">
-    <div class="wd-reco-card">
-        <div class="wd-reco-icon">📄</div>
-        <div>
-            <h2>Générer la recommandation patrimoniale</h2>
-            <p>Veuillez remplir ou mettre à jour tous les formulaires de connaissance client</p>
-        </div>
+<div style="display:flex;gap:12px;justify-content:flex-end;margin:22px 0 0;">
+    <a href="{{ route('tenant.clients.aide-decision', $client) }}" class="wd-recommandation-button">
+        Retour analyse
+    </a>
+    @if($recommandation && $recommandation->status === 'completed')
+    <a href="{{ route('tenant.clients.plan-action', $client) }}" class="wd-recommandation-button">
+        Plan d'action
+    </a>
+    @else
+    <span class="wd-recommandation-button-disabled">
+        Plan d'action
+    </span>
+    @endif
+</div>
+<section class="wd-section wd-analysis-content">
+    <div class="wd-analysis-intro">
+        <p class="wd-analysis-kicker">Aide à la décision</p>
+        <h2 class="wd-analysis-title">Générer la recommandation patrimoniale</h2>
+        <p class="wd-analysis-subtitle">Veuillez remplir ou mettre à jour tous les formulaires de connaissance client</p>
     </div>
     <div class="wd-reco-body">
         @if(session('status'))
@@ -186,7 +202,7 @@
             </p>
 
             <div class="wd-reco-actions">
-                <button type="submit" class="wd-reco-submit">
+                <button type="submit" class="wd-reco-submit" data-reco-submit disabled>
                     Recommandation
                 </button>
             </div>
@@ -316,6 +332,7 @@
     var form = document.querySelector('[data-reco-form]');
     if (!form) return;
     var totalEl = form.querySelector('[data-reco-total]');
+    var submitBtn = form.querySelector('[data-reco-submit]');
     var blocks = form.querySelectorAll('[data-mission]');
 
     function recompute() {
@@ -342,6 +359,7 @@
             }
         });
         totalEl.textContent = total.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (submitBtn) submitBtn.disabled = total <= 0;
     }
 
     blocks.forEach(function(block) {
