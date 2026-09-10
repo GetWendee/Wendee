@@ -97,7 +97,7 @@
 
         <div class="wd-perf-head">
             <div>
-                <p class="wd-perf-eyebrow">Vue cabinet</p>
+                <p class="wd-perf-eyebrow">{{ $isCourtier ? 'Vue cabinet' : 'Vue personnelle' }}</p>
                 <h1 class="wd-perf-title">Patrimoine sous gestion</h1>
             </div>
 
@@ -110,7 +110,7 @@
 
         <div class="wd-perf-hero">
             <div>
-                <p class="wd-perf-hero-label">Solde patrimonial du cabinet</p>
+                <p class="wd-perf-hero-label">{{ $isCourtier ? 'Solde patrimonial du cabinet' : 'Votre solde patrimonial' }}</p>
                 <p class="wd-perf-hero-value">{{ number_format($solde, 0, ',', ' ') }} €</p>
             </div>
             <div class="wd-perf-hero-sub">
@@ -158,6 +158,7 @@
 
         <div class="wd-perf-grid">
 
+            @if ($isCourtier)
             <div class="wd-perf-card">
                 <h3>Par conseiller</h3>
                 <p class="sub">Classé par patrimoine géré</p>
@@ -184,10 +185,11 @@
                     </div>
                 @endforeach
             </div>
+            @endif
 
             <div class="wd-perf-card">
                 <h3>Répartition allocation</h3>
-                <p class="sub">Actifs du cabinet</p>
+                <p class="sub">{{ $isCourtier ? 'Actifs du cabinet' : 'Vos actifs' }}</p>
 
                 @if (empty($repartition))
                     <p style="font-size:13px;color:var(--muted)">Aucun actif renseigné.</p>
@@ -230,7 +232,7 @@
         </div>
 
         <div class="wd-perf-card" style="margin-bottom:16px;">
-            <h3>Évolution du patrimoine cabinet</h3>
+            <h3>{{ $isCourtier ? 'Évolution du patrimoine cabinet' : 'Évolution de votre patrimoine' }}</h3>
             <p class="sub">Cumul du patrimoine actif, sur 13 mois</p>
 
             @php
@@ -273,6 +275,7 @@
             </div>
         </div>
 
+        @if ($isCourtier)
         <div class="wd-perf-card">
             <h3>Alertes conformité agrégées</h3>
             <p class="sub">Classées par niveau de friction</p>
@@ -300,6 +303,7 @@
                 </div>
             @endforeach
         </div>
+        @endif
 
     </div>
 

@@ -69,7 +69,7 @@
 
         <div class="wd-perf-head">
             <div>
-                <p class="wd-perf-eyebrow">Vue cabinet</p>
+                <p class="wd-perf-eyebrow">{{ $isCourtier ? 'Vue cabinet' : 'Vue personnelle' }}</p>
                 <h1 class="wd-perf-title">Revenus</h1>
             </div>
 
@@ -151,6 +151,7 @@
 
         <div class="wd-perf-grid">
 
+            @if ($isCourtier)
             <div class="wd-perf-card">
                 <h3>Classement conseillers</h3>
                 <p class="sub">Par revenu généré</p>
@@ -190,6 +191,7 @@
                     </div>
                 @endif
             </div>
+            @endif
 
             <div class="wd-perf-card">
                 <h3>Répartition des revenus</h3>
@@ -226,7 +228,9 @@
                     <thead>
                         <tr>
                             <th>Client</th>
+                            @if ($isCourtier)
                             <th>Conseiller</th>
+                            @endif
                             <th>Mandat courtage</th>
                             <th>CIF</th>
                             <th>CII</th>
@@ -237,7 +241,9 @@
                         @foreach ($detailClients as $ligne)
                             <tr data-rev-name="{{ strtolower($ligne['client']->prenom.' '.$ligne['client']->nom) }}">
                                 <td class="muted">{{ $ligne['client']->prenom }} {{ $ligne['client']->nom }}</td>
+                                @if ($isCourtier)
                                 <td class="muted">{{ $ligne['conseiller']?->name ?? '-' }}</td>
+                                @endif
                                 <td>{{ number_format($ligne['mandat_courtage'], 0, ',', ' ') }} €</td>
                                 <td>{{ number_format($ligne['cif'], 0, ',', ' ') }} €</td>
                                 <td>{{ number_format($ligne['cii'], 0, ',', ' ') }} €</td>

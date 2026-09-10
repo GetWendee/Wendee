@@ -100,7 +100,9 @@ class PerformanceController extends Controller
     {
         $user = $request->user();
 
-        abort_unless($user && $user->effectiveRole() === 'courtier', 403);
+        abort_unless($user && in_array($user->effectiveRole(), ['courtier', 'conseiller'], true), 403);
+
+        $isCourtier = $user->effectiveRole() === 'courtier';
 
         $periode = in_array($request->query('periode'), ['mois', 'trimestre', 'annee'], true)
             ? $request->query('periode')
@@ -110,6 +112,7 @@ class PerformanceController extends Controller
 
         $clients = Client::query()
             ->with(['kyc', 'profilInvestisseur', 'patrimoineElements', 'conseiller'])
+            ->when(! $isCourtier, fn ($query) => $query->where('conseiller_id', $user->id))
             ->get();
 
         $clientIds = $clients->pluck('id');
@@ -122,8 +125,14 @@ class PerformanceController extends Controller
 
         $clientsActifs = $clients->count();
 
-        $clientsCreesPeriode = Client::query()->whereBetween('created_at', [$debut, $fin])->count();
-        $clientsCreesPeriodePrecedente = Client::query()->whereBetween('created_at', [$debutPrecedent, $finPrecedent])->count();
+        $clientsCreesPeriode = Client::query()
+            ->when(! $isCourtier, fn ($query) => $query->where('conseiller_id', $user->id))
+            ->whereBetween('created_at', [$debut, $fin])
+            ->count();
+        $clientsCreesPeriodePrecedente = Client::query()
+            ->when(! $isCourtier, fn ($query) => $query->where('conseiller_id', $user->id))
+            ->whereBetween('created_at', [$debutPrecedent, $finPrecedent])
+            ->count();
 
         $evolutionClientsCrees = $clientsCreesPeriodePrecedente > 0
             ? round((($clientsCreesPeriode - $clientsCreesPeriodePrecedente) / $clientsCreesPeriodePrecedente) * 100, 1)
@@ -151,48 +160,54 @@ class PerformanceController extends Controller
 
         $evolutionPatrimoine = $this->evolutionPatrimoine($clients);
 
-        $conseillers = collect([$user])->merge(
-            User::query()->where('role', 'conseiller')->where('parent_id', $user->id)->orderBy('name')->get()
-        );
+        $lignesConseillers = collect();
+        $alertesConformite = collect();
 
-        $lignesConseillers = $conseillers->map(function (User $conseiller) use ($clients): array {
-            $clientsConseiller = $clients->where('conseiller_id', $conseiller->id);
-            $patrimoineConseiller = $clientsConseiller->flatMap->patrimoineElements;
+        if ($isCourtier) {
+            $conseillers = collect([$user])->merge(
+                User::query()->where('role', 'conseiller')->where('parent_id', $user->id)->orderBy('name')->get()
+            );
 
-            return [
-                'conseiller' => $conseiller,
-                'patrimoine_gere' => (float) $patrimoineConseiller
-                    ->whereIn('categorie', ['actif_financier', 'actif_non_financier'])
-                    ->sum('montant'),
-                'clients' => $clientsConseiller->count(),
-            ];
-        })->sortByDesc('patrimoine_gere')->values();
+            $lignesConseillers = $conseillers->map(function (User $conseiller) use ($clients): array {
+                $clientsConseiller = $clients->where('conseiller_id', $conseiller->id);
+                $patrimoineConseiller = $clientsConseiller->flatMap->patrimoineElements;
 
-        $limiteConformite = now()->subYear();
+                return [
+                    'conseiller' => $conseiller,
+                    'patrimoine_gere' => (float) $patrimoineConseiller
+                        ->whereIn('categorie', ['actif_financier', 'actif_non_financier'])
+                        ->sum('montant'),
+                    'clients' => $clientsConseiller->count(),
+                ];
+            })->sortByDesc('patrimoine_gere')->values();
 
-        $alertesConformite = $conseillers->map(function (User $conseiller) use ($clients, $limiteConformite): array {
-            $clientsConseiller = $clients->where('conseiller_id', $conseiller->id);
+            $limiteConformite = now()->subYear();
 
-            $kycExpires = $clientsConseiller->filter(function (Client $client) use ($limiteConformite) {
-                $date = $client->kyc?->signe_le;
+            $alertesConformite = $conseillers->map(function (User $conseiller) use ($clients, $limiteConformite): array {
+                $clientsConseiller = $clients->where('conseiller_id', $conseiller->id);
 
-                return empty($date) || $date->lt($limiteConformite);
-            })->count();
+                $kycExpires = $clientsConseiller->filter(function (Client $client) use ($limiteConformite) {
+                    $date = $client->kyc?->signe_le;
 
-            $profilsARenouveler = $clientsConseiller->filter(function (Client $client) use ($limiteConformite) {
-                $date = $client->profilInvestisseur?->signe_le;
+                    return empty($date) || $date->lt($limiteConformite);
+                })->count();
 
-                return empty($date) || $date->lt($limiteConformite);
-            })->count();
+                $profilsARenouveler = $clientsConseiller->filter(function (Client $client) use ($limiteConformite) {
+                    $date = $client->profilInvestisseur?->signe_le;
 
-            return [
-                'conseiller' => $conseiller,
-                'kyc_expires' => $kycExpires,
-                'profils_a_renouveler' => $profilsARenouveler,
-            ];
-        })->sortByDesc(fn (array $ligne) => $ligne['kyc_expires'] + $ligne['profils_a_renouveler'])->values();
+                    return empty($date) || $date->lt($limiteConformite);
+                })->count();
+
+                return [
+                    'conseiller' => $conseiller,
+                    'kyc_expires' => $kycExpires,
+                    'profils_a_renouveler' => $profilsARenouveler,
+                ];
+            })->sortByDesc(fn (array $ligne) => $ligne['kyc_expires'] + $ligne['profils_a_renouveler'])->values();
+        }
 
         return view('tenant.performances.index', [
+            'isCourtier' => $isCourtier,
             'periode' => $periode,
             'actifs' => $actifs,
             'passifs' => $passifs,

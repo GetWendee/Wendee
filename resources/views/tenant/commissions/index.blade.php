@@ -45,7 +45,7 @@
 
         <div class="wd-perf-head">
             <div>
-                <p class="wd-perf-eyebrow">Vue cabinet</p>
+                <p class="wd-perf-eyebrow">{{ $isCourtier ? 'Vue cabinet' : 'Vue personnelle' }}</p>
                 <h1 class="wd-perf-title">Commissions</h1>
             </div>
         </div>
@@ -57,13 +57,17 @@
             @if ($aRecevoir->isEmpty())
                 <p class="wd-com-empty">Aucune commission en attente de réception.</p>
             @else
+                @if ($isCourtier)
                 <form method="POST" action="{{ route('tenant.commissions.confirmer-fonds-recus') }}">
                     @csrf
+                @endif
                     <div class="wd-table-scroll">
                     <table class="wd-rev-table">
                         <thead>
                             <tr>
+                                @if ($isCourtier)
                                 <th><input type="checkbox" data-wd-select-all="a-recevoir"></th>
+                                @endif
                                 <th>Apporteur</th>
                                 <th>Client</th>
                                 <th>Mission</th>
@@ -74,7 +78,9 @@
                         <tbody>
                             @foreach ($aRecevoir as $commission)
                                 <tr>
+                                    @if ($isCourtier)
                                     <td><input type="checkbox" name="commissions[]" value="{{ $commission->id }}" data-wd-group="a-recevoir"></td>
+                                    @endif
                                     <td>
                                         <span class="name-cell">
                                             <span class="wd-perf-avatar">{{ collect(explode(' ', $commission->apporteur->name))->map(fn ($mot) => mb_substr($mot, 0, 1))->implode('') }}</span>
@@ -90,8 +96,10 @@
                         </tbody>
                     </table>
                     </div>
+                @if ($isCourtier)
                     <button type="submit" class="wd-com-btn" data-wd-submit="a-recevoir" disabled>Confirmer la réception des fonds</button>
                 </form>
+                @endif
             @endif
         </div>
 
@@ -102,13 +110,17 @@
             @if ($virementsAFaire->isEmpty())
                 <p class="wd-com-empty">Aucun virement en attente.</p>
             @else
+                @if ($isCourtier)
                 <form method="POST" action="{{ route('tenant.commissions.valider-virements') }}">
                     @csrf
+                @endif
                     <div class="wd-table-scroll">
                     <table class="wd-rev-table">
                         <thead>
                             <tr>
+                                @if ($isCourtier)
                                 <th><input type="checkbox" data-wd-select-all="virements"></th>
+                                @endif
                                 <th>Apporteur</th>
                                 <th>Client</th>
                                 <th>Mission</th>
@@ -120,7 +132,9 @@
                             @foreach ($virementsAFaire as $commission)
                                 @php $ribValide = $commission->apporteur && $commission->apporteur->rib_valide; @endphp
                                 <tr class="{{ $ribValide ? '' : 'wd-com-row-blocked' }}">
+                                    @if ($isCourtier)
                                     <td><input type="checkbox" name="commissions[]" value="{{ $commission->id }}" data-wd-group="virements" {{ $ribValide ? '' : 'disabled' }}></td>
+                                    @endif
                                     <td>
                                         <span class="name-cell">
                                             <span class="wd-perf-avatar">{{ collect(explode(' ', $commission->apporteur->name))->map(fn ($mot) => mb_substr($mot, 0, 1))->implode('') }}</span>
@@ -136,9 +150,11 @@
                         </tbody>
                     </table>
                     </div>
+                @if ($isCourtier)
                     <button type="submit" class="wd-com-btn" data-wd-submit="virements" disabled>Valider les virements sélectionnés</button>
                     <p class="wd-com-empty" style="margin-top:10px;">Les lignes grisées ont un RIB non validé : elles seront ignorées tant que le RIB de l'apporteur n'est pas validé.</p>
                 </form>
+                @endif
             @endif
         </div>
 
