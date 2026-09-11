@@ -11,6 +11,13 @@
             mb_substr($client->nom ?? '', 0, 1)
         );
 
+    $eyebrowClient = match (true) {
+        $client->estMorale() => 'Client · société',
+        $client->estMineur() => 'Client · mineur',
+        $client->estMajeurProtege() => 'Client · majeur protégé',
+        default => 'Client · particulier',
+    };
+
     $labelsRelation = [
         'parent' => 'représentant légal',
         'tuteur' => 'tuteur',
@@ -2401,7 +2408,7 @@ html,body{
 <div class="wd-avatar">{{ $initiales }}</div>
 
 <div>
-<div class="wd-eyebrow">Client · portefeuille privé</div>
+<div class="wd-eyebrow">{{ $eyebrowClient }}</div>
 <h1>{{ $client->nomAffichage() }}</h1>
 <div class="wd-hero-meta">
 Dossier client · suivi patrimonial
