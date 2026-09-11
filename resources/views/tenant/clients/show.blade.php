@@ -348,14 +348,31 @@
     | bas dans la page (notre charte, pas celle d'un outil tiers).
     */
     $echelleColor = function (?string $value) {
-        if (! $value || ! preg_match('/^([🔴🟠🟢])/u', $value, $m)) {
+        if (! $value) {
             return 'neutre';
         }
 
-        return match ($m[1]) {
-            '🟢' => 'bon',
-            '🟠' => 'vigilance',
-            '🔴' => 'attention',
+        if (preg_match('/^([🔴🟠🟢])/u', $value, $m)) {
+            return match ($m[1]) {
+                '🟢' => 'bon',
+                '🟠' => 'vigilance',
+                '🔴' => 'attention',
+                default => 'neutre',
+            };
+        }
+
+        // Quelques formules (ex : score_capacite_subir_pertes_echelle) ne
+        // préfixent pas leur résultat d'un émoji de couleur, contrairement
+        // aux autres échelles. On retombe alors sur le libellé texte, avec
+        // les mêmes seuils que les échelles équivalentes (ex : tolérance au
+        // risque : très faible/faible = rouge, modérée = orange, élevée/très
+        // élevée = vert) pour rester cohérent avec le reste de la page.
+        $texte = mb_strtolower(trim($value));
+
+        return match (true) {
+            str_contains($texte, 'très faible'), str_contains($texte, 'faible') => 'attention',
+            str_contains($texte, 'modérée') => 'vigilance',
+            str_contains($texte, 'élevée'), str_contains($texte, 'bonne'), str_contains($texte, 'avancé'), str_contains($texte, 'confortable'), str_contains($texte, 'expert') => 'bon',
             default => 'neutre',
         };
     };
@@ -1451,14 +1468,14 @@ html,body{
     border-top:1px solid var(--line);
     border-right:1px solid var(--line);
     border-bottom:1px solid var(--line);
-    border-left:3px solid var(--line);
+    border-left:6px solid var(--line);
     border-radius:13px;
-    padding:20px 20px 19px 17px;
+    padding:20px 20px 19px 18px;
 }
 
-.wd-profile-metric-bon{border-left-color:#7d9c88;}
-.wd-profile-metric-vigilance{border-left-color:#c79a62;}
-.wd-profile-metric-attention{border-left-color:#9d5f66;}
+.wd-profile-metric-bon{border-left-color:#7d9c88; background:rgba(125,156,136,.07);}
+.wd-profile-metric-vigilance{border-left-color:#c79a62; background:rgba(199,154,98,.08);}
+.wd-profile-metric-attention{border-left-color:#9d5f66; background:rgba(157,95,102,.07);}
 .wd-profile-metric-neutre{border-left-color:#c7c2bd;}
 
 .wd-profile-metric-head{
@@ -1490,9 +1507,9 @@ html,body{
 
 .wd-status-pill{
     display:inline-block;
-    font-size:15px;
+    font-size:17px;
     font-weight:800;
-    letter-spacing:-.01em;
+    letter-spacing:-.015em;
     line-height:1.3;
 }
 
