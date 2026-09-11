@@ -58,8 +58,8 @@
                             @if($prompt->enAttenteDeConfirmation())
                                 <div class="mb-4 bg-amber-50 border border-amber-200 rounded-md p-4 space-y-3">
                                     <p class="text-sm text-amber-800">
-                                        Une modification est en attente depuis {{ $prompt->code_envoye_le?->diffForHumans() }}.
-                                        Un code a été envoyé à {{ $prompt->modifiePar?->email ?? "l'auteur de la modification" }}.
+                                        Une modification est en attente depuis {{ $prompt->code_envoye_le?->diffForHumans() }}, proposée par {{ $prompt->modifiePar?->name ?? $prompt->modifiePar?->email ?? "un utilisateur" }}.
+                                        Un code de validation a été envoyé à l'associé.
                                     </p>
                                     <div class="flex flex-wrap items-center gap-2">
                                         <form method="POST" action="{{ route('prompts-ia.confirmer', $prompt) }}" class="flex flex-wrap items-center gap-2">
