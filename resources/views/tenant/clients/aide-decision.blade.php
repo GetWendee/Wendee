@@ -3377,63 +3377,6 @@ Plan d'action
 
     @endif
 
-
-
-
-    {{-- ======================================================
-         RECOMMANDATION PATRIMONIALE
-         ====================================================== --}}
-
-    <div class="wd-recommandation-bar">
-
-        <div class="wd-recommandation-copy">
-
-            <p class="wd-recommandation-kicker">
-                Aide à la décision
-            </p>
-
-            <h3 class="wd-recommandation-title">
-                Recommandation patrimoniale
-            </h3>
-
-            @if($recommandationDisponible)
-
-                <p class="wd-recommandation-description">
-                    Accédez à la recommandation patrimoniale construite
-                    à partir de l’analyse du dossier.
-                </p>
-
-            @else
-
-                <p class="wd-recommandation-description">
-                    La recommandation patrimoniale sera disponible après
-                    la génération d’une suggestion de prestations.
-                </p>
-
-            @endif
-
-        </div>
-
-
-        @if($recommandationDisponible)
-
-            <a
-                href="{{ route('tenant.clients.recommandation-patrimoniale', $client) }}"
-                class="wd-recommandation-button"
-            >
-                Recommandation
-            </a>
-
-        @else
-
-            <span class="wd-recommandation-button-disabled">
-                Recommandation
-            </span>
-
-        @endif
-
-    </div>
-
 </section>
 
 </div>
