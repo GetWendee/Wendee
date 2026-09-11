@@ -1383,9 +1383,10 @@ html,body{
     width:2px;
     height:86px;
     margin-left:-1px;
-    background:linear-gradient(180deg, var(--pink), #ff4fac);
+    background:linear-gradient(180deg, #ffffff, #d8d5d2);
     border-radius:2px;
     transform-origin:bottom center;
+    box-shadow:0 1px 4px rgba(0,0,0,.35);
 }
 
 .wd-gauge-center{
@@ -1396,7 +1397,7 @@ html,body{
     height:13px;
     margin-left:-6.5px;
     border-radius:50%;
-    background:var(--pink);
+    background:#ffffff;
     border:3px solid #242424;
     box-shadow:0 0 0 1px rgba(255,255,255,.12);
 }
@@ -1404,7 +1405,8 @@ html,body{
 .wd-profile-scale-labels{
     display:flex;
     justify-content:space-between;
-    margin-top:16px;
+    width:220px;
+    margin:16px auto 0;
     color:#837c78;
     font-size:8px;
     text-transform:uppercase;
@@ -1446,10 +1448,18 @@ html,body{
 .wd-profile-metric{
     min-width:0;
     background:#fff;
-    border:1px solid var(--line);
+    border-top:1px solid var(--line);
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    border-left:3px solid var(--line);
     border-radius:13px;
-    padding:20px 20px 19px;
+    padding:20px 20px 19px 17px;
 }
+
+.wd-profile-metric-bon{border-left-color:#7d9c88;}
+.wd-profile-metric-vigilance{border-left-color:#c79a62;}
+.wd-profile-metric-attention{border-left-color:#9d5f66;}
+.wd-profile-metric-neutre{border-left-color:#c7c2bd;}
 
 .wd-profile-metric-head{
     display:flex;
@@ -1467,9 +1477,10 @@ html,body{
 }
 
 /*
- * Statut qualitatif : un badge plein (fond teinté + texte de la même
- * couleur) plutôt qu'une puce + petit texte gris — le libellé ("Élevée",
- * "Expertise"...) porte l'information, il doit être ce qu'on lit en premier.
+ * Statut qualitatif : la couleur du statut se lit sur la bordure gauche de
+ * la vignette (cf. .wd-profile-metric-bon/vigilance/attention ci-dessus),
+ * le libellé ("Élevée", "Expertise"...) reste du texte plein, sans fond,
+ * mais en gras et plus grand pour porter l'information en premier.
  * Mêmes 3 teintes que "Compatibilité des placements" plus bas, pour rester
  * cohérent avec notre charte sur toute la page.
  */
@@ -1479,18 +1490,16 @@ html,body{
 
 .wd-status-pill{
     display:inline-block;
-    padding:8px 15px;
-    border-radius:9px;
-    font-size:13.5px;
-    font-weight:750;
+    font-size:15px;
+    font-weight:800;
     letter-spacing:-.01em;
     line-height:1.3;
 }
 
-.wd-status-pill-bon{background:rgba(125,156,136,.14);color:#4c6656;}
-.wd-status-pill-vigilance{background:rgba(199,154,98,.16);color:#8c642f;}
-.wd-status-pill-attention{background:rgba(157,95,102,.15);color:#844950;}
-.wd-status-pill-neutre{background:rgba(145,138,133,.14);color:#5c5651;}
+.wd-status-pill-bon{color:#4c6656;}
+.wd-status-pill-vigilance{color:#8c642f;}
+.wd-status-pill-attention{color:#844950;}
+.wd-status-pill-neutre{color:#5c5651;}
 
 @media(max-width:1050px){
     .wd-profile-new-grid{
@@ -3774,7 +3783,7 @@ class="wd-btn-dark">
 
     <div class="wd-profile-metrics">
 
-        <div class="wd-profile-metric">
+        <div class="wd-profile-metric wd-profile-metric-{{ $colorConnaissance }}">
             <div class="wd-profile-metric-head">
                 <span>Connaissance</span>
             </div>
@@ -3785,7 +3794,7 @@ class="wd-btn-dark">
         </div>
 
 
-        <div class="wd-profile-metric">
+        <div class="wd-profile-metric wd-profile-metric-{{ $colorExperience }}">
             <div class="wd-profile-metric-head">
                 <span>Expérience</span>
             </div>
@@ -3796,7 +3805,7 @@ class="wd-btn-dark">
         </div>
 
 
-        <div class="wd-profile-metric">
+        <div class="wd-profile-metric wd-profile-metric-{{ $colorCapacite }}">
             <div class="wd-profile-metric-head">
                 <span>Capacité financière</span>
             </div>
@@ -3807,7 +3816,7 @@ class="wd-btn-dark">
         </div>
 
 
-        <div class="wd-profile-metric">
+        <div class="wd-profile-metric wd-profile-metric-{{ $colorTolerance }}">
             <div class="wd-profile-metric-head">
                 <span>Tolérance au risque</span>
             </div>
@@ -3818,7 +3827,7 @@ class="wd-btn-dark">
         </div>
 
 
-        <div class="wd-profile-metric">
+        <div class="wd-profile-metric wd-profile-metric-{{ $colorPertes }}">
             <div class="wd-profile-metric-head">
                 <span>Capacité à subir des pertes</span>
             </div>
@@ -3831,7 +3840,7 @@ class="wd-btn-dark">
         </div>
 
 
-        <div class="wd-profile-metric">
+        <div class="wd-profile-metric wd-profile-metric-{{ $colorEsg }}">
             <div class="wd-profile-metric-head">
                 <span>Extra-financier</span>
             </div>
