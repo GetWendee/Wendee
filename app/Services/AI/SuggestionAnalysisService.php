@@ -233,10 +233,27 @@ Tu dois privilégier les besoins concrets et actionnables.
 
 Produis exactement 4 prestations recommandées.
 
-Pour chaque prestation :
+Pour chaque prestation, tu dois déterminer :
+
+- categorie : exactement l'une des valeurs suivantes : "ASSURANCE",
+  "IOBSP", "CIF" ;
+- type_document : le document contractuel correspondant à la catégorie,
+  strictement selon cette correspondance :
+    ASSURANCE → "MANDAT_COURTAGE_ASSURANCE"
+    IOBSP → "MANDAT_COURTAGE_IOBSP"
+    CIF → "LETTRE_MISSION_CIF"
 - titre : nom court et professionnel de la prestation ;
 - justification : explique précisément pourquoi elle est pertinente au regard
   des informations du dossier ;
+- score_pertinence : note entière de 0 à 100 évaluant la priorité commerciale
+  et patrimoniale de cette prestation pour ce dossier (usage interne uniquement,
+  jamais un indicateur de risque ni de certitude) ;
+- motif_score : une phrase courte expliquant ce qui justifie ce niveau de score ;
+- donnees_cles : entre 2 et 5 données précises et vérifiables, issues des
+  analyses fournies, qui ont déclenché cette suggestion (ex : montants,
+  statuts, profils) ;
+- perimetre : entre 3 et 6 éléments courts décrivant les sujets qui seraient
+  étudiés si la mission est retenue ;
 - actions : exactement 2 actions concrètes que le conseiller pourrait proposer.
 
 Ne recommande jamais un produit financier précis uniquement parce qu'il existe
@@ -245,13 +262,30 @@ dans le patrimoine du client.
 Les recommandations doivent rester adaptées au profil investisseur et aux
 informations disponibles.
 
+Ne mélange jamais categorie et type_document : chaque type_document doit
+correspondre exactement à sa categorie selon la table de correspondance
+ci-dessus.
+
 Format JSON STRICT :
 
 {
   "prestations": [
     {
+      "categorie": "CIF",
+      "type_document": "LETTRE_MISSION_CIF",
       "titre": "...",
       "justification": "...",
+      "score_pertinence": 92,
+      "motif_score": "...",
+      "donnees_cles": [
+        "...",
+        "..."
+      ],
+      "perimetre": [
+        "...",
+        "...",
+        "..."
+      ],
       "actions": [
         "...",
         "..."
@@ -276,6 +310,12 @@ PROMPT;
             );
         }
 
+        $categoriesValides = [
+            'ASSURANCE' => 'MANDAT_COURTAGE_ASSURANCE',
+            'IOBSP' => 'MANDAT_COURTAGE_IOBSP',
+            'CIF' => 'LETTRE_MISSION_CIF',
+        ];
+
         foreach ($result['prestations'] as $prestation) {
 
             if (
@@ -288,6 +328,61 @@ PROMPT;
             ) {
                 throw new RuntimeException(
                     'Format de prestation Suggestion invalide.'
+                );
+            }
+
+            $categorie = $prestation['categorie'] ?? null;
+            $typeDocument = $prestation['type_document'] ?? null;
+
+            if (
+                ! is_string($categorie) ||
+                ! array_key_exists($categorie, $categoriesValides) ||
+                $typeDocument !== $categoriesValides[$categorie]
+            ) {
+                throw new RuntimeException(
+                    'Catégorie ou type de document de prestation Suggestion invalide.'
+                );
+            }
+
+            $score = $prestation['score_pertinence'] ?? null;
+
+            if (
+                ! is_int($score) ||
+                $score < 0 ||
+                $score > 100
+            ) {
+                throw new RuntimeException(
+                    'Score de pertinence de prestation Suggestion invalide.'
+                );
+            }
+
+            if (empty($prestation['motif_score']) || ! is_string($prestation['motif_score'])) {
+                throw new RuntimeException(
+                    'Motif de score de prestation Suggestion invalide.'
+                );
+            }
+
+            $donneesCles = $prestation['donnees_cles'] ?? null;
+
+            if (
+                ! is_array($donneesCles) ||
+                count($donneesCles) < 2 ||
+                count($donneesCles) > 5
+            ) {
+                throw new RuntimeException(
+                    'Données clés de prestation Suggestion invalides.'
+                );
+            }
+
+            $perimetre = $prestation['perimetre'] ?? null;
+
+            if (
+                ! is_array($perimetre) ||
+                count($perimetre) < 3 ||
+                count($perimetre) > 6
+            ) {
+                throw new RuntimeException(
+                    'Périmètre de prestation Suggestion invalide.'
                 );
             }
         }

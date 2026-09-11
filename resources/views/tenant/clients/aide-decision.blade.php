@@ -142,6 +142,36 @@
 
     /*
     |--------------------------------------------------------------------------
+    | Présentations (conseiller / client) de la dernière suggestion
+    |--------------------------------------------------------------------------
+    |
+    | Générées automatiquement juste après la suggestion brute (moteur IA 1)
+    | par les moteurs de présentation dédiés. On ne retient que celles
+    | générées après (ou en même temps que) la suggestion actuelle, pour ne
+    | jamais afficher une présentation devenue obsolète.
+    |
+    */
+
+    $dernierePresentationConseiller = $derniereSuggestion
+        ? $client->analyses()
+            ->where('type', 'suggestion_presentation_conseiller')
+            ->where('status', 'completed')
+            ->where('completed_at', '>=', $derniereSuggestion->completed_at)
+            ->latest('completed_at')
+            ->first()
+        : null;
+
+    $dernierePresentationClient = $derniereSuggestion
+        ? $client->analyses()
+            ->where('type', 'suggestion_presentation_client')
+            ->where('status', 'completed')
+            ->where('completed_at', '>=', $derniereSuggestion->completed_at)
+            ->latest('completed_at')
+            ->first()
+        : null;
+
+    /*
+    |--------------------------------------------------------------------------
     | Disponibilité de la recommandation patrimoniale
     |--------------------------------------------------------------------------
     |
@@ -2482,6 +2512,181 @@ html,body{
 
 }
 
+
+/* ============================================================
+   CARTES DE PRÉSENTATION (SUGGESTION) — conseiller / client
+   ============================================================ */
+
+.wd-presentation-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.wd-presentation-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    padding: 20px 22px 22px;
+
+    background: #ffffff;
+    border: 1px solid #E1E7E4;
+    border-radius: 15px;
+
+    box-shadow:
+        0 2px 8px rgba(36,51,47,.035),
+        0 8px 22px rgba(36,51,47,.025);
+}
+
+.wd-presentation-card-top {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.wd-presentation-rank {
+    color: #80A29A;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .1em;
+}
+
+.wd-presentation-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: #EEF3F0;
+    color: #526D60;
+    font-size: 9px;
+    font-weight: 750;
+}
+
+.wd-presentation-chip-doc {
+    background: #F1EFED;
+    color: #6B655F;
+}
+
+.wd-presentation-title {
+    margin: 0;
+    color: #242424;
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 750;
+    letter-spacing: -.01em;
+}
+
+.wd-presentation-block-title {
+    margin-bottom: 5px;
+    color: #56635F;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.wd-presentation-text {
+    margin: 0;
+    color: #514c48;
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+
+.wd-presentation-list {
+    margin: 0;
+    padding-left: 16px;
+    color: #514c48;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.wd-presentation-score {
+    padding: 13px 14px;
+    background: #FAFCFB;
+    border: 1px solid #EDF1EF;
+    border-radius: 10px;
+}
+
+.wd-presentation-score-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.wd-presentation-score-top span {
+    color: #79726d;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+}
+
+.wd-presentation-score-top strong {
+    color: #242424;
+    font-size: 15px;
+    letter-spacing: -.02em;
+}
+
+.wd-presentation-score-track {
+    height: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+    background: #eeeae7;
+    border-radius: 20px;
+}
+
+.wd-presentation-score-track i {
+    display: block;
+    height: 100%;
+    background: #80A29A;
+    border-radius: 20px;
+}
+
+.wd-presentation-score-motif {
+    margin: 8px 0 0;
+    color: #79726d;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.wd-presentation-cta {
+    margin-top: auto;
+
+    min-height: 38px;
+    padding: 0 16px;
+
+    border: 1px solid rgba(255,255,255,.10);
+    border-top: 2px solid #FF3399;
+    border-radius: 8px;
+
+    background: #242424;
+    color: #ffffff;
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+
+    font-family: inherit;
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+.wd-presentation-card-client {
+    background: #FAFCFB;
+}
+
+@media (max-width: 1200px) {
+
+    .wd-presentation-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
 </style>
 <div class="wd-wrap">
 
@@ -2778,7 +2983,15 @@ Plan d'action
                 Suggestion de prestations
             </h3>
 
-            @if($suggestionDisponible)
+            @if($viewRole === 'client')
+
+                <p class="wd-suggestion-description">
+                    Votre situation patrimoniale a été analysée. Certaines
+                    pistes d’accompagnement peuvent être pertinentes au
+                    regard des informations de votre dossier.
+                </p>
+
+            @elseif($suggestionDisponible)
 
                 <p class="wd-suggestion-description">
                     Les trois analyses du dossier sont disponibles et à jour.
@@ -2821,89 +3034,325 @@ Plan d'action
 
     @if($derniereSuggestion)
 
-        @php
+        @if($viewRole === 'client')
 
-            $suggestionResultat =
-                $derniereSuggestion->result_json ?? [];
+            {{-- ==================================================
+                 INTERFACE CLIENT — présentation épurée, sans score
+                 ================================================== --}}
 
-            $prestations =
-                is_array($suggestionResultat['prestations'] ?? null)
-                    ? $suggestionResultat['prestations']
-                    : [];
+            @php
+                $presentationResultat =
+                    $dernierePresentationClient->result_json ?? [];
 
-        @endphp
+                $prestationsPresentees =
+                    is_array($presentationResultat['prestations'] ?? null)
+                        ? $presentationResultat['prestations']
+                        : [];
+            @endphp
 
+            @if($dernierePresentationClient && count($prestationsPresentees))
 
-        @if(count($prestations))
+                <section class="wd-suggestion-result">
 
-            <section class="wd-suggestion-result">
+                    <div class="wd-suggestion-result-head">
+                        <h3 class="wd-suggestion-result-title">
+                            Pistes d’accompagnement
+                        </h3>
+                    </div>
 
-                <div class="wd-suggestion-result-head">
+                    <div class="wd-presentation-grid">
 
-                    <h3 class="wd-suggestion-result-title">
-                        Prestations suggérées
-                    </h3>
+                        @foreach($prestationsPresentees as $prestation)
 
-                    <p class="wd-suggestion-result-date">
-                        Analyse générée le
-                        {{ optional($derniereSuggestion->completed_at?->copy()->setTimezone('Europe/Paris'))->translatedFormat('d F Y à H:i') }}
-                    </p>
+                            <article class="wd-presentation-card wd-presentation-card-client">
 
-                </div>
+                                @if(! empty($prestation['categorie_affichee']))
+                                    <span class="wd-presentation-chip">
+                                        {{ $prestation['categorie_affichee'] }}
+                                    </span>
+                                @endif
 
+                                <h4 class="wd-presentation-title">
+                                    {{ $prestation['titre'] ?? '' }}
+                                </h4>
 
-                <div class="wd-suggestion-list">
-
-                    @foreach($prestations as $index => $prestation)
-
-                        <article class="wd-suggestion-item">
-
-                            <span class="wd-suggestion-item-number">
-                                {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
-                            </span>
-
-                            <h4 class="wd-suggestion-item-title">
-                                {{ $prestation['titre'] ?? '' }}
-                            </h4>
-
-                            <p class="wd-suggestion-item-text">
-                                {{ $prestation['justification'] ?? '' }}
-                            </p>
-
-                            @if(
-                                isset($prestation['actions']) &&
-                                is_array($prestation['actions'])
-                            )
-
-                                <div class="wd-suggestion-actions">
-
-                                    <div class="wd-suggestion-actions-label">
-                                        Actions proposées
+                                <div class="wd-presentation-block">
+                                    <div class="wd-presentation-block-title">
+                                        Pourquoi cette analyse peut être utile
                                     </div>
+                                    <p class="wd-presentation-text">
+                                        {{ $prestation['pourquoi'] ?? '' }}
+                                    </p>
+                                </div>
 
-                                    <ul>
+                                <div class="wd-presentation-block">
+                                    <div class="wd-presentation-block-title">
+                                        Ce que nous vous proposons
+                                    </div>
+                                    <p class="wd-presentation-text">
+                                        {{ $prestation['proposition'] ?? '' }}
+                                    </p>
+                                </div>
 
-                                        @foreach($prestation['actions'] as $action)
+                                @if(! empty($prestation['actions']) && is_array($prestation['actions']))
+                                    <div class="wd-presentation-block">
+                                        <div class="wd-presentation-block-title">
+                                            Travaux prévus
+                                        </div>
+                                        <ul class="wd-presentation-list">
+                                            @foreach($prestation['actions'] as $action)
+                                                <li>{{ $action }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
 
-                                            <li>
-                                                {{ $action }}
-                                            </li>
+                                <button type="button" class="wd-presentation-cta" disabled title="Bientôt disponible">
+                                    {{ $prestation['cta'] ?? 'Découvrir cette prestation' }}
+                                </button>
 
-                                        @endforeach
+                            </article>
 
-                                    </ul>
+                        @endforeach
+
+                    </div>
+
+                </section>
+
+            @else
+
+                <p class="wd-analysis-empty">
+                    Une présentation détaillée de ces pistes d’accompagnement est en cours de préparation.
+                </p>
+
+            @endif
+
+        @else
+
+            {{-- ==================================================
+                 INTERFACE CONSEILLER / COURTIER — cartes complètes
+                 ================================================== --}}
+
+            @php
+                $presentationResultat =
+                    $dernierePresentationConseiller->result_json ?? [];
+
+                $prestationsPresentees =
+                    is_array($presentationResultat['prestations'] ?? null)
+                        ? $presentationResultat['prestations']
+                        : [];
+            @endphp
+
+            @if($dernierePresentationConseiller && count($prestationsPresentees))
+
+                <section class="wd-suggestion-result">
+
+                    <div class="wd-suggestion-result-head">
+
+                        <h3 class="wd-suggestion-result-title">
+                            Prestations suggérées
+                        </h3>
+
+                        <p class="wd-suggestion-result-date">
+                            Analyse générée le
+                            {{ optional($derniereSuggestion->completed_at?->copy()->setTimezone('Europe/Paris'))->translatedFormat('d F Y à H:i') }}
+                        </p>
+
+                    </div>
+
+                    <div class="wd-presentation-grid">
+
+                        @foreach($prestationsPresentees as $prestation)
+
+                            <article class="wd-presentation-card">
+
+                                <div class="wd-presentation-card-top">
+
+                                    <span class="wd-presentation-rank">
+                                        {{ str_pad((int) ($prestation['rang'] ?? 0), 2, '0', STR_PAD_LEFT) }}
+                                    </span>
+
+                                    @if(! empty($prestation['categorie_affichee']))
+                                        <span class="wd-presentation-chip">
+                                            {{ $prestation['categorie_affichee'] }}
+                                        </span>
+                                    @endif
+
+                                    @if(! empty($prestation['type_document_affiche']))
+                                        <span class="wd-presentation-chip wd-presentation-chip-doc">
+                                            {{ $prestation['type_document_affiche'] }}
+                                        </span>
+                                    @endif
 
                                 </div>
 
-                            @endif
+                                <h4 class="wd-presentation-title">
+                                    {{ $prestation['titre'] ?? '' }}
+                                </h4>
 
-                        </article>
+                                <div class="wd-presentation-block">
+                                    <div class="wd-presentation-block-title">
+                                        Pourquoi cette prestation ?
+                                    </div>
+                                    <p class="wd-presentation-text">
+                                        {{ $prestation['justification'] ?? '' }}
+                                    </p>
+                                </div>
 
-                    @endforeach
+                                <div class="wd-presentation-score">
+                                    <div class="wd-presentation-score-top">
+                                        <span>Pertinence</span>
+                                        <strong>{{ (int) ($prestation['score_pertinence'] ?? 0) }}/100</strong>
+                                    </div>
+                                    <div class="wd-presentation-score-track">
+                                        <i style="width:{{ (int) ($prestation['score_pertinence'] ?? 0) }}%"></i>
+                                    </div>
+                                    @if(! empty($prestation['motif_score']))
+                                        <p class="wd-presentation-score-motif">
+                                            Pourquoi ce score : {{ $prestation['motif_score'] }}
+                                        </p>
+                                    @endif
+                                </div>
 
-                </div>
+                                @if(! empty($prestation['donnees_cles']) && is_array($prestation['donnees_cles']))
+                                    <div class="wd-presentation-block">
+                                        <div class="wd-presentation-block-title">
+                                            Données ayant déclenché la suggestion
+                                        </div>
+                                        <ul class="wd-presentation-list">
+                                            @foreach($prestation['donnees_cles'] as $donnee)
+                                                <li>{{ $donnee }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
 
-            </section>
+                                @if(! empty($prestation['perimetre']) && is_array($prestation['perimetre']))
+                                    <div class="wd-presentation-block">
+                                        <div class="wd-presentation-block-title">
+                                            Périmètre envisagé
+                                        </div>
+                                        <ul class="wd-presentation-list">
+                                            @foreach($prestation['perimetre'] as $item)
+                                                <li>{{ $item }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                @if(! empty($prestation['actions']) && is_array($prestation['actions']))
+                                    <div class="wd-presentation-block">
+                                        <div class="wd-presentation-block-title">
+                                            Travaux proposés
+                                        </div>
+                                        <ul class="wd-presentation-list">
+                                            @foreach($prestation['actions'] as $action)
+                                                <li>{{ $action }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                <button type="button" class="wd-presentation-cta" disabled title="Génération du document commercial à venir">
+                                    {{ $prestation['cta'] ?? 'Sélectionner cette prestation' }}
+                                </button>
+
+                            </article>
+
+                        @endforeach
+
+                    </div>
+
+                </section>
+
+            @else
+
+                {{-- Repli : cartes brutes (suggestion générée avant cette
+                     mise à jour, ou présentation conseiller indisponible) --}}
+
+                @php
+                    $suggestionResultatBrut =
+                        $derniereSuggestion->result_json ?? [];
+
+                    $prestationsBrutes =
+                        is_array($suggestionResultatBrut['prestations'] ?? null)
+                            ? $suggestionResultatBrut['prestations']
+                            : [];
+                @endphp
+
+                @if(count($prestationsBrutes))
+
+                    <section class="wd-suggestion-result">
+
+                        <div class="wd-suggestion-result-head">
+
+                            <h3 class="wd-suggestion-result-title">
+                                Prestations suggérées
+                            </h3>
+
+                            <p class="wd-suggestion-result-date">
+                                Analyse générée le
+                                {{ optional($derniereSuggestion->completed_at?->copy()->setTimezone('Europe/Paris'))->translatedFormat('d F Y à H:i') }}
+                            </p>
+
+                        </div>
+
+                        <div class="wd-suggestion-list">
+
+                            @foreach($prestationsBrutes as $index => $prestation)
+
+                                <article class="wd-suggestion-item">
+
+                                    <span class="wd-suggestion-item-number">
+                                        {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
+                                    </span>
+
+                                    <h4 class="wd-suggestion-item-title">
+                                        {{ $prestation['titre'] ?? '' }}
+                                    </h4>
+
+                                    <p class="wd-suggestion-item-text">
+                                        {{ $prestation['justification'] ?? '' }}
+                                    </p>
+
+                                    @if(
+                                        isset($prestation['actions']) &&
+                                        is_array($prestation['actions'])
+                                    )
+
+                                        <div class="wd-suggestion-actions">
+
+                                            <div class="wd-suggestion-actions-label">
+                                                Actions proposées
+                                            </div>
+
+                                            <ul>
+
+                                                @foreach($prestation['actions'] as $action)
+
+                                                    <li>
+                                                        {{ $action }}
+                                                    </li>
+
+                                                @endforeach
+
+                                            </ul>
+
+                                        </div>
+
+                                    @endif
+
+                                </article>
+
+                            @endforeach
+
+                        </div>
+
+                    </section>
+
+                @endif
+
+            @endif
 
         @endif
 

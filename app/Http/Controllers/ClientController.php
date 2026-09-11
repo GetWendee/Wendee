@@ -3144,7 +3144,9 @@ class ClientController extends Controller
 
     public function genererSuggestion(
         Client $client,
-        \App\Services\AI\SuggestionAnalysisService $suggestionAnalysis
+        \App\Services\AI\SuggestionAnalysisService $suggestionAnalysis,
+        \App\Services\AI\SuggestionPresentationConseillerService $presentationConseiller,
+        \App\Services\AI\SuggestionPresentationClientService $presentationClient
     ): \Illuminate\Http\RedirectResponse
     {
         $analyses = $client->analyses()
@@ -3192,6 +3194,40 @@ class ClientController extends Controller
         try {
 
             $suggestion = $suggestionAnalysis->analyze($client);
+
+            /*
+             * Les présentations conseiller/client sont une couche de mise
+             * en forme au-dessus de la suggestion brute (moteur IA 1) :
+             * si l'une d'elles échoue, la suggestion reste exploitable
+             * (repli sur les cartes brutes côté conseiller) et on ne fait
+             * pas échouer toute la génération pour autant.
+             */
+
+            try {
+                $presentationConseiller->presenter($suggestion);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error(
+                    'Erreur génération présentation conseiller (suggestion)',
+                    [
+                        'client_id' => $client->id,
+                        'suggestion_id' => $suggestion->id,
+                        'error' => $e->getMessage(),
+                    ]
+                );
+            }
+
+            try {
+                $presentationClient->presenter($suggestion);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error(
+                    'Erreur génération présentation client (suggestion)',
+                    [
+                        'client_id' => $client->id,
+                        'suggestion_id' => $suggestion->id,
+                        'error' => $e->getMessage(),
+                    ]
+                );
+            }
 
             return redirect()
                 ->route(
