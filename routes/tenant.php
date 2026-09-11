@@ -190,6 +190,9 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::get('/plan-action/{client}/pdf', [ClientController::class, 'telechargerPlanActionPdf'])->name('clients.plan-action.pdf');
         Route::put('/plan-action/{client}/contenu/{analysis}', [ClientController::class, 'modifierPlanActionContenu'])->name('clients.plan-action.modifier');
         Route::post('/aide-decision/{client}/suggestion', [ClientController::class, 'genererSuggestion'])->name('clients.aide-decision.suggestion');
+        Route::post('/aide-decision/{client}/suggestion/{suggestion}/mission/{prestationId}', [ClientController::class, 'construireMission'])->name('clients.missions.construire');
+        Route::get('/missions/{client}/{mission}', [ClientController::class, 'afficherMissionConstruite'])->name('clients.missions.show');
+        Route::post('/missions/{client}/{mission}', [ClientController::class, 'enregistrerMissionConstruite'])->name('clients.missions.update');
         Route::get('/clients/{client}/modifier', [ClientController::class, 'edit'])->name('clients.edit');
         Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
         Route::post('/clients/{client}/cloturer', [ClientController::class, 'cloturer'])->name('clients.cloturer');

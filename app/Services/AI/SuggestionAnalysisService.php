@@ -150,6 +150,22 @@ class SuggestionAnalysisService
                         );
                     }
 
+                    /*
+                     * Identifiant stable par prestation (1 à 4), attribué par
+                     * Wendee et non par l'IA : sert ensuite à référencer sans
+                     * ambiguïté la prestation choisie par le conseiller,
+                     * indépendamment de tout réordonnancement fait par les
+                     * moteurs de présentation.
+                     */
+                    if (isset($result['prestations']) && is_array($result['prestations'])) {
+                        foreach ($result['prestations'] as $index => &$prestationBrute) {
+                            if (is_array($prestationBrute)) {
+                                $prestationBrute['id'] = $index + 1;
+                            }
+                        }
+                        unset($prestationBrute);
+                    }
+
                     // Persistance AVANT validation, pour pouvoir diagnostiquer
                     // les échecs même si la validation rejette la réponse.
                     $analysis->update([

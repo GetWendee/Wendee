@@ -3126,10 +3126,6 @@ Plan d'action
                                     </div>
                                 @endif
 
-                                <button type="button" class="wd-presentation-cta" disabled title="Bientôt disponible">
-                                    {{ $prestation['cta'] ?? 'Découvrir cette prestation' }}
-                                </button>
-
                             </article>
 
                         @endforeach
@@ -3272,9 +3268,12 @@ Plan d'action
                                     </div>
                                 @endif
 
-                                <button type="button" class="wd-presentation-cta" disabled title="Génération du document commercial à venir">
-                                    {{ $prestation['cta'] ?? 'Sélectionner cette prestation' }}
-                                </button>
+                                <form method="POST" action="{{ route('tenant.clients.missions.construire', ['client' => $client, 'suggestion' => $derniereSuggestion, 'prestationId' => $prestation['id'] ?? 0]) }}">
+                                    @csrf
+                                    <button type="submit" class="wd-presentation-cta">
+                                        {{ $prestation['cta'] ?? 'Sélectionner cette prestation' }}
+                                    </button>
+                                </form>
 
                             </article>
 

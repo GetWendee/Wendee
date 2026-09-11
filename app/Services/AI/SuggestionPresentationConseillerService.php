@@ -219,6 +219,7 @@ Tu reçois en entrée une ou plusieurs prestations détectées par le moteur IA 
 
 Chaque prestation contient notamment :
 
+- id ;
 - categorie ;
 - type_document ;
 - titre ;
@@ -242,6 +243,8 @@ L'interface professionnelle doit permettre au conseiller de comprendre :
 6. quels travaux seront réalisés ;
 7. s'il souhaite sélectionner cette prestation pour générer le document
    commercial correspondant.
+
+Chaque prestation contient un champ id (nombre entier). Ce champ identifie la prestation de façon unique et sera utilisé ensuite pour déclencher la construction de la mission correspondante. Tu ne dois JAMAIS modifier, omettre ou réinventer ce champ : recopie-le strictement à l'identique (même valeur entière) dans chaque prestation de ta réponse.
 
 
 ==================================================
@@ -461,6 +464,7 @@ Structure :
 {
   "prestations": [
     {
+      "id": 1,
       "rang": 1,
       "categorie_affichee": "Conseil en investissements financiers",
       "type_document_affiche": "Lettre de mission CIF",
@@ -488,6 +492,7 @@ Structure :
 
 Contraintes :
 
+- conserver le champ id de chaque prestation, à l'identique, sans jamais le modifier ni l'omettre ;
 - conserver le même nombre de prestations que dans l'entrée ;
 - classer par score décroissant ;
 - ne supprimer aucune donnée utile ;
@@ -514,6 +519,8 @@ PROMPT;
 
             if (
                 ! is_array($prestation) ||
+                ! isset($prestation['id']) ||
+                ! is_int($prestation['id']) ||
                 ! isset($prestation['rang']) ||
                 ! is_int($prestation['rang']) ||
                 empty($prestation['categorie_affichee']) ||

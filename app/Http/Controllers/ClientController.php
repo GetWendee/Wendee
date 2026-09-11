@@ -3262,6 +3262,127 @@ class ClientController extends Controller
     }
 
     /**
+     * IA 2A - Construction de la mission à partir d'UNE prestation
+     * sélectionnée par le conseiller (voir app/Services/AI/MissionConstructionService.php).
+     */
+    public function construireMission(
+        Client $client,
+        \App\Models\ClientAnalysis $suggestion,
+        int $prestationId,
+        \App\Services\AI\MissionConstructionService $missionConstruction
+    ): RedirectResponse
+    {
+        abort_unless($suggestion->client_id === $client->id, 404);
+        abort_unless($suggestion->type === 'suggestion', 404);
+
+        $prestations = $suggestion->result_json['prestations'] ?? [];
+
+        $prestation = collect($prestations)
+            ->first(fn ($p) => is_array($p) && (int) ($p['id'] ?? 0) === $prestationId);
+
+        if (! $prestation) {
+
+            return redirect()
+                ->route('tenant.clients.aide-decision', $client)
+                ->with('error', 'Prestation introuvable dans cette suggestion.');
+        }
+
+        try {
+
+            $mission = $missionConstruction->construire($client, $suggestion, $prestation);
+
+            return redirect()
+                ->route(
+                    'tenant.clients.missions.show',
+                    ['client' => $client, 'mission' => $mission]
+                )
+                ->with('status', 'Mission construite.');
+
+        } catch (\Throwable $e) {
+
+            \Illuminate\Support\Facades\Log::error(
+                'Erreur construction mission (IA 2A)',
+                [
+                    'client_id' => $client->id,
+                    'suggestion_id' => $suggestion->id,
+                    'prestation_id' => $prestationId,
+                    'error' => $e->getMessage(),
+                ]
+            );
+
+            return redirect()
+                ->route('tenant.clients.aide-decision', $client)
+                ->with(
+                    'error',
+                    'La mission n’a pas pu être construite. Réessaie dans quelques instants.'
+                );
+        }
+    }
+
+    public function afficherMissionConstruite(
+        Client $client,
+        \App\Models\Mission $mission
+    ): View
+    {
+        abort_unless($mission->client_id === $client->id, 404);
+
+        return view('tenant.clients.mission-construite', [
+            'client' => $client,
+            'mission' => $mission,
+        ]);
+    }
+
+    public function enregistrerMissionConstruite(
+        Request $request,
+        Client $client,
+        \App\Models\Mission $mission
+    ): RedirectResponse
+    {
+        abort_unless($mission->client_id === $client->id, 404);
+
+        $validated = $request->validate([
+            'intitule_mission' => ['required', 'string', 'max:255'],
+            'contexte' => ['required', 'string'],
+            'objet' => ['required', 'string'],
+            'perimetre' => ['required', 'string'],
+            'hors_perimetre' => ['required', 'string'],
+            'travaux' => ['required', 'string'],
+            'livrables' => ['required', 'string'],
+        ]);
+
+        $versLignes = function (string $texte): array {
+            return collect(explode("\n", $texte))
+                ->map(fn ($ligne) => trim($ligne))
+                ->filter(fn ($ligne) => $ligne !== '')
+                ->values()
+                ->all();
+        };
+
+        $editedJson = [
+            'intitule_mission' => trim($validated['intitule_mission']),
+            'contexte' => trim($validated['contexte']),
+            'objet' => trim($validated['objet']),
+            'perimetre' => $versLignes($validated['perimetre']),
+            'hors_perimetre' => $versLignes($validated['hors_perimetre']),
+            'travaux' => $versLignes($validated['travaux']),
+            'livrables' => $versLignes($validated['livrables']),
+            'pieces_a_collecter' => $mission->result_json['pieces_a_collecter'] ?? [],
+        ];
+
+        $mission->update([
+            'edited_json' => $editedJson,
+            'valide_le' => now(),
+        ]);
+
+        return redirect()
+            ->route(
+                'tenant.clients.missions.show',
+                ['client' => $client, 'mission' => $mission]
+            )
+            ->with('status', 'Mission enregistrée.');
+    }
+
+    /**
      * Clôture le dossier : il quitte le portefeuille actif et bascule dans
      * Comptes clôturés, réactivable librement pendant 6 mois avant
      * archivage automatique (voir Client::cloturer()).
