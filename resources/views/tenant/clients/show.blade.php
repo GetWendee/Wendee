@@ -338,6 +338,36 @@
         return trim(preg_replace('/^[🔴🟠🟢]+\s*/u', '', $value));
     };
 
+    /*
+    |--------------------------------------------------------------------------
+    | Couleur de statut (pastille) à partir de l'émoji déjà calculé par le
+    | moteur de scoring en tête de chaque libellé "_echelle" (🔴/🟠/🟢).
+    | On récupère cette couleur AVANT le nettoyage du texte ci-dessous, sur
+    | les champs bruts du modèle, pour ne pas dépendre de l'ordre des lignes.
+    | Mappé sur les mêmes 3 couleurs que "Compatibilité des placements" plus
+    | bas dans la page (notre charte, pas celle d'un outil tiers).
+    */
+    $echelleColor = function (?string $value) {
+        if (! $value || ! preg_match('/^([🔴🟠🟢])/u', $value, $m)) {
+            return 'neutre';
+        }
+
+        return match ($m[1]) {
+            '🟢' => 'bon',
+            '🟠' => 'vigilance',
+            '🔴' => 'attention',
+            default => 'neutre',
+        };
+    };
+
+    $colorProfilFinal = $echelleColor($profil?->profil_risque_final_echelle);
+    $colorConnaissance = $echelleColor($profil?->score_connaissance_global_echelle);
+    $colorExperience = $echelleColor($profil?->score_experience_global_echelle);
+    $colorCapacite = $echelleColor($profil?->score_capacite_financiere_echelle);
+    $colorTolerance = $echelleColor($profil?->score_tolerance_risque_echelle);
+    $colorPertes = $echelleColor($profil?->score_capacite_subir_pertes_echelle);
+    $colorEsg = $echelleColor($profil?->engagement_extra_financier_echelle);
+
     $profilFinal = $cleanScoreLabel($profilFinal);
     $tolerance = $cleanScoreLabel($tolerance);
     $capacite = $cleanScoreLabel($capacite);
@@ -1306,46 +1336,71 @@ html,body{
     letter-spacing:-.04em;
 }
 
-.wd-profile-score{
-    white-space:nowrap;
-    display:flex;
-    align-items:baseline;
-    gap:3px;
-}
-
-.wd-profile-score strong{
-    font-size:34px;
-    line-height:1;
-    letter-spacing:-.05em;
-}
-
-.wd-profile-score span{
-    color:#8e8782;
-    font-size:11px;
-}
-
 .wd-profile-scale{
-    margin-top:30px;
+    margin-top:14px;
 }
 
-.wd-profile-scale-track{
-    height:5px;
+/*
+ * Jauge demi-cercle : un anneau conic-gradient (3 zones, nos couleurs de
+ * statut) masqué en anneau via mask radial, rogné de moitié par le
+ * conteneur (overflow hidden, hauteur = moitié de la largeur), et une
+ * aiguille tournant de -90deg (Conservateur) à +90deg (Dynamique) autour
+ * d'un pivot en bas centré.
+ */
+.wd-gauge{
+    position:relative;
+    width:176px;
+    height:88px;
+    margin:6px auto 0;
     overflow:hidden;
-    background:rgba(255,255,255,.10);
-    border-radius:20px;
 }
 
-.wd-profile-scale-value{
-    height:100%;
-    min-width:4px;
+.wd-gauge-arc{
+    position:absolute;
+    top:0;
+    left:0;
+    width:176px;
+    height:176px;
+    border-radius:50%;
+    background:conic-gradient(
+        from 270deg,
+        #7d9c88 0deg 60deg,
+        #c79a62 60deg 120deg,
+        #9d5f66 120deg 180deg,
+        transparent 180deg 360deg
+    );
+    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 13px), #000 calc(100% - 13px));
+    mask:radial-gradient(farthest-side, transparent calc(100% - 13px), #000 calc(100% - 13px));
+}
+
+.wd-gauge-needle{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    width:2px;
+    height:70px;
+    margin-left:-1px;
     background:var(--pink);
-    border-radius:20px;
+    border-radius:2px;
+    transform-origin:bottom center;
+}
+
+.wd-gauge-center{
+    position:absolute;
+    bottom:-5px;
+    left:50%;
+    width:11px;
+    height:11px;
+    margin-left:-5.5px;
+    border-radius:50%;
+    background:var(--pink);
+    border:2px solid #242424;
 }
 
 .wd-profile-scale-labels{
     display:flex;
     justify-content:space-between;
-    margin-top:8px;
+    margin-top:10px;
     color:#837c78;
     font-size:8px;
     text-transform:uppercase;
@@ -1407,31 +1462,29 @@ html,body{
     letter-spacing:.09em;
 }
 
-.wd-profile-metric-head strong{
-    color:#242424;
-    font-size:17px;
-    letter-spacing:-.025em;
+.wd-profile-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:15px;
 }
 
-.wd-profile-meter{
-    height:3px;
-    margin:15px 0 11px;
-    overflow:hidden;
-    background:var(--chart-track);
-    border-radius:20px;
+.wd-status-dot{
+    width:8px;
+    height:8px;
+    flex:0 0 8px;
+    border-radius:50%;
 }
 
-.wd-profile-meter i{
-    display:block;
-    height:100%;
-    background:#242424;
-    border-radius:20px;
-}
+.wd-status-bon{background:#7d9c88;}
+.wd-status-vigilance{background:#c79a62;}
+.wd-status-attention{background:#9d5f66;}
+.wd-status-neutre{background:#c8c2bd;}
 
 .wd-profile-metric small{
     display:block;
     color:#45403d;
-    font-size:11px;
+    font-size:11.5px;
     font-weight:650;
     line-height:1.4;
 }
@@ -3678,20 +3731,18 @@ class="wd-btn-dark">
                 </div>
             </div>
 
-            <div class="wd-profile-score">
-                <strong>{{ number_format($scoreProfil, 1, ',', ' ') }}</strong>
-                <span>/ 7</span>
-            </div>
-
         </div>
 
         <div class="wd-profile-scale">
 
-            <div class="wd-profile-scale-track">
-                <div
-                    class="wd-profile-scale-value"
-                    style="width:{{ min(100, max(0, $scoreProfil / 7 * 100)) }}%">
-                </div>
+            @php
+                $wdAngleAiguille = -90 + (min(7, max(0, $scoreProfil)) / 7 * 180);
+            @endphp
+
+            <div class="wd-gauge">
+                <div class="wd-gauge-arc"></div>
+                <div class="wd-gauge-needle" style="transform:rotate({{ $wdAngleAiguille }}deg)"></div>
+                <div class="wd-gauge-center"></div>
             </div>
 
             <div class="wd-profile-scale-labels">
@@ -3723,88 +3774,76 @@ class="wd-btn-dark">
         <div class="wd-profile-metric">
             <div class="wd-profile-metric-head">
                 <span>Connaissance</span>
-                <strong>{{ number_format($scoreConnaissance, 1, ',', ' ') }}</strong>
             </div>
 
-            <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreConnaissance / 7 * 100)) }}%"></i>
+            <div class="wd-profile-status">
+                <i class="wd-status-dot wd-status-{{ $colorConnaissance }}"></i>
+                <small>{{ $connaissance }}</small>
             </div>
-
-            <small>{{ $connaissance }}</small>
         </div>
 
 
         <div class="wd-profile-metric">
             <div class="wd-profile-metric-head">
                 <span>Expérience</span>
-                <strong>{{ number_format($scoreExperience, 1, ',', ' ') }}</strong>
             </div>
 
-            <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreExperience / 7 * 100)) }}%"></i>
+            <div class="wd-profile-status">
+                <i class="wd-status-dot wd-status-{{ $colorExperience }}"></i>
+                <small>{{ $experience }}</small>
             </div>
-
-            <small>{{ $experience }}</small>
         </div>
 
 
         <div class="wd-profile-metric">
             <div class="wd-profile-metric-head">
                 <span>Capacité financière</span>
-                <strong>{{ number_format($scoreCapacite, 1, ',', ' ') }}</strong>
             </div>
 
-            <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreCapacite / 7 * 100)) }}%"></i>
+            <div class="wd-profile-status">
+                <i class="wd-status-dot wd-status-{{ $colorCapacite }}"></i>
+                <small>{{ $capacite }}</small>
             </div>
-
-            <small>{{ $capacite }}</small>
         </div>
 
 
         <div class="wd-profile-metric">
             <div class="wd-profile-metric-head">
                 <span>Tolérance au risque</span>
-                <strong>{{ number_format($scoreTolerance, 1, ',', ' ') }}</strong>
             </div>
 
-            <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreTolerance / 7 * 100)) }}%"></i>
+            <div class="wd-profile-status">
+                <i class="wd-status-dot wd-status-{{ $colorTolerance }}"></i>
+                <small>{{ $tolerance }}</small>
             </div>
-
-            <small>{{ $tolerance }}</small>
         </div>
 
 
         <div class="wd-profile-metric">
             <div class="wd-profile-metric-head">
                 <span>Capacité à subir des pertes</span>
-                <strong>{{ number_format($scorePertes, 1, ',', ' ') }}</strong>
             </div>
 
-            <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scorePertes / 7 * 100)) }}%"></i>
+            <div class="wd-profile-status">
+                <i class="wd-status-dot wd-status-{{ $colorPertes }}"></i>
+                <small>
+                    {{ $cleanScoreLabel($profil->score_capacite_subir_pertes_echelle) }}
+                </small>
             </div>
-
-            <small>
-                {{ $cleanScoreLabel($profil->score_capacite_subir_pertes_echelle) }}
-            </small>
         </div>
 
 
         <div class="wd-profile-metric">
             <div class="wd-profile-metric-head">
                 <span>Extra-financier</span>
-                <strong>{{ number_format($scoreEsg, 1, ',', ' ') }}</strong>
             </div>
 
-            <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreEsg / 7 * 100)) }}%"></i>
+            <div class="wd-profile-status">
+                <i class="wd-status-dot wd-status-{{ $colorEsg }}"></i>
+                <small>
+                    {{ $cleanScoreLabel($profil->engagement_extra_financier_echelle) }}
+                </small>
             </div>
-
-            <small>
-                {{ $cleanScoreLabel($profil->engagement_extra_financier_echelle) }}
-            </small>
         </div>
 
     </div>
@@ -3853,7 +3892,7 @@ Compatibilité des placements</h2>
             @click="filtre = 'compatible'"
             :class="{ 'active': filtre === 'compatible' }"
         >
-            Compatible
+            Adaptés
         </button>
 
         <button
@@ -3861,7 +3900,7 @@ Compatibilité des placements</h2>
             @click="filtre = 'vigilance'"
             :class="{ 'active': filtre === 'vigilance' }"
         >
-            À surveiller
+            Adaptés sous conditions
         </button>
 
         <button
@@ -3869,7 +3908,7 @@ Compatibilité des placements</h2>
             @click="filtre = 'non_adapte'"
             :class="{ 'active': filtre === 'non_adapte' }"
         >
-            Non adapté
+            Non recommandés actuellement
         </button>
 
     </div>
@@ -3892,9 +3931,9 @@ Compatibilité des placements</h2>
             $niveau = $compatibilite['niveau'] ?? 'vigilance';
 
             $niveauLabel = match($niveau) {
-                'compatible' => 'Compatible',
-                'non_adapte' => 'Non adapté',
-                default => 'À surveiller',
+                'compatible' => 'Adaptés',
+                'non_adapte' => 'Non recommandés actuellement',
+                default => 'Adaptés sous conditions',
             };
         @endphp
 
