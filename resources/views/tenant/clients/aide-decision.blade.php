@@ -2280,6 +2280,19 @@ html,body{
     margin-bottom: 22px;
 }
 
+.wd-error-banner {
+    margin-bottom: 18px;
+    padding: 13px 16px;
+
+    background: #FBEEEE;
+    border: 1px solid #E7C6C6;
+    border-radius: 10px;
+
+    color: #8C3F3F;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
 .wd-analysis-kicker {
     margin: 0 0 7px;
     color: #80A29A;
@@ -2816,6 +2829,12 @@ Plan d'action
 </div>
 
 <section class="wd-section wd-analysis-content">
+
+    @if(session('error'))
+        <div class="wd-error-banner">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <div class="wd-analysis-intro">
 
