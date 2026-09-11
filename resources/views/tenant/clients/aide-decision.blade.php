@@ -2684,8 +2684,20 @@ html,body{
     text-transform: uppercase;
 
     font-family: inherit;
+    cursor: pointer;
+    transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.wd-presentation-cta:hover {
+    box-shadow: 0 0 0 2px rgba(255,51,153,.10);
+    transform: translateY(-1px);
+}
+
+.wd-presentation-cta:disabled {
     cursor: not-allowed;
     opacity: .55;
+    transform: none;
+    box-shadow: none;
 }
 
 .wd-presentation-card-client {

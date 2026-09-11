@@ -65,7 +65,7 @@
 <section class="wd-section wd-analysis-content">
     <div class="wd-analysis-intro">
         <p class="wd-analysis-kicker">Aide à la décision</p>
-        <h2 class="wd-analysis-title">Générer le plan d'action</h2>
+        <h2 class="wd-analysis-title">Plan d'action</h2>
         <p class="wd-analysis-subtitle">Basé sur le KYC, le patrimoine, le profil investisseur et la recommandation patrimoniale du client</p>
     </div>
     <div class="wd-reco-body">

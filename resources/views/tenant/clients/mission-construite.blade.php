@@ -1,4 +1,7 @@
 <x-tenant-app-layout>
+@include('tenant.clients.partials.header-tabs', ['active' => 'analyse'])
+
+{{-- $viewRole est déjà défini par le partial header-tabs inclus ci-dessus. --}}
 
 <style>
 .wd-mc-wrap{max-width:860px;margin:0 auto;padding:24px 0 60px;}
@@ -30,6 +33,8 @@
 .wd-mc-piece-doc{font-weight:700;font-size:13px;color:var(--ink);}
 .wd-mc-piece-raison{font-size:12px;color:var(--muted);margin-top:2px;}
 .wd-mc-pieces-empty{font-size:13px;color:var(--muted);}
+.wd-mc-text{font-size:14px;color:var(--ink);line-height:1.6;margin:0;white-space:pre-line;}
+.wd-mc-readonly-list{margin:0;padding-left:18px;font-size:14px;color:var(--ink);line-height:1.7;}
 
 .wd-mc-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
 .wd-mc-save{background:#242424;color:#fff;border:none;border-radius:8px;padding:12px 22px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;}
@@ -105,6 +110,8 @@
                 ? implode("\n", $liste)
                 : '';
         @endphp
+
+        @if($viewRole !== 'client')
 
         <form method="POST" action="{{ route('tenant.clients.missions.update', ['client' => $client, 'mission' => $mission]) }}">
             @csrf
@@ -223,6 +230,87 @@
             </div>
 
         </form>
+
+
+        @else
+
+            <div class="wd-mc-card">
+                <span class="wd-mc-label">Intitulé de la mission</span>
+                <p class="wd-mc-text">{{ $contenu['intitule_mission'] ?? '' }}</p>
+            </div>
+
+            <div class="wd-mc-card">
+                <span class="wd-mc-label">Contexte identifié</span>
+                <p class="wd-mc-text">{{ $contenu['contexte'] ?? '' }}</p>
+            </div>
+
+            <div class="wd-mc-card">
+                <span class="wd-mc-label">Objet de la mission</span>
+                <p class="wd-mc-text">{{ $contenu['objet'] ?? '' }}</p>
+            </div>
+
+            <div class="wd-mc-card">
+                <span class="wd-mc-label">Périmètre</span>
+                <ul class="wd-mc-readonly-list">
+                    @foreach($contenu['perimetre'] ?? [] as $item)
+                        <li>{{ $item }}</li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="wd-mc-card">
+                <span class="wd-mc-label">Hors périmètre</span>
+                <ul class="wd-mc-readonly-list">
+                    @foreach($contenu['hors_perimetre'] ?? [] as $item)
+                        <li>{{ $item }}</li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="wd-mc-card">
+                <span class="wd-mc-label">Travaux prévus</span>
+                <ul class="wd-mc-readonly-list">
+                    @foreach($contenu['travaux'] ?? [] as $item)
+                        <li>{{ $item }}</li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="wd-mc-card">
+                <span class="wd-mc-label">Livrables</span>
+                <ul class="wd-mc-readonly-list">
+                    @foreach($contenu['livrables'] ?? [] as $item)
+                        <li>{{ $item }}</li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="wd-mc-card">
+                <span class="wd-mc-label">Pièces à collecter</span>
+                <p class="wd-mc-hint">Généré automatiquement, non modifiable ici pour l'instant.</p>
+
+                @if(! empty($contenu['pieces_a_collecter']))
+                    <ul class="wd-mc-pieces">
+                        @foreach($contenu['pieces_a_collecter'] as $piece)
+                            <li class="wd-mc-piece">
+                                <span class="wd-mc-piece-badge {{ ! empty($piece['necessaire']) ? 'wd-mc-piece-badge-oui' : 'wd-mc-piece-badge-non' }}">
+                                    {{ ! empty($piece['necessaire']) ? 'Indispensable' : 'Utile' }}
+                                </span>
+                                <div>
+                                    <div class="wd-mc-piece-doc">{{ $piece['document'] ?? '' }}</div>
+                                    @if(! empty($piece['raison']))
+                                        <div class="wd-mc-piece-raison">{{ $piece['raison'] }}</div>
+                                    @endif
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="wd-mc-pieces-empty">Aucune pièce complémentaire identifiée.</p>
+                @endif
+            </div>
+
+        @endif
 
     @endif
 

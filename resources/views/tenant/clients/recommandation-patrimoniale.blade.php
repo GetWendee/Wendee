@@ -118,7 +118,7 @@
 <section class="wd-section wd-analysis-content">
     <div class="wd-analysis-intro">
         <p class="wd-analysis-kicker">Aide à la décision</p>
-        <h2 class="wd-analysis-title">Générer la recommandation patrimoniale</h2>
+        <h2 class="wd-analysis-title">Recommandation patrimoniale</h2>
         <p class="wd-analysis-subtitle">Veuillez remplir ou mettre à jour tous les formulaires de connaissance client</p>
     </div>
     <div class="wd-reco-body">
