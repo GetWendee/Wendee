@@ -1307,8 +1307,8 @@ html,body{
 .wd-profile-summary{
     background:#242424;
     color:#fff;
-    border-radius:13px;
-    padding:27px 28px 24px;
+    border-radius:16px;
+    padding:34px 32px 30px;
     border-top:3px solid var(--pink);
     box-shadow:0 8px 24px rgba(30,26,24,.06);
 }
@@ -1337,21 +1337,23 @@ html,body{
 }
 
 .wd-profile-scale{
-    margin-top:14px;
+    margin-top:32px;
 }
 
 /*
  * Jauge demi-cercle : un anneau conic-gradient (3 zones, nos couleurs de
- * statut) masqué en anneau via mask radial, rogné de moitié par le
+ * statut, séparées par de fins interstices pour un rendu "cadran" plus
+ * soigné) masqué en fin anneau via mask radial, rogné de moitié par le
  * conteneur (overflow hidden, hauteur = moitié de la largeur), et une
  * aiguille tournant de -90deg (Conservateur) à +90deg (Dynamique) autour
- * d'un pivot en bas centré.
+ * d'un pivot en bas centré. Anneau volontairement fin et cadran large pour
+ * respirer, plutôt qu'un gros bloc compact.
  */
 .wd-gauge{
     position:relative;
-    width:176px;
-    height:88px;
-    margin:6px auto 0;
+    width:220px;
+    height:110px;
+    margin:0 auto;
     overflow:hidden;
 }
 
@@ -1359,18 +1361,19 @@ html,body{
     position:absolute;
     top:0;
     left:0;
-    width:176px;
-    height:176px;
+    width:220px;
+    height:220px;
     border-radius:50%;
     background:conic-gradient(
         from 270deg,
-        #7d9c88 0deg 60deg,
-        #c79a62 60deg 120deg,
-        #9d5f66 120deg 180deg,
+        #7d9c88 0deg 57deg, transparent 57deg 63deg,
+        #c79a62 63deg 117deg, transparent 117deg 123deg,
+        #9d5f66 123deg 180deg,
         transparent 180deg 360deg
     );
-    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 13px), #000 calc(100% - 13px));
-    mask:radial-gradient(farthest-side, transparent calc(100% - 13px), #000 calc(100% - 13px));
+    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
+    mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
+    filter:drop-shadow(0 3px 8px rgba(0,0,0,.28));
 }
 
 .wd-gauge-needle{
@@ -1378,29 +1381,30 @@ html,body{
     bottom:0;
     left:50%;
     width:2px;
-    height:70px;
+    height:86px;
     margin-left:-1px;
-    background:var(--pink);
+    background:linear-gradient(180deg, var(--pink), #ff4fac);
     border-radius:2px;
     transform-origin:bottom center;
 }
 
 .wd-gauge-center{
     position:absolute;
-    bottom:-5px;
+    bottom:-6px;
     left:50%;
-    width:11px;
-    height:11px;
-    margin-left:-5.5px;
+    width:13px;
+    height:13px;
+    margin-left:-6.5px;
     border-radius:50%;
     background:var(--pink);
-    border:2px solid #242424;
+    border:3px solid #242424;
+    box-shadow:0 0 0 1px rgba(255,255,255,.12);
 }
 
 .wd-profile-scale-labels{
     display:flex;
     justify-content:space-between;
-    margin-top:10px;
+    margin-top:16px;
     color:#837c78;
     font-size:8px;
     text-transform:uppercase;
@@ -1408,12 +1412,12 @@ html,body{
 }
 
 .wd-profile-reading{
-    margin-top:27px;
-    padding-top:20px;
+    margin-top:32px;
+    padding-top:22px;
     border-top:1px solid rgba(255,255,255,.08);
     color:#aaa39e;
-    font-size:11px;
-    line-height:1.65;
+    font-size:11.5px;
+    line-height:1.75;
 }
 
 .wd-profile-date{
@@ -1436,15 +1440,15 @@ html,body{
 .wd-profile-metrics{
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:10px;
+    gap:14px;
 }
 
 .wd-profile-metric{
     min-width:0;
     background:#fff;
     border:1px solid var(--line);
-    border-radius:11px;
-    padding:17px 18px 15px;
+    border-radius:13px;
+    padding:20px 20px 19px;
 }
 
 .wd-profile-metric-head{
@@ -1455,39 +1459,38 @@ html,body{
 }
 
 .wd-profile-metric-head span{
-    color:#79726d;
+    color:#918a85;
     font-size:9px;
     font-weight:800;
     text-transform:uppercase;
     letter-spacing:.09em;
 }
 
+/*
+ * Statut qualitatif : un badge plein (fond teinté + texte de la même
+ * couleur) plutôt qu'une puce + petit texte gris — le libellé ("Élevée",
+ * "Expertise"...) porte l'information, il doit être ce qu'on lit en premier.
+ * Mêmes 3 teintes que "Compatibilité des placements" plus bas, pour rester
+ * cohérent avec notre charte sur toute la page.
+ */
 .wd-profile-status{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-top:15px;
+    margin-top:16px;
 }
 
-.wd-status-dot{
-    width:8px;
-    height:8px;
-    flex:0 0 8px;
-    border-radius:50%;
+.wd-status-pill{
+    display:inline-block;
+    padding:8px 15px;
+    border-radius:9px;
+    font-size:13.5px;
+    font-weight:750;
+    letter-spacing:-.01em;
+    line-height:1.3;
 }
 
-.wd-status-bon{background:#7d9c88;}
-.wd-status-vigilance{background:#c79a62;}
-.wd-status-attention{background:#9d5f66;}
-.wd-status-neutre{background:#c8c2bd;}
-
-.wd-profile-metric small{
-    display:block;
-    color:#45403d;
-    font-size:11.5px;
-    font-weight:650;
-    line-height:1.4;
-}
+.wd-status-pill-bon{background:rgba(125,156,136,.14);color:#4c6656;}
+.wd-status-pill-vigilance{background:rgba(199,154,98,.16);color:#8c642f;}
+.wd-status-pill-attention{background:rgba(157,95,102,.15);color:#844950;}
+.wd-status-pill-neutre{background:rgba(145,138,133,.14);color:#5c5651;}
 
 @media(max-width:1050px){
     .wd-profile-new-grid{
@@ -3777,8 +3780,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-status">
-                <i class="wd-status-dot wd-status-{{ $colorConnaissance }}"></i>
-                <small>{{ $connaissance }}</small>
+                <span class="wd-status-pill wd-status-pill-{{ $colorConnaissance }}">{{ $connaissance }}</span>
             </div>
         </div>
 
@@ -3789,8 +3791,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-status">
-                <i class="wd-status-dot wd-status-{{ $colorExperience }}"></i>
-                <small>{{ $experience }}</small>
+                <span class="wd-status-pill wd-status-pill-{{ $colorExperience }}">{{ $experience }}</span>
             </div>
         </div>
 
@@ -3801,8 +3802,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-status">
-                <i class="wd-status-dot wd-status-{{ $colorCapacite }}"></i>
-                <small>{{ $capacite }}</small>
+                <span class="wd-status-pill wd-status-pill-{{ $colorCapacite }}">{{ $capacite }}</span>
             </div>
         </div>
 
@@ -3813,8 +3813,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-status">
-                <i class="wd-status-dot wd-status-{{ $colorTolerance }}"></i>
-                <small>{{ $tolerance }}</small>
+                <span class="wd-status-pill wd-status-pill-{{ $colorTolerance }}">{{ $tolerance }}</span>
             </div>
         </div>
 
@@ -3825,10 +3824,9 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-status">
-                <i class="wd-status-dot wd-status-{{ $colorPertes }}"></i>
-                <small>
+                <span class="wd-status-pill wd-status-pill-{{ $colorPertes }}">
                     {{ $cleanScoreLabel($profil->score_capacite_subir_pertes_echelle) }}
-                </small>
+                </span>
             </div>
         </div>
 
@@ -3839,10 +3837,9 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-status">
-                <i class="wd-status-dot wd-status-{{ $colorEsg }}"></i>
-                <small>
+                <span class="wd-status-pill wd-status-pill-{{ $colorEsg }}">
                     {{ $cleanScoreLabel($profil->engagement_extra_financier_echelle) }}
-                </small>
+                </span>
             </div>
         </div>
 
