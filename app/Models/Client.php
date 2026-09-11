@@ -166,6 +166,15 @@ class Client extends Model
         return $query->whereNotNull('archive_le');
     }
 
+    /**
+     * Clients comptant dans le quota de l'abonnement (voir Tenant::PALIERS_ABONNEMENT) :
+     * actifs + clôturés, jamais les archivés.
+     */
+    public function scopeNonArchives($query)
+    {
+        return $query->whereNull('archive_le');
+    }
+
     public function estCloture(): bool
     {
         return $this->cloture_le !== null && $this->archive_le === null;

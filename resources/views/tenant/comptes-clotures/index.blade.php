@@ -22,6 +22,22 @@
                     et uniquement pendant 5 ans.
                 </p>
             </div>
+
+            <div class="relative">
+                <input type="search"
+                       id="wd-cc-search"
+                       placeholder="Rechercher un nom..."
+                       class="w-full sm:w-72 rounded-xl border-gray-200 bg-gray-50 pl-10 pr-4 py-2.5 text-sm focus:border-[#ff008a] focus:ring-[#ff008a]">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="absolute left-3 top-3 w-4 h-4 text-gray-400"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
+                </svg>
+            </div>
         </section>
 
         {{-- Clôturés --}}
@@ -36,9 +52,9 @@
                 <p class="mt-1 text-xs text-gray-400">Réactivation libre, avant archivage automatique.</p>
             </div>
 
-            <div class="divide-y divide-gray-100">
+            <div class="divide-y divide-gray-100" id="wd-cc-clotures-list">
                 @forelse ($clotures as $client)
-                    <div class="px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+                    <div class="px-6 py-4 flex flex-wrap items-center justify-between gap-4" data-cc-row data-name="{{ strtolower($client->nomAffichage()) }}">
                         <div class="min-w-0 flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-[#f3f1ee] text-gray-600 flex items-center justify-center text-sm font-semibold shrink-0">
                                 {{ $client->estMorale() ? mb_strtoupper(mb_substr($client->raison_sociale ?? '', 0, 2)) : mb_strtoupper(mb_substr($client->prenom, 0, 1).mb_substr($client->nom, 0, 1)) }}
@@ -70,6 +86,7 @@
                     <p class="px-6 py-10 text-center text-sm text-gray-400">Aucun dossier clôturé.</p>
                 @endforelse
             </div>
+            <p id="wd-cc-clotures-empty" style="display:none" class="px-6 py-10 text-center text-sm text-gray-400">Aucun résultat pour cette recherche.</p>
         </section>
 
         {{-- Archivés --}}
@@ -90,9 +107,9 @@
                 </p>
             </div>
 
-            <div class="divide-y divide-gray-100">
+            <div class="divide-y divide-gray-100" id="wd-cc-archives-list">
                 @forelse ($archives as $client)
-                    <div class="px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+                    <div class="px-6 py-4 flex flex-wrap items-center justify-between gap-4" data-cc-row data-name="{{ strtolower($client->nomAffichage()) }}">
                         <div class="min-w-0 flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-[#f3f1ee] text-gray-600 flex items-center justify-center text-sm font-semibold shrink-0">
                                 {{ $client->estMorale() ? mb_strtoupper(mb_substr($client->raison_sociale ?? '', 0, 2)) : mb_strtoupper(mb_substr($client->prenom, 0, 1).mb_substr($client->nom, 0, 1)) }}
@@ -141,7 +158,42 @@
                     <p class="px-6 py-10 text-center text-sm text-gray-400">Aucun dossier archivé.</p>
                 @endforelse
             </div>
+            <p id="wd-cc-archives-empty" style="display:none" class="px-6 py-10 text-center text-sm text-gray-400">Aucun résultat pour cette recherche.</p>
         </section>
 
     </div>
+
+    <script>
+    (function () {
+        var search = document.getElementById('wd-cc-search');
+        if (! search) return;
+
+        var lists = [
+            { rows: document.getElementById('wd-cc-clotures-list'), empty: document.getElementById('wd-cc-clotures-empty') },
+            { rows: document.getElementById('wd-cc-archives-list'), empty: document.getElementById('wd-cc-archives-empty') },
+        ];
+
+        function applyFilter() {
+            var term = (search.value || '').trim().toLowerCase();
+
+            lists.forEach(function (list) {
+                if (! list.rows) return;
+                var rows = Array.prototype.slice.call(list.rows.querySelectorAll('[data-cc-row]'));
+                var visibleCount = 0;
+
+                rows.forEach(function (row) {
+                    var visible = ! term || row.getAttribute('data-name').indexOf(term) !== -1;
+                    row.style.display = visible ? '' : 'none';
+                    if (visible) visibleCount++;
+                });
+
+                if (list.empty) {
+                    list.empty.style.display = (term && visibleCount === 0 && rows.length > 0) ? '' : 'none';
+                }
+            });
+        }
+
+        search.addEventListener('input', applyFilter);
+    })();
+    </script>
 </x-tenant-app-layout>

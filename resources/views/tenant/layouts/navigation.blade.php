@@ -16,6 +16,15 @@
 @endphp
 <aside class="wd-sidebar">
     <div class="wd-logo"><b>W</b>endee<small>OS du conseiller patrimonial</small></div>
+    @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
+        @php
+            $wdNombreClientsMax = tenant('abonnement_nombre_clients_max');
+            $wdNombreClientsActuel = \App\Models\Client::query()->nonArchives()->count();
+        @endphp
+        <div style="margin:0 20px 16px;padding:8px 12px;border-radius:10px;background:#f3f1ee;font-size:11px;font-weight:700;color:#6b6560;text-align:center;">
+            {{ $wdNombreClientsActuel }} / {{ $wdNombreClientsMax ?? '∞' }} clients
+        </div>
+    @endif
     <nav class="wd-nav">
         <div class="wd-nav-section">Général</div>
         <a class="{{ request()->routeIs('tenant.dashboard') || (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) ? 'active' : '' }}" href="{{ Auth::check() && Auth::user()->effectiveRole() === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard') }}">

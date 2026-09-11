@@ -351,8 +351,23 @@ class CabinetController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'abonnement_nombre_clients_max' => [
+                'required', 'integer', 'in:'.implode(',', Tenant::PALIERS_ABONNEMENT),
+            ],
         ]);
-        $tenant->update(['name' => $validated['name']]);
+
+        $donnees = ['name' => $validated['name']];
+
+        // Trace qui a changé l'abonnement et quand, seulement si la valeur
+        // change réellement (pas à chaque enregistrement du formulaire).
+        if ((int) $tenant->abonnement_nombre_clients_max !== $validated['abonnement_nombre_clients_max']) {
+            $donnees['abonnement_nombre_clients_max'] = $validated['abonnement_nombre_clients_max'];
+            $donnees['abonnement_modifie_par_nom'] = $request->user()->name;
+            $donnees['abonnement_modifie_le'] = now();
+        }
+
+        $tenant->update($donnees);
+
         return redirect()->route('cabinets.index')->with('status_simple', 'Cabinet mis à jour.');
     }
 
