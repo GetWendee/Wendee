@@ -79,6 +79,44 @@ class Client extends Model
     }
 
     /**
+     * Relations de représentant qui caractérisent un majeur protégé
+     * (tutelle, curatelle, mandat de protection future), par opposition
+     * au représentant légal d'un mineur ("parent") ou aux représentants
+     * d'une personne morale ("gerant", "president", "associe"...).
+     */
+    private const RELATIONS_MAJEUR_PROTEGE = ['tuteur', 'curateur', 'mandataire'];
+
+    /**
+     * Mineur au sens de l'âge réel (< 18 ans), calculé depuis la date de
+     * naissance plutôt que depuis la colonne `mineur` : celle-ci n'est
+     * positionnée qu'une fois, à la création de la fiche (voir
+     * ClientController::storeRepresentant()), et ne se met pas à jour
+     * automatiquement le jour des 18 ans du titulaire.
+     */
+    public function estMineur(): bool
+    {
+        return $this->date_naissance !== null
+            && $this->date_naissance->age < 18;
+    }
+
+    /**
+     * Majeur protégé : personne physique majeure représentée par un
+     * tuteur, curateur ou mandataire (mandat de protection future).
+     * Nécessite que representants() soit déjà chargée pour éviter une
+     * requête par client dans les listes (portefeuille...).
+     */
+    public function estMajeurProtege(): bool
+    {
+        if ($this->estMorale() || $this->estMineur()) {
+            return false;
+        }
+
+        return $this->representants->contains(
+            fn ($r) => in_array($r->relation, self::RELATIONS_MAJEUR_PROTEGE, true)
+        );
+    }
+
+    /**
      * Nom d'affichage du titulaire, quel que soit son type (personne
      * physique ou morale).
      */

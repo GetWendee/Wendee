@@ -308,45 +308,66 @@
                             @php
                                 $status = $client->completionStatus();
                                 $statutApporteur = $wdRole === 'apporteur' ? $client->statutApporteur() : null;
+
+                                $nomAffichage = $client->nomAffichage();
+
+                                $initiales = $client->estMorale()
+                                    ? mb_strtoupper(mb_substr($client->raison_sociale ?? '', 0, 2))
+                                    : mb_strtoupper(mb_substr($client->prenom, 0, 1).mb_substr($client->nom, 0, 1));
+
+                                $typeBadge = match (true) {
+                                    $client->estMorale() => ['label' => 'Société', 'class' => 'text-sky-600'],
+                                    $client->estMineur() => ['label' => 'Mineur', 'class' => 'text-amber-600'],
+                                    $client->estMajeurProtege() => ['label' => 'Majeur protégé', 'class' => 'text-purple-600'],
+                                    default => null,
+                                };
                             @endphp
                             @if($wdRole === 'apporteur')
                             <div data-portfolio-card
                                data-role="client"
                                @if($statutApporteur) data-statut-apporteur="{{ $statutApporteur['key'] }}" @endif
-                               data-name="{{ strtolower($client->prenom.' '.$client->nom) }}"
+                               data-name="{{ strtolower($nomAffichage) }}"
                                class="relative block overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
                             @else
                             <a href="{{ route('tenant.clients.show', $client) }}"
                                data-portfolio-card
                                data-role="client"
                                @if($statutApporteur) data-statut-apporteur="{{ $statutApporteur['key'] }}" @endif
-                               data-name="{{ strtolower($client->prenom.' '.$client->nom) }}"
+                               data-name="{{ strtolower($nomAffichage) }}"
                                class="group relative block overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
                             @endif
                                 <div class="bg-[#f3f1ee] px-6 pt-6 pb-5 flex items-start justify-between gap-3">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="w-12 h-12 rounded-2xl bg-white text-gray-600 flex items-center justify-center text-base font-semibold shrink-0">
-                                            {{ mb_strtoupper(mb_substr($client->prenom, 0, 1).mb_substr($client->nom, 0, 1)) }}
+                                            {{ $initiales }}
                                         </div>
 
                                         <div class="min-w-0">
                                             <p class="wd-portfolio-name font-semibold text-gray-900 truncate group-hover:text-[#ff008a] transition">
-                                                {{ $client->prenom }} {{ $client->nom }}
+                                                {{ $nomAffichage }}
                                             </p>
-                                            @if($statutApporteur)
-                                            <span @class([
-                                                'mt-1 inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider',
-                                                'bg-gray-100 text-gray-600' => in_array($statutApporteur['key'], ['prospect_cree', 'perdu_sans_suite']),
-                                                'bg-[#fff0f7] text-[#ff008a]' => in_array($statutApporteur['key'], ['premier_contact_qualifie', 'proposition_envoyee']),
-                                                'bg-[#ff008a] text-white' => $statutApporteur['key'] === 'client_signe',
-                                            ])>
-                                                {{ $statutApporteur['label'] }}
-                                            </span>
-                                            @else
-                                            <span class="mt-1 inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
-                                                Client
-                                            </span>
-                                            @endif
+                                            <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                                                @if($statutApporteur)
+                                                <span @class([
+                                                    'inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider',
+                                                    'bg-gray-100 text-gray-600' => in_array($statutApporteur['key'], ['prospect_cree', 'perdu_sans_suite']),
+                                                    'bg-[#fff0f7] text-[#ff008a]' => in_array($statutApporteur['key'], ['premier_contact_qualifie', 'proposition_envoyee']),
+                                                    'bg-[#ff008a] text-white' => $statutApporteur['key'] === 'client_signe',
+                                                ])>
+                                                    {{ $statutApporteur['label'] }}
+                                                </span>
+                                                @else
+                                                <span class="inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
+                                                    Client
+                                                </span>
+                                                @endif
+
+                                                @if($typeBadge)
+                                                <span class="inline-flex rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider {{ $typeBadge['class'] }}">
+                                                    {{ $typeBadge['label'] }}
+                                                </span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
 
