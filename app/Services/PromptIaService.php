@@ -6,7 +6,6 @@ use App\Mail\PromptIaCodeMail;
 use App\Models\PromptIa;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
-use RuntimeException;
 
 /**
  * Prompts système des services IA (App\Services\AI\*), pilotés depuis la
@@ -15,13 +14,23 @@ use RuntimeException;
  *
  * resolve() est appelé par chaque service IA pour récupérer le prompt
  * actif. proposerModification() / confirmer() gèrent le flux d'édition :
- * toute sauvegarde passe par un code de confirmation envoyé par email à
- * l'auteur de la modification avant d'être réellement appliquée — le champ
- * "contenu" n'est jamais écrit directement depuis le formulaire.
+ * toute sauvegarde passe par un code de confirmation envoyé par email aux
+ * adresses de validation (DESTINATAIRES_VALIDATION), quel que soit l'auteur
+ * de la modification, avant d'être réellement appliquée. Le champ "contenu"
+ * n'est jamais écrit directement depuis le formulaire.
  */
 class PromptIaService
 {
     private const CARACTERES = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+    /**
+     * Seul(s) destinataire(s) habilité(s) à valider une modification de
+     * prompt, quel que soit l'auteur de la modification.
+     */
+    private const DESTINATAIRES_VALIDATION = [
+        'v.dominguez@wendee.fr',
+        'vdominguez@w-conseils.fr',
+    ];
 
     /**
      * Contenu actif d'un prompt, avec repli sur $defaut si la ligne est
@@ -46,12 +55,6 @@ class PromptIaService
 
     public function proposerModification(PromptIa $prompt, string $nouveauContenu, User $auteur): void
     {
-        if (empty($auteur->email)) {
-            throw new RuntimeException(
-                "Aucune adresse email sur ce compte, impossible d'envoyer le code de confirmation."
-            );
-        }
-
         $code = $this->genererCode();
 
         $prompt->update([
@@ -61,7 +64,7 @@ class PromptIaService
             'modifie_par_user_id' => $auteur->id,
         ]);
 
-        Mail::to($auteur->email)->send(new PromptIaCodeMail($prompt, $auteur, $code));
+        Mail::to(self::DESTINATAIRES_VALIDATION)->send(new PromptIaCodeMail($prompt, $auteur, $code));
     }
 
     public function confirmer(PromptIa $prompt, string $code): bool
