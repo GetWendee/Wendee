@@ -2,6 +2,8 @@
 
 namespace App\Services\AI;
 
+use App\Services\PromptIaService;
+
 use App\Models\Client;
 use App\Models\ClientAnalysis;
 use Illuminate\Support\Facades\Http;
@@ -130,6 +132,14 @@ class PlanActionAnalysisServiceMorale
     }
 
     private function systemPrompt(): string
+    {
+        return app(\App\Services\PromptIaService::class)->resolve(
+            'plan_action_morale',
+            $this->defaultSystemPrompt()
+        );
+    }
+
+    private function defaultSystemPrompt(): string
     {
         return <<<'PROMPT'
 Tu es conseiller en gestion de patrimoine (CIF, courtier assurance/IOBSP, agent immobilier).

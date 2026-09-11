@@ -42,6 +42,11 @@ return [
     ],
 
 
+    'opensanctions' => [
+        'key' => env('OPENSANCTIONS_API_KEY'),
+        'base_url' => env('OPENSANCTIONS_BASE_URL', 'https://api.opensanctions.org'),
+    ],
+
     'sirene' => [
         'url' => env(
             'INSEE_SIRENE_URL',

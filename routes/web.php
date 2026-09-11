@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CabinetController;
+use App\Http\Controllers\PromptIaController;
 use App\Http\Controllers\TacheController;
 use App\Http\Controllers\CentralAccountController;
 use App\Http\Controllers\ProfileController;
@@ -45,6 +46,11 @@ foreach (config('tenancy.central_domains') as $domain) {
             })->name('mails.index');
             Route::get('/comptes/creer', [CentralAccountController::class, 'create'])->name('comptes.create');
             Route::post('/comptes', [CentralAccountController::class, 'store'])->name('comptes.store');
+
+            Route::get('/configuration-ia', [PromptIaController::class, 'index'])->name('prompts-ia.index');
+            Route::put('/configuration-ia/{prompt}', [PromptIaController::class, 'update'])->name('prompts-ia.update');
+            Route::post('/configuration-ia/{prompt}/confirmer', [PromptIaController::class, 'confirmer'])->name('prompts-ia.confirmer');
+            Route::post('/configuration-ia/{prompt}/annuler', [PromptIaController::class, 'annuler'])->name('prompts-ia.annuler');
         });
 
         require __DIR__.'/auth.php';

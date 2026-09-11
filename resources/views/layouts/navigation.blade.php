@@ -30,6 +30,9 @@
                     <a href="{{ route('comptes.create') }}" style="display:inline-flex;align-items:center;padding:0 4px;border-bottom:2px solid {{ request()->routeIs('comptes.*') ? '#f40087' : 'transparent' }};color:{{ request()->routeIs('comptes.*') ? '#fff' : '#a8a29a' }};font-size:13px;font-weight:600;text-decoration:none;">
                         {{ __('Créer un compte') }}
                     </a>
+                    <a href="{{ route('prompts-ia.index') }}" style="display:inline-flex;align-items:center;padding:0 4px;border-bottom:2px solid {{ request()->routeIs('prompts-ia.*') ? '#f40087' : 'transparent' }};color:{{ request()->routeIs('prompts-ia.*') ? '#fff' : '#a8a29a' }};font-size:13px;font-weight:600;text-decoration:none;">
+                        {{ __('Configuration IA') }}
+                    </a>
                 </div>
             </div>
 
@@ -99,6 +102,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('comptes.create')" :active="request()->routeIs('comptes.*')">
                 {{ __('Créer un compte') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('prompts-ia.index')" :active="request()->routeIs('prompts-ia.*')">
+                {{ __('Configuration IA') }}
             </x-responsive-nav-link>
         </div>
 

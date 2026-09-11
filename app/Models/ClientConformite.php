@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'date_derniere_revue',
     'tracfin_statut', 'tracfin_justification',
     'commentaire',
+    'screening_ppe_sanctions_statut', 'screening_ppe_sanctions_resultats', 'screening_ppe_sanctions_le',
 ])]
 class ClientConformite extends Model
 {
@@ -24,6 +25,8 @@ class ClientConformite extends Model
             'vigilance_renforcee' => 'boolean',
             'motifs_vigilance' => 'array',
             'date_derniere_revue' => 'date',
+            'screening_ppe_sanctions_resultats' => 'array',
+            'screening_ppe_sanctions_le' => 'datetime',
         ];
     }
 

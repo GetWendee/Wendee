@@ -2,6 +2,8 @@
 
 namespace App\Services\AI;
 
+use App\Services\PromptIaService;
+
 use App\Models\CabinetProfile;
 use App\Models\Client;
 use App\Models\ClientAnalysis;
@@ -154,6 +156,17 @@ class RecommandationAnalysisServiceMorale
     }
 
     private function systemPrompt(float $total): string
+    {
+        $totalFormatted = number_format($total, 2, ',', ' ') . ' €';
+
+        return app(\App\Services\PromptIaService::class)->resolve(
+            'recommandation_morale',
+            $this->defaultSystemPrompt($total),
+            ['{{total_honoraires}}' => $totalFormatted]
+        );
+    }
+
+    private function defaultSystemPrompt(float $total): string
     {
         $totalFormatted = number_format($total, 2, ',', ' ') . ' €';
 

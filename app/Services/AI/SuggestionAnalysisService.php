@@ -2,6 +2,8 @@
 
 namespace App\Services\AI;
 
+use App\Services\PromptIaService;
+
 use App\Models\Client;
 use App\Models\ClientAnalysis;
 use Illuminate\Support\Facades\Http;
@@ -193,6 +195,14 @@ class SuggestionAnalysisService
     }
 
     private function systemPrompt(): string
+    {
+        return app(\App\Services\PromptIaService::class)->resolve(
+            'suggestion_physique',
+            $this->defaultSystemPrompt()
+        );
+    }
+
+    private function defaultSystemPrompt(): string
     {
         return <<<'PROMPT'
 Tu es le moteur d'aide à la décision patrimoniale de Wendee.

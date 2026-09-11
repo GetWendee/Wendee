@@ -596,6 +596,13 @@ class Client extends Model
             $facteurs[] = ['cle' => 'vigilance_manuelle', 'label' => 'Vigilance renforcée activée par le conseiller', 'niveau' => 'eleve'];
         }
 
+        // Screening automatisé PPE / sanctions (OpenSanctions) : une
+        // correspondance potentielle prime toujours sur le déclaratif du
+        // KYC, y compris si le client a répondu "non" à la question PPE.
+        if ($conformite && $conformite->screening_ppe_sanctions_statut === 'correspondance_potentielle') {
+            $facteurs[] = ['cle' => 'screening_ppe_sanctions', 'label' => 'Correspondance potentielle détectée lors du screening PPE / sanctions', 'niveau' => 'eleve'];
+        }
+
         $niveauCalcule = 'faible';
         if (collect($facteurs)->contains(fn ($f) => $f['niveau'] === 'eleve')) {
             $niveauCalcule = 'eleve';

@@ -944,6 +944,35 @@ class ClientController extends Controller
             ->with('status', 'conformite-mise-a-jour');
     }
 
+    public function screenerConformite(
+        Client $client,
+        \App\Services\Conformite\SanctionsScreeningService $screening
+    ): \Illuminate\Http\RedirectResponse {
+        $user = auth()->user();
+        abort_if(in_array($user->effectiveRole(), ['apporteur', 'client']), 403);
+
+        $client->load('kyc', 'intervenants');
+
+        $resultat = $screening->screener($client);
+
+        $client->conformite()->updateOrCreate(['client_id' => $client->id], [
+            'screening_ppe_sanctions_statut' => $resultat['statut'],
+            'screening_ppe_sanctions_resultats' => $resultat['resultats'],
+            'screening_ppe_sanctions_le' => now(),
+        ]);
+
+        $message = match ($resultat['statut']) {
+            'correspondance_potentielle' => 'screening-alerte',
+            'aucune_correspondance' => 'screening-ok',
+            'aucune_identite' => 'screening-vide',
+            default => 'screening-erreur',
+        };
+
+        return redirect()
+            ->route('tenant.clients.conformite-lcbft', $client)
+            ->with('status', $message);
+    }
+
     public function mandatAssuranceVie(
         Client $client
     ): \Illuminate\View\View

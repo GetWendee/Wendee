@@ -96,8 +96,21 @@
     </div>
 </div>
 
-@if(session('status') === 'conformite-mise-a-jour')
-    <div class="wd-conf-flash" style="margin-top:16px;">Revue de conformité enregistrée.</div>
+@php
+    $flashLabels = [
+        'conformite-mise-a-jour' => 'Revue de conformité enregistrée.',
+        'screening-ok' => 'Vérification PPE / sanctions effectuée : aucune correspondance trouvée.',
+        'screening-alerte' => 'Vérification PPE / sanctions effectuée : correspondance potentielle détectée, voir ci-dessous.',
+        'screening-vide' => "Vérification PPE / sanctions impossible : aucune identité à contrôler (KYC incomplet).",
+        'screening-erreur' => 'Vérification PPE / sanctions non aboutie (erreur technique ou clé API non configurée).',
+    ];
+    $flashAlerte = in_array(session('status'), ['screening-alerte', 'screening-erreur'], true);
+@endphp
+
+@if(session('status') && isset($flashLabels[session('status')]))
+    <div class="wd-conf-flash" style="margin-top:16px;{{ $flashAlerte ? 'background:#fbecec;color:var(--red);border-color:#f3d3d3;' : '' }}">
+        {{ $flashLabels[session('status')] }}
+    </div>
 @endif
 
 <div class="wd-conf-grid">
@@ -154,6 +167,62 @@
         </div>
     </div>
 
+</div>
+
+<div class="wd-conf-panel" style="margin-top:16px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div>
+            <h3>Screening PPE / sanctions</h3>
+            <p class="sub">
+                Vérification automatisée{{ $client->estMorale() ? " du client et des intervenants déclarés (dirigeants, actionnaires, bénéficiaires effectifs)" : " du client et de son conjoint le cas échéant" }} contre les listes internationales de sanctions et de personnes politiquement exposées.
+                @if($conformite?->screening_ppe_sanctions_le)
+                    Dernière vérification : {{ $conformite->screening_ppe_sanctions_le->translatedFormat('d F Y à H:i') }}.
+                @else
+                    Jamais lancée.
+                @endif
+            </p>
+        </div>
+        <form method="POST" action="{{ route('tenant.clients.conformite-lcbft.screening', $client) }}">
+            @csrf
+            <button type="submit" class="wd-conf-submit" style="min-width:0;padding:0 18px;">Lancer la vérification</button>
+        </form>
+    </div>
+
+    @php $statutScreening = $conformite?->screening_ppe_sanctions_statut; @endphp
+
+    @if($statutScreening === 'correspondance_potentielle')
+        <div class="wd-conf-check" style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;">
+            <span class="lbl" style="font-weight:700;color:var(--red);">Correspondance(s) potentielle(s) — à examiner avant toute entrée en relation.</span>
+        </div>
+        @foreach($conformite->screening_ppe_sanctions_resultats ?? [] as $ligne)
+            @if(! empty($ligne['matches']))
+                <div class="wd-conf-facteur">
+                    <span class="pastille eleve"></span>
+                    <p>
+                        <strong>{{ $ligne['identite'] }}</strong> ({{ $ligne['role'] }}) —
+                        @foreach($ligne['matches'] as $match)
+                            {{ $match['nom'] }}{{ $match['score'] ? ' (score '.round($match['score'] * 100).'%)' : '' }}{{ ! empty($match['topics']) ? ' — '.implode(', ', $match['topics']) : '' }}@if(! $loop->last), @endif
+                        @endforeach
+                    </p>
+                </div>
+            @endif
+        @endforeach
+    @elseif($statutScreening === 'aucune_correspondance')
+        <div class="wd-conf-check" style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;">
+            <span class="lbl">Aucune correspondance trouvée</span>
+            <span class="val ok">OK</span>
+        </div>
+    @elseif($statutScreening === 'erreur')
+        <div class="wd-conf-check" style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;">
+            <span class="lbl">Vérification non aboutie (erreur technique ou clé API non configurée)</span>
+            <span class="val bad">Erreur</span>
+        </div>
+    @elseif($statutScreening === 'aucune_identite')
+        <div class="wd-conf-check" style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;">
+            <span class="lbl">Aucune identité à vérifier (KYC incomplet)</span>
+            <span class="val neutre">—</span>
+        </div>
+    @endif
 </div>
 
 <div class="wd-conf-panel wd-conf-form">

@@ -2,6 +2,8 @@
 
 namespace App\Services\AI;
 
+use App\Services\PromptIaService;
+
 use App\Models\Client;
 use App\Models\ClientAnalysis;
 use Illuminate\Support\Facades\Http;
@@ -209,6 +211,14 @@ class KycAnalysisService
     }
 
     private function systemPrompt(): string
+    {
+        return app(\App\Services\PromptIaService::class)->resolve(
+            'kyc_physique',
+            $this->defaultSystemPrompt()
+        );
+    }
+
+    private function defaultSystemPrompt(): string
     {
         return <<<'PROMPT'
 Tu es un conseiller en gestion de patrimoine expérimenté.
