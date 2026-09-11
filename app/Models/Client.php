@@ -19,6 +19,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'adresse_siege_social', 'adresse_direction_effective', 'regime_fiscal',
     'activite_principale', 'activite_annexes',
 ])]
+// cloture_le, archive_le, notification_archivage_envoyee_le et
+// demande_reactivation_le sont volontairement absents du Fillable : ils ne
+// sont jamais positionnés via un formulaire, seulement par
+// cloturer()/reactiver()/demanderReactivation() ci-dessous ou par la
+// commande clients:traiter-clotures.
 class Client extends Model
 {
     use HasFactory;
@@ -40,6 +45,10 @@ class Client extends Model
         return [
             'date_naissance' => 'date',
             'mineur' => 'boolean',
+            'cloture_le' => 'datetime',
+            'archive_le' => 'datetime',
+            'notification_archivage_envoyee_le' => 'datetime',
+            'demande_reactivation_le' => 'datetime',
         ];
     }
 
@@ -114,6 +123,148 @@ class Client extends Model
         return $this->representants->contains(
             fn ($r) => in_array($r->relation, self::RELATIONS_MAJEUR_PROTEGE, true)
         );
+    }
+
+    /**
+     * Nombre de jours de conservation d'un dossier clôturé avant archivage
+     * automatique, et nombre d'années pendant lesquelles un dossier archivé
+     * reste réactivable (par le courtier, ou sur demande du conseiller).
+     */
+    public const JOURS_AVANT_ARCHIVAGE = 180;
+
+    public const ANNEES_REACTIVATION_APRES_ARCHIVAGE = 5;
+
+    /**
+     * Uniquement les clients "actifs" : ni clôturés, ni archivés. C'est ce
+     * périmètre qui doit être utilisé partout où la liste des clients d'un
+     * cabinet/conseiller est affichée en usage courant (portefeuille,
+     * dashboard...). Un dossier clôturé ou archivé n'en sort que via
+     * Comptes clôturés.
+     */
+    public function scopeActifs($query)
+    {
+        return $query->whereNull('cloture_le');
+    }
+
+    /**
+     * Clients clôturés mais pas encore archivés : ceux affichés dans la
+     * section "Clôturés" de la page Comptes clôturés, réactivables
+     * librement par le courtier ou le conseiller du dossier.
+     */
+    public function scopeClotures($query)
+    {
+        return $query->whereNotNull('cloture_le')->whereNull('archive_le');
+    }
+
+    /**
+     * Clients archivés : section "Archivés" de la page Comptes clôturés.
+     * Reste affiché pendant ANNEES_REACTIVATION_APRES_ARCHIVAGE, tant qu'une
+     * réactivation est encore possible.
+     */
+    public function scopeArchives($query)
+    {
+        return $query->whereNotNull('archive_le');
+    }
+
+    public function estCloture(): bool
+    {
+        return $this->cloture_le !== null && $this->archive_le === null;
+    }
+
+    public function estArchive(): bool
+    {
+        return $this->archive_le !== null;
+    }
+
+    /**
+     * Date à laquelle ce dossier sera archivé si personne ne le réactive
+     * avant, ou null s'il n'est pas clôturé (ou déjà archivé).
+     */
+    public function dateArchivagePrevue(): ?\Illuminate\Support\Carbon
+    {
+        if (! $this->estCloture()) {
+            return null;
+        }
+
+        return $this->cloture_le->copy()->addDays(self::JOURS_AVANT_ARCHIVAGE);
+    }
+
+    public function joursAvantArchivage(): ?int
+    {
+        $date = $this->dateArchivagePrevue();
+
+        if (! $date) {
+            return null;
+        }
+
+        return (int) ceil(($date->timestamp - now()->timestamp) / 86400);
+    }
+
+    /**
+     * Date au-delà de laquelle un dossier archivé ne peut plus être
+     * réactivé du tout (même par le courtier), ou null s'il n'est pas
+     * archivé.
+     */
+    public function dateLimiteReactivation(): ?\Illuminate\Support\Carbon
+    {
+        if (! $this->archive_le) {
+            return null;
+        }
+
+        return $this->archive_le->copy()->addYears(self::ANNEES_REACTIVATION_APRES_ARCHIVAGE);
+    }
+
+    public function estEncoreReactivable(): bool
+    {
+        if (! $this->estArchive()) {
+            return true;
+        }
+
+        return $this->dateLimiteReactivation()->isFuture();
+    }
+
+    public function demandeReactivationEnAttente(): bool
+    {
+        return $this->demande_reactivation_le !== null;
+    }
+
+    /**
+     * Clôture le dossier : il quitte immédiatement le portefeuille actif.
+     * Réinitialise les compteurs d'archivage au cas où ce dossier avait déjà
+     * été clôturé/réactivé par le passé.
+     */
+    public function cloturer(): void
+    {
+        $this->cloture_le = now();
+        $this->archive_le = null;
+        $this->notification_archivage_envoyee_le = null;
+        $this->demande_reactivation_le = null;
+        $this->save();
+    }
+
+    /**
+     * Réactive le dossier, qu'il soit simplement clôturé ou déjà archivé :
+     * retour au portefeuille actif normal. Autorisation vérifiée par
+     * l'appelant (courtier toujours, conseiller seulement tant que le
+     * dossier n'est pas archivé — voir ComptesCloturesController).
+     */
+    public function reactiver(): void
+    {
+        $this->cloture_le = null;
+        $this->archive_le = null;
+        $this->notification_archivage_envoyee_le = null;
+        $this->demande_reactivation_le = null;
+        $this->save();
+    }
+
+    /**
+     * Le conseiller ne peut pas réactiver lui-même un dossier archivé : il
+     * ne fait que signaler au courtier qu'une réactivation est souhaitée.
+     */
+    public function demanderReactivation(): void
+    {
+        $this->demande_reactivation_le = now();
+        $this->save();
     }
 
     /**

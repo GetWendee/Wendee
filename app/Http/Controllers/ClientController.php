@@ -3196,6 +3196,27 @@ class ClientController extends Controller
         }
     }
 
+    /**
+     * Clôture le dossier : il quitte le portefeuille actif et bascule dans
+     * Comptes clôturés, réactivable librement pendant 6 mois avant
+     * archivage automatique (voir Client::cloturer()).
+     */
+    public function cloturer(Request $request, Client $client): RedirectResponse
+    {
+        $user = $request->user();
+        $role = $user->effectiveRole();
 
+        abort_unless(in_array($role, ['courtier', 'conseiller'], true), 403);
+        abort_unless(
+            $client->conseiller_id === $user->id || $user->voitTousLesClients(),
+            403
+        );
+
+        $client->cloturer();
+
+        return redirect()
+            ->route('tenant.clients.show', $client)
+            ->with('status', 'Le dossier a été clôturé. Il reste réactivable librement pendant 6 mois depuis Comptes clôturés.');
+    }
 
 }

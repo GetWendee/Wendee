@@ -15,6 +15,7 @@ use App\Http\Controllers\ClientPilotageMoraleController;
 use App\Http\Controllers\DossierEnrolementController;
 use App\Http\Controllers\BackOfficeEnrolementController;
 use App\Http\Controllers\PortefeuilleCabinetController;
+use App\Http\Controllers\ComptesCloturesController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\RevenuController;
 use App\Http\Controllers\CommissionController;
@@ -92,6 +93,9 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
 
         Route::get('/portefeuille', [PortefeuilleCabinetController::class, 'index'])
             ->name('portefeuille.index');
+        Route::get('/comptes-clotures', [ComptesCloturesController::class, 'index'])->name('comptes-clotures.index');
+        Route::post('/comptes-clotures/{client}/reactiver', [ComptesCloturesController::class, 'reactiver'])->name('comptes-clotures.reactiver');
+        Route::post('/comptes-clotures/{client}/demander-reactivation', [ComptesCloturesController::class, 'demanderReactivation'])->name('comptes-clotures.demander-reactivation');
         Route::get('/performances', [PerformanceController::class, 'index'])->name('performances.index');
         Route::get('/revenus', [RevenuController::class, 'index'])->name('revenus.index');
         Route::get('/utilisateurs/creer', [UserAccountController::class, 'create'])->name('users.create');
@@ -184,6 +188,7 @@ Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telec
         Route::post('/aide-decision/{client}/suggestion', [ClientController::class, 'genererSuggestion'])->name('clients.aide-decision.suggestion');
         Route::get('/clients/{client}/modifier', [ClientController::class, 'edit'])->name('clients.edit');
         Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
+        Route::post('/clients/{client}/cloturer', [ClientController::class, 'cloturer'])->name('clients.cloturer');
         Route::get('/kyc/{client}', [ClientKycController::class, 'edit'])->name('clients.kyc.edit');
         Route::put('/kyc/{client}', [ClientKycController::class, 'update'])->name('clients.kyc.update');
         Route::get('/kyc/{client}/pdf', [ClientController::class, 'telechargerKycPdf'])->name('clients.kyc.pdf');

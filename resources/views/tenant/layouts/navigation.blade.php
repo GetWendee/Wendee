@@ -84,6 +84,10 @@
             <span class="wd-soon">Bientot</span>
         </a>
         @endif
+        <a class="{{ request()->routeIs('tenant.comptes-clotures.*') ? 'active' : '' }}" href="{{ route('tenant.comptes-clotures.index') }}">
+            <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M9 12h6"/></svg>
+            <span>Comptes clôturés</span>
+        </a>
         @endif
         <div class="wd-nav-section">Compte</div>
         @php

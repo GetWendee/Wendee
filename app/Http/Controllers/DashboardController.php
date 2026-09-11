@@ -33,6 +33,7 @@ class DashboardController extends Controller
          * ses propres clients sont donc ceux dont conseiller_id = son id.
          */
         $clients = Client::query()
+            ->actifs()
             ->where('conseiller_id', $user->id)
             ->with([
                 'kyc',

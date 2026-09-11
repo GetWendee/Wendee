@@ -52,6 +52,7 @@ class PortefeuilleCabinetController extends Controller
                 ->get();
 
             $clients = Client::query()
+                ->actifs()
                 ->with(['conseiller', 'apporteur', 'kyc', 'profilInvestisseur', 'patrimoineElements', 'representants'])
                 ->orderBy('nom')
                 ->orderBy('prenom')
@@ -69,6 +70,7 @@ class PortefeuilleCabinetController extends Controller
                 ->get();
 
             $clientsQuery = Client::query()
+                ->actifs()
                 ->with(['conseiller', 'apporteur', 'kyc', 'profilInvestisseur', 'patrimoineElements', 'representants'])
                 ->orderBy('nom')
                 ->orderBy('prenom');
@@ -89,6 +91,7 @@ class PortefeuilleCabinetController extends Controller
             $apporteurs = collect([$user]);
 
             $clients = Client::query()
+                ->actifs()
                 ->with(['conseiller', 'apporteur', 'kyc', 'profilInvestisseur', 'patrimoineElements', 'representants'])
                 ->where('apporteur_id', $user->id)
                 ->orderBy('nom')

@@ -2430,6 +2430,13 @@ Dossier client · suivi patrimonial
 href="{{ route('tenant.clients.edit', $client) }}">
 Modifier
 </a>
+
+@if(! $client->estCloture() && ! $client->estArchive())
+<form method="POST" action="{{ route('tenant.clients.cloturer', $client) }}" onsubmit="return confirm('Clôturer ce dossier ? Il restera réactivable librement pendant 6 mois avant archivage.');">
+    @csrf
+    <button type="submit" class="wd-btn">Clôturer</button>
+</form>
+@endif
 @endunless
 
 @if($viewRole === 'client')
@@ -2695,6 +2702,48 @@ function rdvPopup(urlDisponibilites, urlStore) {
 </div>
 
 </section>
+
+@if($viewRole !== 'client' && ($client->estCloture() || $client->estArchive()))
+<div style="margin:18px 0;padding:16px 20px;border-radius:14px;background:{{ $client->estArchive() ? '#f3f1ee' : '#fff7ed' }};border:1px solid {{ $client->estArchive() ? '#ded9d4' : '#fed7aa' }};display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="font-size:13px;color:#4b4640;">
+        @if($client->estArchive())
+            <strong>Dossier archivé</strong> le {{ $client->archive_le->translatedFormat('d F Y') }}.
+            @if($client->estEncoreReactivable())
+                Réactivable jusqu'au {{ $client->dateLimiteReactivation()->translatedFormat('d F Y') }}.
+                @if($client->demandeReactivationEnAttente())
+                    Demande de réactivation envoyée le {{ $client->demande_reactivation_le->translatedFormat('d F Y') }}, en attente du courtier.
+                @endif
+            @else
+                Le délai de réactivation (5 ans) est dépassé.
+            @endif
+        @else
+            <strong>Dossier clôturé</strong> le {{ $client->cloture_le->translatedFormat('d F Y') }}.
+            Archivage automatique dans {{ $client->joursAvantArchivage() }} jour(s) sauf réactivation.
+        @endif
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        @if($client->estCloture())
+            <form method="POST" action="{{ route('tenant.comptes-clotures.reactiver', $client) }}">
+                @csrf
+                <button type="submit" class="wd-btn">Réactiver</button>
+            </form>
+        @elseif($client->estArchive() && $client->estEncoreReactivable())
+            @if($viewRole === 'courtier')
+                <form method="POST" action="{{ route('tenant.comptes-clotures.reactiver', $client) }}">
+                    @csrf
+                    <button type="submit" class="wd-btn">Réactiver</button>
+                </form>
+            @elseif($viewRole === 'conseiller' && ! $client->demandeReactivationEnAttente())
+                <form method="POST" action="{{ route('tenant.comptes-clotures.demander-reactivation', $client) }}">
+                    @csrf
+                    <button type="submit" class="wd-btn">Demander la réactivation</button>
+                </form>
+            @endif
+        @endif
+    </div>
+</div>
+@endif
 
 <div x-data="{ visible: @js(session('status') === 'demande-rdv-envoyee'), envoye: @js(session('status') === 'demande-rdv-envoyee') }" x-on:ouvrir-mes-rdv.window="visible = true">
 <template x-teleport="body">
