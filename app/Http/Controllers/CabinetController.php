@@ -360,7 +360,21 @@ class CabinetController extends Controller
 
         // Trace qui a changé l'abonnement et quand, seulement si la valeur
         // change réellement (pas à chaque enregistrement du formulaire).
-        if ((int) $tenant->abonnement_nombre_clients_max !== $validated['abonnement_nombre_clients_max']) {
+        $abonnementChange = (int) $tenant->abonnement_nombre_clients_max !== $validated['abonnement_nombre_clients_max'];
+
+        if ($abonnementChange) {
+            $nombreClientsActuel = $tenant->run(
+                fn () => \App\Models\Client::query()->nonArchives()->count()
+            );
+
+            if ($validated['abonnement_nombre_clients_max'] < $nombreClientsActuel) {
+                return redirect()->route('cabinets.index')
+                    ->withErrors([
+                        'abonnement_nombre_clients_max' => "Ce cabinet compte actuellement {$nombreClientsActuel} clients : impossible de choisir un abonnement inférieur.",
+                    ])
+                    ->with('error_cabinet_id', $tenant->id);
+            }
+
             $donnees['abonnement_nombre_clients_max'] = $validated['abonnement_nombre_clients_max'];
             $donnees['abonnement_modifie_par_nom'] = $request->user()->name;
             $donnees['abonnement_modifie_le'] = now();

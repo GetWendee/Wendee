@@ -16,6 +16,7 @@ use App\Http\Controllers\DossierEnrolementController;
 use App\Http\Controllers\BackOfficeEnrolementController;
 use App\Http\Controllers\PortefeuilleCabinetController;
 use App\Http\Controllers\ComptesCloturesController;
+use App\Http\Controllers\AbonnementController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\RevenuController;
 use App\Http\Controllers\CommissionController;
@@ -96,6 +97,8 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::get('/comptes-clotures', [ComptesCloturesController::class, 'index'])->name('comptes-clotures.index');
         Route::post('/comptes-clotures/{client}/reactiver', [ComptesCloturesController::class, 'reactiver'])->name('comptes-clotures.reactiver');
         Route::post('/comptes-clotures/{client}/demander-reactivation', [ComptesCloturesController::class, 'demanderReactivation'])->name('comptes-clotures.demander-reactivation');
+        Route::get('/abonnement', [AbonnementController::class, 'index'])->name('abonnement.index');
+        Route::put('/abonnement', [AbonnementController::class, 'update'])->name('abonnement.update');
         Route::get('/performances', [PerformanceController::class, 'index'])->name('performances.index');
         Route::get('/revenus', [RevenuController::class, 'index'])->name('revenus.index');
         Route::get('/utilisateurs/creer', [UserAccountController::class, 'create'])->name('users.create');

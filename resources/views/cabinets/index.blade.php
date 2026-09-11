@@ -41,7 +41,7 @@
                     <tbody class="divide-y divide-gray-200">
                         @forelse ($cabinets as $cabinet)
                             <tr
-                                x-data="{ open: false }"
+                                x-data="{ open: {{ (($errors->any() && session('error_cabinet_id') === $cabinet->id)) ? 'true' : 'false' }} }"
                                 @click="open = true"
                                 class="cursor-pointer hover:bg-gray-50 transition"
                             >
@@ -68,11 +68,11 @@
                                     <div
                                         x-show="open"
                                         x-cloak
-                                        style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(21,21,21,.45);"
+                                        class="wd-cabinet-modal-overlay"
                                         @click.self="open = false"
                                         @keydown.escape.window="open = false"
                                     >
-                                        <div style="background:#fff;border-radius:16px;padding:28px;max-width:480px;width:92%;max-height:88vh;overflow-y:auto;" @click.stop>
+                                        <div class="wd-cabinet-modal-box" @click.stop>
                                             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
                                                 <h2 style="font-size:17px;font-weight:800;color:#151515;">{{ $cabinet->name }}</h2>
                                                 <button type="button" @click="open = false" style="background:none;border:none;font-size:20px;cursor:pointer;color:#817b76;">&times;</button>
@@ -84,7 +84,7 @@
 
                                                 <div>
                                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nom du cabinet</label>
-                                                    <input type="text" name="name" value="{{ $cabinet->name }}" class="block w-full border-gray-300 rounded-md shadow-sm">
+                                                    <input type="text" name="name" value="{{ (session('error_cabinet_id') === $cabinet->id) ? old('name', $cabinet->name) : $cabinet->name }}" class="block w-full border-gray-300 rounded-md shadow-sm">
                                                 </div>
 
                                                 <div class="text-sm text-gray-500">
@@ -100,6 +100,12 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
+
+                                                    @if($errors->any() && session('error_cabinet_id') === $cabinet->id)
+                                                        <p class="mt-1.5 text-xs font-semibold text-red-600">
+                                                            {{ $errors->first('abonnement_nombre_clients_max') }}
+                                                        </p>
+                                                    @endif
 
                                                     @if($cabinet->abonnement_modifie_par_nom)
                                                         <p class="mt-1.5 text-xs text-gray-400">
@@ -145,4 +151,36 @@
             </div>
         </div>
     </div>
+
+    {{--
+        Centrage de la modale : les propriétés de centrage (display/align-items/
+        justify-content) doivent vivre dans une classe, PAS dans le style inline
+        de l'élément piloté par x-show. Alpine réécrit directement el.style.display
+        pour l'affichage/masquage ; si "display:flex" était déclaré dans ce même
+        style inline, Alpine l'efface au moment d'afficher la modale (il repasse
+        juste sur "" / "none"), et le flex se perd : la modale retombe alors en
+        display:block par défaut, collée en haut à gauche au lieu d'être centrée.
+        En gardant le flex dans une classe CSS, Alpine ne touche qu'à l'état
+        caché/visible et le centrage défini par la classe reste actif.
+    --}}
+    <style>
+    .wd-cabinet-modal-overlay{
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:rgba(21,21,21,.45);
+    }
+    .wd-cabinet-modal-box{
+        background:#fff;
+        border-radius:16px;
+        padding:28px;
+        max-width:480px;
+        width:92%;
+        max-height:88vh;
+        overflow-y:auto;
+    }
+    </style>
 </x-app-layout>

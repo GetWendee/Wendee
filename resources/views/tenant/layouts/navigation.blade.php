@@ -11,20 +11,12 @@
         request()->routeIs('tenant.commissions.*') => 'Cabinet · Commissions',
         request()->routeIs('tenant.rendez-vous.*') => 'Agenda · Rendez-vous',
         request()->routeIs('tenant.profil.rib.*') => 'Compte · Mon RIB',
+        request()->routeIs('tenant.abonnement.*') => 'Compte · Abonnement',
         default => 'Wendee',
     };
 @endphp
 <aside class="wd-sidebar">
     <div class="wd-logo"><b>W</b>endee<small>OS du conseiller patrimonial</small></div>
-    @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
-        @php
-            $wdNombreClientsMax = tenant('abonnement_nombre_clients_max');
-            $wdNombreClientsActuel = \App\Models\Client::query()->nonArchives()->count();
-        @endphp
-        <div style="margin:0 20px 16px;padding:8px 12px;border-radius:10px;background:#f3f1ee;font-size:11px;font-weight:700;color:#6b6560;text-align:center;">
-            {{ $wdNombreClientsActuel }} / {{ $wdNombreClientsMax ?? '∞' }} clients
-        </div>
-    @endif
     <nav class="wd-nav">
         <div class="wd-nav-section">Général</div>
         <a class="{{ request()->routeIs('tenant.dashboard') || (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) ? 'active' : '' }}" href="{{ Auth::check() && Auth::user()->effectiveRole() === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard') }}">
@@ -131,6 +123,12 @@
             <span>Paramètres</span>
         </a>
         @endif
+        @if(Auth::check() && Auth::user()->effectiveRole() === 'courtier')
+        <a class="{{ request()->routeIs('tenant.abonnement.*') ? 'active' : '' }}" href="{{ route('tenant.abonnement.index') }}">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            <span>Abonnement</span>
+        </a>
+        @endif
         <a class="{{ request()->routeIs('tenant.profil.*') ? 'active' : '' }}" href="{{ route('tenant.profil.edit') }}">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             <span>Profil</span>
@@ -205,6 +203,15 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <header class="wd-topbar">
     <div class="wd-crumb">{{ $wdCrumb }}</div>
+    @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
+        @php
+            $wdNombreClientsMax = tenant('abonnement_nombre_clients_max');
+            $wdNombreClientsActuel = \App\Models\Client::query()->nonArchives()->count();
+        @endphp
+        <div style="padding:6px 12px;border-radius:999px;background:#f3f1ee;font-size:11px;font-weight:700;color:#6b6560;white-space:nowrap;">
+            {{ $wdNombreClientsActuel }} / {{ $wdNombreClientsMax ?? '∞' }} clients
+        </div>
+    @endif
     @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
     <div class="wd-notif" x-data="{ open: false }" x-on:click.outside="open = false">
         <button type="button" class="wd-notif-bell" x-on:click="open = !open" aria-label="Notifications">
@@ -333,6 +340,10 @@ document.addEventListener('DOMContentLoaded', function () {
             <a class="{{ request()->routeIs('tenant.cabinet') ? 'active' : '' }}" href="{{ route('tenant.cabinet') }}">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
                 <span>Paramètres</span>
+            </a>
+            <a class="{{ request()->routeIs('tenant.abonnement.*') ? 'active' : '' }}" href="{{ route('tenant.abonnement.index') }}">
+                <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                <span>Abonnement</span>
             </a>
             @endif
             <a class="{{ request()->routeIs('tenant.profil.*') ? 'active' : '' }}" href="{{ route('tenant.profil.edit') }}">
