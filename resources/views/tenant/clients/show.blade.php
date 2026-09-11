@@ -344,13 +344,26 @@
     $experience = $cleanScoreLabel($experience);
     $connaissance = $cleanScoreLabel($connaissance);
 
-    $scoreProfil = (float) ($profil?->profil_risque_final ?? 0);
-    $scoreConnaissance = (float) ($profil?->score_connaissance_global ?? 0);
-    $scoreExperience = (float) ($profil?->score_experience_global ?? 0);
-    $scoreCapacite = (float) ($profil?->score_capacite_financiere ?? 0);
-    $scoreTolerance = (float) ($profil?->score_tolerance_risque ?? 0);
-    $scorePertes = (float) ($profil?->score_capacite_subir_pertes ?? 0);
-    $scoreEsg = (float) ($profil?->score_esg ?? 0);
+    /*
+    |--------------------------------------------------------------------------
+    | Affichage du profil de risque sur 7 (et non sur 10)
+    |--------------------------------------------------------------------------
+    | Le moteur de scoring (config/profil_investisseur_formules.php) calcule
+    | et stocke tout en interne sur une échelle de 0 à 10 : c'est ce qui est
+    | utilisé par PlacementCompatibilityService pour les seuils de
+    | compatibilité produit (ex. $risque <= 2, < 5, < 6...) et ne doit pas
+    | changer. Seul l'affichage ci-dessous est converti sur 7, pour parler le
+    | même langage que le SRRI/SRI réglementaire (qui note les PRODUITS, pas
+    | le client — ce n'est pas la même échelle réglementaire, juste un choix
+    | d'affichage pour rester lisible pour les conseillers habitués au SRRI).
+    */
+    $scoreProfil = (float) ($profil?->profil_risque_final ?? 0) * 0.7;
+    $scoreConnaissance = (float) ($profil?->score_connaissance_global ?? 0) * 0.7;
+    $scoreExperience = (float) ($profil?->score_experience_global ?? 0) * 0.7;
+    $scoreCapacite = (float) ($profil?->score_capacite_financiere ?? 0) * 0.7;
+    $scoreTolerance = (float) ($profil?->score_tolerance_risque ?? 0) * 0.7;
+    $scorePertes = (float) ($profil?->score_capacite_subir_pertes ?? 0) * 0.7;
+    $scoreEsg = (float) ($profil?->score_esg ?? 0) * 0.7;
 @endphp
 
 <style>
@@ -3667,7 +3680,7 @@ class="wd-btn-dark">
 
             <div class="wd-profile-score">
                 <strong>{{ number_format($scoreProfil, 1, ',', ' ') }}</strong>
-                <span>/ 10</span>
+                <span>/ 7</span>
             </div>
 
         </div>
@@ -3677,7 +3690,7 @@ class="wd-btn-dark">
             <div class="wd-profile-scale-track">
                 <div
                     class="wd-profile-scale-value"
-                    style="width:{{ min(100, max(0, $scoreProfil * 10)) }}%">
+                    style="width:{{ min(100, max(0, $scoreProfil / 7 * 100)) }}%">
                 </div>
             </div>
 
@@ -3714,7 +3727,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreConnaissance * 10)) }}%"></i>
+                <i style="width:{{ min(100, max(0, $scoreConnaissance / 7 * 100)) }}%"></i>
             </div>
 
             <small>{{ $connaissance }}</small>
@@ -3728,7 +3741,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreExperience * 10)) }}%"></i>
+                <i style="width:{{ min(100, max(0, $scoreExperience / 7 * 100)) }}%"></i>
             </div>
 
             <small>{{ $experience }}</small>
@@ -3742,7 +3755,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreCapacite * 10)) }}%"></i>
+                <i style="width:{{ min(100, max(0, $scoreCapacite / 7 * 100)) }}%"></i>
             </div>
 
             <small>{{ $capacite }}</small>
@@ -3756,7 +3769,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreTolerance * 10)) }}%"></i>
+                <i style="width:{{ min(100, max(0, $scoreTolerance / 7 * 100)) }}%"></i>
             </div>
 
             <small>{{ $tolerance }}</small>
@@ -3770,7 +3783,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scorePertes * 10)) }}%"></i>
+                <i style="width:{{ min(100, max(0, $scorePertes / 7 * 100)) }}%"></i>
             </div>
 
             <small>
@@ -3786,7 +3799,7 @@ class="wd-btn-dark">
             </div>
 
             <div class="wd-profile-meter">
-                <i style="width:{{ min(100, max(0, $scoreEsg * 10)) }}%"></i>
+                <i style="width:{{ min(100, max(0, $scoreEsg / 7 * 100)) }}%"></i>
             </div>
 
             <small>
