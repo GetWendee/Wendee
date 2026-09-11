@@ -385,6 +385,13 @@
     $colorPertes = $echelleColor($profil?->score_capacite_subir_pertes_echelle);
     $colorEsg = $echelleColor($profil?->engagement_extra_financier_echelle);
 
+    $statusIcon = fn (string $couleur) => match ($couleur) {
+        'bon' => '✓',
+        'vigilance' => '–',
+        'attention' => '!',
+        default => '•',
+    };
+
     $profilFinal = $cleanScoreLabel($profilFinal);
     $tolerance = $cleanScoreLabel($tolerance);
     $capacite = $cleanScoreLabel($capacite);
@@ -1465,27 +1472,54 @@ html,body{
 .wd-profile-metric{
     min-width:0;
     background:#fff;
-    border-top:1px solid var(--line);
-    border-right:1px solid var(--line);
-    border-bottom:1px solid var(--line);
-    border-left:6px solid var(--line);
-    border-radius:13px;
-    padding:20px 20px 19px 18px;
-}
-
-.wd-profile-metric-bon{border-left-color:#7d9c88; background:rgba(125,156,136,.07);}
-.wd-profile-metric-vigilance{border-left-color:#c79a62; background:rgba(199,154,98,.08);}
-.wd-profile-metric-attention{border-left-color:#9d5f66; background:rgba(157,95,102,.07);}
-.wd-profile-metric-neutre{border-left-color:#c7c2bd;}
-
-.wd-profile-metric-head{
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:19px 20px 20px;
     display:flex;
-    justify-content:space-between;
-    gap:15px;
-    align-items:center;
+    flex-direction:column;
+    gap:14px;
+    transition:border-color .15s ease, box-shadow .15s ease;
 }
 
-.wd-profile-metric-head span{
+.wd-profile-metric:hover{
+    border-color:#d8d3ce;
+    box-shadow:0 4px 14px rgba(30,26,24,.05);
+}
+
+/*
+ * Statut qualitatif : un seul accent de couleur par vignette, porté par le
+ * badge rond (icône + fond teinté) à côté du libellé — le reste de la carte
+ * (fond, bordure, valeur) reste neutre. Un badge lit plus "produit fini"
+ * qu'une bordure ou un fond teinté sur toute la carte, et la forme de
+ * l'icône (✓ / – / !) double la couleur pour rester lisible sans elle.
+ * Mêmes 3 teintes que "Compatibilité des placements" plus bas, pour rester
+ * cohérent avec notre charte sur toute la page.
+ */
+.wd-profile-metric-top{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.wd-metric-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 25px;
+    width:25px;
+    height:25px;
+    border-radius:50%;
+    font-size:12px;
+    font-weight:800;
+    line-height:1;
+}
+
+.wd-metric-badge-bon{background:rgba(125,156,136,.16); color:#4c6656;}
+.wd-metric-badge-vigilance{background:rgba(199,154,98,.18); color:#8c642f;}
+.wd-metric-badge-attention{background:rgba(157,95,102,.16); color:#844950;}
+.wd-metric-badge-neutre{background:rgba(145,138,133,.16); color:#5c5651;}
+
+.wd-profile-metric-label{
     color:#918a85;
     font-size:9px;
     font-weight:800;
@@ -1493,30 +1527,12 @@ html,body{
     letter-spacing:.09em;
 }
 
-/*
- * Statut qualitatif : la couleur du statut se lit sur la bordure gauche de
- * la vignette (cf. .wd-profile-metric-bon/vigilance/attention ci-dessus),
- * le libellé ("Élevée", "Expertise"...) reste du texte plein, sans fond,
- * mais en gras et plus grand pour porter l'information en premier.
- * Mêmes 3 teintes que "Compatibilité des placements" plus bas, pour rester
- * cohérent avec notre charte sur toute la page.
- */
-.wd-profile-status{
-    margin-top:16px;
-}
-
-.wd-status-pill{
-    display:inline-block;
-    font-size:17px;
+.wd-profile-metric-value{
+    font-size:19px;
     font-weight:800;
-    letter-spacing:-.015em;
-    line-height:1.3;
+    letter-spacing:-.02em;
+    color:#242424;
 }
-
-.wd-status-pill-bon{color:#4c6656;}
-.wd-status-pill-vigilance{color:#8c642f;}
-.wd-status-pill-attention{color:#844950;}
-.wd-status-pill-neutre{color:#5c5651;}
 
 @media(max-width:1050px){
     .wd-profile-new-grid{
@@ -3800,72 +3816,60 @@ class="wd-btn-dark">
 
     <div class="wd-profile-metrics">
 
-        <div class="wd-profile-metric wd-profile-metric-{{ $colorConnaissance }}">
-            <div class="wd-profile-metric-head">
-                <span>Connaissance</span>
+        <div class="wd-profile-metric">
+            <div class="wd-profile-metric-top">
+                <span class="wd-metric-badge wd-metric-badge-{{ $colorConnaissance }}">{{ $statusIcon($colorConnaissance) }}</span>
+                <span class="wd-profile-metric-label">Connaissance</span>
             </div>
+            <div class="wd-profile-metric-value">{{ $connaissance }}</div>
+        </div>
 
-            <div class="wd-profile-status">
-                <span class="wd-status-pill wd-status-pill-{{ $colorConnaissance }}">{{ $connaissance }}</span>
+
+        <div class="wd-profile-metric">
+            <div class="wd-profile-metric-top">
+                <span class="wd-metric-badge wd-metric-badge-{{ $colorExperience }}">{{ $statusIcon($colorExperience) }}</span>
+                <span class="wd-profile-metric-label">Expérience</span>
+            </div>
+            <div class="wd-profile-metric-value">{{ $experience }}</div>
+        </div>
+
+
+        <div class="wd-profile-metric">
+            <div class="wd-profile-metric-top">
+                <span class="wd-metric-badge wd-metric-badge-{{ $colorCapacite }}">{{ $statusIcon($colorCapacite) }}</span>
+                <span class="wd-profile-metric-label">Capacité financière</span>
+            </div>
+            <div class="wd-profile-metric-value">{{ $capacite }}</div>
+        </div>
+
+
+        <div class="wd-profile-metric">
+            <div class="wd-profile-metric-top">
+                <span class="wd-metric-badge wd-metric-badge-{{ $colorTolerance }}">{{ $statusIcon($colorTolerance) }}</span>
+                <span class="wd-profile-metric-label">Tolérance au risque</span>
+            </div>
+            <div class="wd-profile-metric-value">{{ $tolerance }}</div>
+        </div>
+
+
+        <div class="wd-profile-metric">
+            <div class="wd-profile-metric-top">
+                <span class="wd-metric-badge wd-metric-badge-{{ $colorPertes }}">{{ $statusIcon($colorPertes) }}</span>
+                <span class="wd-profile-metric-label">Capacité à subir des pertes</span>
+            </div>
+            <div class="wd-profile-metric-value">
+                {{ $cleanScoreLabel($profil->score_capacite_subir_pertes_echelle) }}
             </div>
         </div>
 
 
-        <div class="wd-profile-metric wd-profile-metric-{{ $colorExperience }}">
-            <div class="wd-profile-metric-head">
-                <span>Expérience</span>
+        <div class="wd-profile-metric">
+            <div class="wd-profile-metric-top">
+                <span class="wd-metric-badge wd-metric-badge-{{ $colorEsg }}">{{ $statusIcon($colorEsg) }}</span>
+                <span class="wd-profile-metric-label">Extra-financier</span>
             </div>
-
-            <div class="wd-profile-status">
-                <span class="wd-status-pill wd-status-pill-{{ $colorExperience }}">{{ $experience }}</span>
-            </div>
-        </div>
-
-
-        <div class="wd-profile-metric wd-profile-metric-{{ $colorCapacite }}">
-            <div class="wd-profile-metric-head">
-                <span>Capacité financière</span>
-            </div>
-
-            <div class="wd-profile-status">
-                <span class="wd-status-pill wd-status-pill-{{ $colorCapacite }}">{{ $capacite }}</span>
-            </div>
-        </div>
-
-
-        <div class="wd-profile-metric wd-profile-metric-{{ $colorTolerance }}">
-            <div class="wd-profile-metric-head">
-                <span>Tolérance au risque</span>
-            </div>
-
-            <div class="wd-profile-status">
-                <span class="wd-status-pill wd-status-pill-{{ $colorTolerance }}">{{ $tolerance }}</span>
-            </div>
-        </div>
-
-
-        <div class="wd-profile-metric wd-profile-metric-{{ $colorPertes }}">
-            <div class="wd-profile-metric-head">
-                <span>Capacité à subir des pertes</span>
-            </div>
-
-            <div class="wd-profile-status">
-                <span class="wd-status-pill wd-status-pill-{{ $colorPertes }}">
-                    {{ $cleanScoreLabel($profil->score_capacite_subir_pertes_echelle) }}
-                </span>
-            </div>
-        </div>
-
-
-        <div class="wd-profile-metric wd-profile-metric-{{ $colorEsg }}">
-            <div class="wd-profile-metric-head">
-                <span>Extra-financier</span>
-            </div>
-
-            <div class="wd-profile-status">
-                <span class="wd-status-pill wd-status-pill-{{ $colorEsg }}">
-                    {{ $cleanScoreLabel($profil->engagement_extra_financier_echelle) }}
-                </span>
+            <div class="wd-profile-metric-value">
+                {{ $cleanScoreLabel($profil->engagement_extra_financier_echelle) }}
             </div>
         </div>
 
