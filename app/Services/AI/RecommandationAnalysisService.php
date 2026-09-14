@@ -66,6 +66,7 @@ class RecommandationAnalysisService
             'patrimoine' => $analyses->get('patrimoine')->result_json,
             'profil_investisseur' => $analyses->get('profil_investisseur')->result_json,
             'suggestion' => $suggestion->result_json,
+            'mission_construite' => $formInput['mission'] ?? null,
             'contexte_conseiller' => $formInput['contexte'] ?? '',
             'missions_retenues' => $formInput['missions'] ?? [],
             'total_forfait_final' => $total,
@@ -247,10 +248,11 @@ Tu disposes, au format JSON dans le message utilisateur :
 - des données patrimoniales
 - du profil investisseur
 - de la suggestion de prestations déjà établie pour ce client
+- de la mission construite par IA 2A (mission_construite), le cas échéant : intitulé, contexte, objet, périmètre, hors périmètre, travaux et livrables relus/édités par le conseiller
 - des missions retenues par le conseiller pour cette lettre de mission
 - du contexte rédigé par le conseiller suite à l'échange avec son client
 
-Le contexte conseiller, lorsqu'il est renseigné, constitue la grille de lecture principale de cette lettre de mission. Il prime sur toute interprétation générique et doit orienter concrètement la rédaction de l'objet, du périmètre et des livrables. En l'absence de contexte, la lettre s'appuie exclusivement sur les données structurées.
+Lorsque mission_construite est présent, il constitue la grille de lecture principale de cette lettre de mission : son objet, son périmètre, ses travaux et ses livrables doivent orienter concrètement la rédaction des sections correspondantes, sans les recopier mot pour mot. Le contexte conseiller (contexte_conseiller), lorsqu'il est renseigné, vient compléter cette grille de lecture. En l'absence des deux, la lettre s'appuie exclusivement sur les données structurées.
 
 Les missions retenues déterminent la nature juridique du document. Elles peuvent être :
 - Mandat de courtage, assurance banque

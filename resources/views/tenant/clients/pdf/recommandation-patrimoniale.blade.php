@@ -36,6 +36,8 @@ body { font-family: 'Montserrat', sans-serif; font-size: 10.5pt; color: #242424;
 .signature-block td { vertical-align: top; font-size: 10pt; }
 .signature-block strong { color: #171514; }
 .mention { font-size: 8.5pt; color: #817a75; font-style: italic; }
+.signature-manuscrite { margin: 10px 0 4px; font-size: 26pt; font-style: italic; font-weight: 700; color: #242424; transform: rotate(-4deg); display: inline-block; }
+.signature-validee-mention { font-size: 8pt; color: #3e7a6c; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
 .pdf-footer { position: fixed; bottom: -26mm; left: 0; right: 0; border-top: 1px solid #ded9d4; padding-top: 8px; font-size: 7.5pt; color: #817a75; }
 .pdf-footer table { width: 100%; border-collapse: collapse; }
 .pdf-footer td { vertical-align: middle; }
@@ -105,9 +107,14 @@ body { font-family: 'Montserrat', sans-serif; font-size: 10.5pt; color: #242424;
             <td width="4%"></td>
             <td width="48%" style="text-align:right;">
                 Le Client<br>
-                <strong>{{ $nomClient }}</strong><br>
-                Signature Client<br>
-                <span class="mention">(Signature précédée de la mention « Lu et approuvé »)</span>
+                @if($valide ?? false)
+                    <div class="signature-manuscrite">{{ $nomClient }}</div><br>
+                    <span class="signature-validee-mention">Validé électroniquement@if($valideLe ?? null) le {{ $valideLe->translatedFormat('d F Y à H:i') }}@endif</span>
+                @else
+                    <strong>{{ $nomClient }}</strong><br>
+                    Signature Client<br>
+                    <span class="mention">(Signature précédée de la mention « Lu et approuvé »)</span>
+                @endif
             </td>
         </tr>
     </table>

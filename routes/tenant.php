@@ -181,6 +181,7 @@ Route::post('/lettre-mission-scpi/{client}', [ClientController::class, 'enregist
 Route::get('/lettre-mission-scpi/{client}/pdf', [ClientController::class, 'telechargerLettreMissionScpiPdf'])->name('clients.lettre-mission-scpi.pdf');
         Route::get('/recommandation-patrimoniale/{client}', [ClientController::class, 'recommandationPatrimoniale'])->name('clients.recommandation-patrimoniale');
         Route::post('/recommandation-patrimoniale/{client}', [ClientController::class, 'genererRecommandation'])->name('clients.recommandation-patrimoniale.generer');
+        Route::post('/recommandation-patrimoniale/{client}/envoyer', [ClientController::class, 'envoyerRecommandationClient'])->name('clients.recommandation-patrimoniale.envoyer');
         Route::get('/recommandation-patrimoniale/{client}/pdf', [ClientController::class, 'telechargerRecommandationPdf'])->name('clients.recommandation-patrimoniale.pdf');
         Route::get('/recommandation-patrimoniale/{client}/pdf/voir', [ClientController::class, 'voirRecommandationPdfEnLigne'])->name('clients.recommandation-patrimoniale.pdf.voir');
         Route::post('/recommandation-patrimoniale/{client}/valider', [ClientController::class, 'validerRecommandation'])->name('clients.recommandation-patrimoniale.valider');

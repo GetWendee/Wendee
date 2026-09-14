@@ -461,6 +461,10 @@ class ClientController extends Controller
             ->where('type', 'recommandation')
             ->latest('created_at')
             ->first();
+        $mission = \App\Models\Mission::where('client_id', $client->id)
+            ->where('status', 'completed')
+            ->latest('id')
+            ->first();
         return view(
             'tenant.clients.recommandation-patrimoniale',
             [
@@ -468,6 +472,7 @@ class ClientController extends Controller
                 'suggestion' => $suggestion,
                 'cabinet' => $cabinet,
                 'recommandation' => $derniereRecommandation,
+                'mission' => $mission,
             ]
         );
     }
@@ -479,7 +484,7 @@ class ClientController extends Controller
     ): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
-            'contexte' => ['nullable', 'string', 'max:5000'],
+            'contexte' => ['nullable', 'string', 'max:8000'],
             'missions' => ['nullable', 'array'],
             'missions.*' => [
                 'string',
@@ -489,7 +494,54 @@ class ClientController extends Controller
             'montants.*' => ['nullable', 'numeric'],
             'taux' => ['nullable', 'array'],
             'taux.*' => ['nullable', 'numeric'],
+            'mission_id' => ['nullable', 'integer'],
+            'intitule_mission' => ['nullable', 'string', 'max:255'],
+            'objet' => ['nullable', 'string', 'max:8000'],
+            'perimetre' => ['nullable', 'string', 'max:8000'],
+            'hors_perimetre' => ['nullable', 'string', 'max:8000'],
+            'travaux' => ['nullable', 'string', 'max:8000'],
+            'livrables' => ['nullable', 'string', 'max:8000'],
         ]);
+
+        /*
+         * Contenu de la mission IA 2A (intitulé, contexte, objet,
+         * périmètre...), édité par le conseiller directement dans la
+         * section 1 de cette page. On l'enregistre sur la mission avant de
+         * lancer la génération, et on le transmet à l'IA de recommandation
+         * comme grille de lecture principale (voir RecommandationAnalysisService).
+         */
+        $missionConstruite = null;
+        if (! empty($validated['mission_id'])) {
+            $mission = \App\Models\Mission::where('id', $validated['mission_id'])
+                ->where('client_id', $client->id)
+                ->first();
+
+            if ($mission) {
+                $versLignes = function (?string $texte): array {
+                    return collect(explode("\n", (string) $texte))
+                        ->map(fn ($ligne) => trim($ligne))
+                        ->filter(fn ($ligne) => $ligne !== '')
+                        ->values()
+                        ->all();
+                };
+
+                $missionConstruite = [
+                    'intitule_mission' => trim($validated['intitule_mission'] ?? ''),
+                    'contexte' => trim($validated['contexte'] ?? ''),
+                    'objet' => trim($validated['objet'] ?? ''),
+                    'perimetre' => $versLignes($validated['perimetre'] ?? ''),
+                    'hors_perimetre' => $versLignes($validated['hors_perimetre'] ?? ''),
+                    'travaux' => $versLignes($validated['travaux'] ?? ''),
+                    'livrables' => $versLignes($validated['livrables'] ?? ''),
+                    'pieces_a_collecter' => $mission->result_json['pieces_a_collecter'] ?? [],
+                ];
+
+                $mission->update([
+                    'edited_json' => $missionConstruite,
+                    'valide_le' => now(),
+                ]);
+            }
+        }
 
         $missionLabels = [
             'courtage_banque' => 'Mandat de courtage banque',
@@ -527,6 +579,7 @@ class ClientController extends Controller
         try {
             $recommandationAnalysis->analyze($client, [
                 'contexte' => $validated['contexte'] ?? '',
+                'mission' => $missionConstruite,
                 'missions' => $missionsRetenues,
                 'total' => round($total, 2),
             ]);
@@ -547,16 +600,78 @@ class ClientController extends Controller
         }
     }
 
+    /**
+     * Construit le PDF de la lettre de mission (recommandation
+     * patrimoniale) à partir d'une analyse complétée. Partagé par le
+     * téléchargement conseiller, la lecture en ligne côté client et
+     * l'email envoyé au client une fois la recommandation validée : le
+     * bloc signature n'a qu'une seule implémentation (voir
+     * tenant.clients.pdf.recommandation-patrimoniale).
+     */
+    private function construirePdfRecommandation(
+        Client $client,
+        \App\Models\ClientAnalysis $recommandation,
+        ?string $lieuOverride = null
+    ): \Barryvdh\DomPDF\PDF
+    {
+        $cabinet = \App\Models\CabinetProfile::query()->first();
+        $conseiller = $client->conseiller;
+
+        $nomClient = trim(
+            ($client->civilite ? $client->civilite . ' ' : '')
+            . $client->prenom . ' ' . $client->nom
+        );
+
+        $corpsHtml = $recommandation->result_json['lettre_mission_html']
+            ?? \App\Services\AI\RecommandationAnalysisService::convertirMarkdownEnHtml(
+                $recommandation->result_json['lettre_mission'] ?? $recommandation->raw_response ?? ''
+            );
+
+        $lieuSignature = $lieuOverride
+            ?: ($recommandation->result_json['lieu_signature'] ?? null)
+            ?: ($client->kyc?->lieu_signature ?: $cabinet?->ville);
+
+        $data = [
+            'client' => $client,
+            'cabinet' => $cabinet,
+            'recommandation' => $recommandation,
+            'nomClient' => $nomClient,
+            'nomConseiller' => $conseiller?->name ?? auth()->user()?->name,
+            'telConseiller' => $conseiller?->telephone_mobile,
+            'mailConseiller' => $conseiller?->email,
+            'lieuSignature' => $lieuSignature,
+            'dateGeneration' => now()->translatedFormat('d F Y'),
+            'corpsHtml' => $corpsHtml,
+            'valide' => (bool) $recommandation->valide_le,
+            'valideLe' => $recommandation->valide_le,
+            'fontRegular' => base_path('resources/fonts/Montserrat-Regular.ttf'),
+            'fontMedium' => base_path('resources/fonts/Montserrat-Medium.ttf'),
+            'fontSemiBold' => base_path('resources/fonts/Montserrat-SemiBold.ttf'),
+            'fontBold' => base_path('resources/fonts/Montserrat-Bold.ttf'),
+            'logoPath' => $cabinet?->logo ? storage_path('app/public/' . $cabinet->logo) : null,
+        ];
+
+        return \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'tenant.clients.pdf.recommandation-patrimoniale',
+            $data
+        );
+    }
+
+    private function derniereRecommandationCompletee(Client $client): ?\App\Models\ClientAnalysis
+    {
+        return $client->analyses()
+            ->where('type', 'recommandation')
+            ->where('status', 'completed')
+            ->latest('completed_at')
+            ->first();
+    }
+
     public function telechargerRecommandationPdf(
         \Illuminate\Http\Request $request,
         Client $client
     ): \Symfony\Component\HttpFoundation\Response
     {
-        $recommandation = $client->analyses()
-            ->where('type', 'recommandation')
-            ->where('status', 'completed')
-            ->latest('completed_at')
-            ->first();
+        $recommandation = $this->derniereRecommandationCompletee($client);
 
         if (! $recommandation) {
             return redirect()
@@ -564,72 +679,9 @@ class ClientController extends Controller
                 ->with('error', 'Aucune recommandation générée à exporter.');
         }
 
-        $cabinet = \App\Models\CabinetProfile::query()->first();
-        $conseiller = $client->conseiller;
+        $pdf = $this->construirePdfRecommandation($client, $recommandation, $request->query('lieu'));
 
-        $nomClient = trim(
-            ($client->civilite ? $client->civilite . ' ' : '')
-            . $client->prenom . ' ' . $client->nom
-        );
-
-        $corpsHtml = $recommandation->result_json['lettre_mission_html']
-            ?? \App\Services\AI\RecommandationAnalysisService::convertirMarkdownEnHtml(
-                $recommandation->result_json['lettre_mission'] ?? $recommandation->raw_response ?? ''
-            );
-
-        $data = [
-            'client' => $client,
-            'cabinet' => $cabinet,
-            'recommandation' => $recommandation,
-            'nomClient' => $nomClient,
-            'nomConseiller' => $conseiller?->name ?? auth()->user()->name,
-            'telConseiller' => $conseiller?->telephone_mobile,
-            'mailConseiller' => $conseiller?->email,
-            'lieuSignature' => $request->query('lieu') ?: ($client->kyc?->lieu_signature ?: $cabinet?->ville),
-            'dateGeneration' => now()->translatedFormat('d F Y'),
-            'corpsHtml' => $corpsHtml,
-            'fontRegular' => base_path('resources/fonts/Montserrat-Regular.ttf'),
-            'fontMedium' => base_path('resources/fonts/Montserrat-Medium.ttf'),
-            'fontSemiBold' => base_path('resources/fonts/Montserrat-SemiBold.ttf'),
-            'fontBold' => base_path('resources/fonts/Montserrat-Bold.ttf'),
-            'logoPath' => $cabinet?->logo ? storage_path('app/public/' . $cabinet->logo) : null,
-        ];
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
-            'tenant.clients.pdf.recommandation-patrimoniale',
-            $data
-        );
-
-        $filename = $this->nommerFichierPdf('Recommandation patrimoniale', $client);
-
-        if ($client->email) {
-            $code = strtoupper(\Illuminate\Support\Str::random(5));
-
-            $recommandation->update([
-                'validation_code' => $code,
-                'validation_code_envoye_le' => now(),
-                'valide_le' => null,
-            ]);
-
-            try {
-                \Illuminate\Support\Facades\Mail::to($client->email)->send(
-                    new \App\Mail\RecommandationPatrimonialeMail(
-                        $client,
-                        $cabinet,
-                        $conseiller,
-                        $code,
-                        $request->boolean('envoyer_email') ? $pdf->output() : null,
-                        $request->boolean('envoyer_email') ? $filename : null
-                    )
-                );
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error(
-                    'Echec envoi email recommandation patrimoniale : ' . $e->getMessage()
-                );
-            }
-        }
-
-        return $pdf->download($filename);
+        return $pdf->download($this->nommerFichierPdf('Recommandation patrimoniale', $client));
     }
 
     public function voirRecommandationPdfEnLigne(
@@ -637,51 +689,77 @@ class ClientController extends Controller
         Client $client
     ): \Symfony\Component\HttpFoundation\Response
     {
-        $recommandation = $client->analyses()
-            ->where('type', 'recommandation')
-            ->where('status', 'completed')
-            ->latest('completed_at')
-            ->first();
+        $recommandation = $this->derniereRecommandationCompletee($client);
 
         abort_unless($recommandation, 404);
 
-        $cabinet = \App\Models\CabinetProfile::query()->first();
-        $conseiller = $client->conseiller;
-
-        $nomClient = trim(
-            ($client->civilite ? $client->civilite . ' ' : '')
-            . $client->prenom . ' ' . $client->nom
-        );
-
-        $corpsHtml = $recommandation->result_json['lettre_mission_html']
-            ?? \App\Services\AI\RecommandationAnalysisService::convertirMarkdownEnHtml(
-                $recommandation->result_json['lettre_mission'] ?? $recommandation->raw_response ?? ''
-            );
-
-        $data = [
-            'client' => $client,
-            'cabinet' => $cabinet,
-            'recommandation' => $recommandation,
-            'nomClient' => $nomClient,
-            'nomConseiller' => $conseiller?->name ?? auth()->user()->name,
-            'telConseiller' => $conseiller?->telephone_mobile,
-            'mailConseiller' => $conseiller?->email,
-            'lieuSignature' => $client->kyc?->lieu_signature ?: $cabinet?->ville,
-            'dateGeneration' => now()->translatedFormat('d F Y'),
-            'corpsHtml' => $corpsHtml,
-            'fontRegular' => base_path('resources/fonts/Montserrat-Regular.ttf'),
-            'fontMedium' => base_path('resources/fonts/Montserrat-Medium.ttf'),
-            'fontSemiBold' => base_path('resources/fonts/Montserrat-SemiBold.ttf'),
-            'fontBold' => base_path('resources/fonts/Montserrat-Bold.ttf'),
-            'logoPath' => $cabinet?->logo ? storage_path('app/public/' . $cabinet->logo) : null,
-        ];
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
-            'tenant.clients.pdf.recommandation-patrimoniale',
-            $data
-        );
+        $pdf = $this->construirePdfRecommandation($client, $recommandation);
 
         return $pdf->stream($this->nommerFichierPdf('Recommandation patrimoniale', $client));
+    }
+
+    /**
+     * "Envoyer au client" : génère un nouveau code de validation, mémorise
+     * le lieu de signature choisi par le conseiller, et prévient le client
+     * par email (avec un lien direct vers cette page). Remplace l'ancien
+     * comportement de telechargerRecommandationPdf(), qui déclenchait ce
+     * même envoi en même temps qu'un téléchargement PDF pour le conseiller.
+     */
+    public function envoyerRecommandationClient(
+        \Illuminate\Http\Request $request,
+        Client $client
+    ): \Illuminate\Http\RedirectResponse
+    {
+        $recommandation = $this->derniereRecommandationCompletee($client);
+
+        if (! $recommandation) {
+            return redirect()
+                ->route('tenant.clients.recommandation-patrimoniale', $client)
+                ->with('error', 'Aucune recommandation générée à envoyer.');
+        }
+
+        if (! $client->email) {
+            return redirect()
+                ->route('tenant.clients.recommandation-patrimoniale', $client)
+                ->with('error', "Ce client n'a pas d'adresse email renseignée.");
+        }
+
+        $validated = $request->validate([
+            'lieu' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $cabinet = \App\Models\CabinetProfile::query()->first();
+        $conseiller = $client->conseiller;
+        $code = strtoupper(\Illuminate\Support\Str::random(5));
+
+        $resultJson = $recommandation->result_json ?? [];
+        if (! empty($validated['lieu'])) {
+            $resultJson['lieu_signature'] = $validated['lieu'];
+        }
+
+        $recommandation->update([
+            'result_json' => $resultJson,
+            'validation_code' => $code,
+            'validation_code_envoye_le' => now(),
+            'valide_le' => null,
+        ]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($client->email)->send(
+                new \App\Mail\RecommandationPatrimonialeMail($client, $cabinet, $conseiller, $code)
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error(
+                'Echec envoi email recommandation patrimoniale : ' . $e->getMessage()
+            );
+            return redirect()
+                ->route('tenant.clients.recommandation-patrimoniale', $client)
+                ->with('error', "L'email n'a pas pu être envoyé au client.");
+        }
+
+        return redirect()
+            ->route('tenant.clients.recommandation-patrimoniale', $client)
+            ->with('status', 'Email envoyé au client.');
     }
 
     public function validerRecommandation(
@@ -709,11 +787,33 @@ class ClientController extends Controller
         }
 
         $recommandation->update(['valide_le' => now()]);
+        $recommandation->refresh();
 
         $destinataire = $client->conseiller;
 
         if ($destinataire) {
             $destinataire->notify(new \App\Notifications\RecommandationValideeNotification($client));
+        }
+
+        // Email de confirmation avec le PDF signé (nom du client en
+        // signature manuscrite, voir la vue PDF) — non bloquant : un échec
+        // d'envoi ne doit pas empêcher la validation elle-même.
+        if ($client->email) {
+            try {
+                $pdf = $this->construirePdfRecommandation($client, $recommandation);
+                \Illuminate\Support\Facades\Mail::to($client->email)->send(
+                    new \App\Mail\RecommandationValideeClientMail(
+                        $client,
+                        \App\Models\CabinetProfile::query()->first(),
+                        $pdf->output(),
+                        $this->nommerFichierPdf('Recommandation patrimoniale', $client)
+                    )
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error(
+                    'Echec envoi email recommandation validée : ' . $e->getMessage()
+                );
+            }
         }
 
         return redirect()
@@ -3292,10 +3392,7 @@ class ClientController extends Controller
             $mission = $missionConstruction->construire($client, $suggestion, $prestation);
 
             return redirect()
-                ->route(
-                    'tenant.clients.missions.show',
-                    ['client' => $client, 'mission' => $mission]
-                )
+                ->route('tenant.clients.recommandation-patrimoniale', $client)
                 ->with('status', 'Mission construite.');
 
         } catch (\Throwable $e) {

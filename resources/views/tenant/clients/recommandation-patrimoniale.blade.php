@@ -34,6 +34,12 @@
 .wd-reco-question{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 10px;}
 .wd-reco-textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;padding:14px;font:inherit;font-size:13px;color:var(--ink);resize:vertical;}
 .wd-reco-textarea:focus{outline:none;border-color:var(--pink);}
+.wd-reco-mission-card{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:20px;background:var(--soft);}
+.wd-reco-mission-card .wd-reco-textarea{min-height:70px;margin-bottom:14px;background:#fff;}
+.wd-reco-field-label{display:block;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 5px;}
+.wd-reco-mission-input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:14px;box-sizing:border-box;background:#fff;}
+.wd-reco-mission-input:focus{outline:none;border-color:var(--pink);}
+.wd-reco-pieces-list{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink);line-height:1.7;}
 .wd-reco-missions{margin:24px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start;}
 .wd-reco-mission-block{border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
 .wd-reco-mission-pricing{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
@@ -94,6 +100,10 @@
 .wd-cabinet-checkbox:has(input:checked){color:#242424;}
 .wd-cabinet-checkbox:has(input:checked) .wd-cabinet-checkbox-box{border-color:#242424;background:#242424;}
 .wd-cabinet-checkbox:has(input:checked) .wd-cabinet-checkbox-box svg{display:block;}
+.wd-reco-signature-bloc{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);text-align:right;}
+.wd-reco-signature-label{display:block;font-size:11px;color:var(--muted);}
+.wd-reco-signature-nom{font-family:'Dancing Script',cursive;font-size:34px;font-weight:700;color:var(--ink);transform:rotate(-4deg);display:inline-block;margin:6px 0 2px;}
+.wd-reco-signature-mention{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--green);}
 @media(max-width:600px){
 .wd-reco-body,.wd-reco-result{padding:18px;}
 .wd-reco-missions{grid-template-columns:1fr;}
@@ -134,6 +144,54 @@
         @if($viewRole !== 'client')
         <form method="POST" action="{{ route('tenant.clients.recommandation-patrimoniale.generer', $client) }}" data-reco-form>
             @csrf
+            @php
+                $contenuMission = $mission?->contenuAffiche() ?? [];
+                $versTexteMission = fn ($liste) => is_array($liste) ? implode("\n", $liste) : '';
+            @endphp
+            @if($mission)
+            <input type="hidden" name="mission_id" value="{{ $mission->id }}">
+
+            <div class="wd-reco-mission-card">
+                <p class="wd-reco-question">1. Mission construite par IA (IA 2A)</p>
+                <p class="wd-reco-hint" style="text-align:left;margin:0 0 14px;">Relisez et ajustez librement le contenu ci-dessous avant de générer la recommandation.</p>
+
+                <label class="wd-reco-field-label" for="intitule_mission">Intitulé de la mission</label>
+                <input
+                    type="text"
+                    id="intitule_mission"
+                    name="intitule_mission"
+                    class="wd-reco-mission-input"
+                    value="{{ old('intitule_mission', $contenuMission['intitule_mission'] ?? '') }}"
+                >
+
+                <label class="wd-reco-field-label" for="contexte">Contexte identifié</label>
+                <textarea id="contexte" name="contexte" class="wd-reco-textarea" rows="4" placeholder="Décrivez le contexte de la mission (attentes du client, projets, contraintes…)">{{ old('contexte', $contenuMission['contexte'] ?? '') }}</textarea>
+
+                <label class="wd-reco-field-label" for="objet">Objet de la mission</label>
+                <textarea id="objet" name="objet" class="wd-reco-textarea" rows="3">{{ old('objet', $contenuMission['objet'] ?? '') }}</textarea>
+
+                <label class="wd-reco-field-label" for="perimetre">Périmètre (un élément par ligne)</label>
+                <textarea id="perimetre" name="perimetre" class="wd-reco-textarea" rows="4">{{ old('perimetre', $versTexteMission($contenuMission['perimetre'] ?? [])) }}</textarea>
+
+                <label class="wd-reco-field-label" for="hors_perimetre">Hors périmètre (un élément par ligne)</label>
+                <textarea id="hors_perimetre" name="hors_perimetre" class="wd-reco-textarea" rows="3">{{ old('hors_perimetre', $versTexteMission($contenuMission['hors_perimetre'] ?? [])) }}</textarea>
+
+                <label class="wd-reco-field-label" for="travaux">Travaux prévus (un élément par ligne)</label>
+                <textarea id="travaux" name="travaux" class="wd-reco-textarea" rows="4">{{ old('travaux', $versTexteMission($contenuMission['travaux'] ?? [])) }}</textarea>
+
+                <label class="wd-reco-field-label" for="livrables">Livrables (un élément par ligne)</label>
+                <textarea id="livrables" name="livrables" class="wd-reco-textarea" rows="3">{{ old('livrables', $versTexteMission($contenuMission['livrables'] ?? [])) }}</textarea>
+
+                @if(! empty($contenuMission['pieces_a_collecter']))
+                <label class="wd-reco-field-label">Pièces à collecter</label>
+                <ul class="wd-reco-pieces-list">
+                    @foreach($contenuMission['pieces_a_collecter'] as $piece)
+                        <li>{{ $piece['document'] ?? '' }}@if(! empty($piece['necessaire'])) <em>(indispensable)</em>@endif</li>
+                    @endforeach
+                </ul>
+                @endif
+            </div>
+            @else
             <p class="wd-reco-question">
                 1. Veuillez contextualiser cette recommandation patrimoniale.
             </p>
@@ -142,17 +200,18 @@
                 class="wd-reco-textarea"
                 placeholder="Décrivez le contexte de la mission (attentes du client, projets, contraintes…)"
             ></textarea>
+            @endif
 
             <div class="wd-reco-missions">
-                @foreach($missionTypes as $mission)
-                    @php $presta = $prestations[$mission['index']] ?? []; @endphp
+                @foreach($missionTypes as $missionType)
+                    @php $presta = $prestations[$missionType['index']] ?? []; @endphp
                     <div class="wd-reco-mission-block" data-mission>
                         <label class="wd-cabinet-checkbox">
-                            <input type="radio" name="missions[]" value="{{ $mission['key'] }}" data-mission-toggle>
+                            <input type="radio" name="missions[]" value="{{ $missionType['key'] }}" data-mission-toggle>
                             <span class="wd-cabinet-checkbox-box">
                                 <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                             </span>
-                            <span>{{ $mission['label'] }}</span>
+                            <span>{{ $missionType['label'] }}</span>
                         </label>
                         <div class="wd-reco-mission-pricing" data-mission-pricing style="display:none;">
                             @if(($presta['mode'] ?? null) === 'forfait')
@@ -164,7 +223,7 @@
                                     <input
                                         type="number"
                                         step="0.01"
-                                        name="montants[{{ $mission['key'] }}]"
+                                        name="montants[{{ $missionType['key'] }}]"
                                         value="{{ $presta['forfait'] ?? '' }}"
                                         class="wd-reco-amount"
                                         data-mission-amount
@@ -186,7 +245,7 @@
                                         <input
                                             type="number"
                                             step="0.01"
-                                            name="montants[{{ $mission['key'] }}]"
+                                            name="montants[{{ $missionType['key'] }}]"
                                             placeholder="0"
                                             class="wd-reco-amount"
                                             data-mission-montant
@@ -198,7 +257,7 @@
                                         <input
                                             type="number"
                                             step="0.01"
-                                            name="taux[{{ $mission['key'] }}]"
+                                            name="taux[{{ $missionType['key'] }}]"
                                             value="{{ $presta['pourcentage'] ?? '' }}"
                                             class="wd-reco-amount wd-reco-amount-small"
                                             data-mission-taux
@@ -239,6 +298,7 @@
             );
     @endphp
     <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.snow.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
     .wd-reco-result .ql-picker.ql-header .ql-picker-label[data-value="1"]::before,
     .wd-reco-result .ql-picker.ql-header .ql-picker-item[data-value="1"]::before{content:'Titre 1' !important;}
@@ -253,9 +313,15 @@
                 <span class="wd-reco-result-eyebrow">Dernière lettre de mission générée</span>
                 <span class="wd-reco-result-date">{{ $recommandation->completed_at?->translatedFormat('d F Y à H:i') }}</span>
                 @if($viewRole !== 'client')
-                <button type="button" id="wd-reco-pdf-btn" class="wd-reco-submit" data-pdf-url="{{ route('tenant.clients.recommandation-patrimoniale.pdf', $client) }}" data-lieu-defaut="{{ $client->kyc?->lieu_signature ?: $cabinet?->ville }}">
-                    Télécharger en PDF
-                </button>
+                    @if($recommandation->valide_le)
+                    <a href="{{ route('tenant.clients.recommandation-patrimoniale.pdf', $client) }}" class="wd-reco-submit">
+                        Télécharger en PDF
+                    </a>
+                    @else
+                    <button type="button" id="wd-reco-pdf-btn" class="wd-reco-submit" data-envoyer-url="{{ route('tenant.clients.recommandation-patrimoniale.envoyer', $client) }}" data-lieu-defaut="{{ $recommandation->result_json['lieu_signature'] ?? ($client->kyc?->lieu_signature ?: $cabinet?->ville) }}">
+                        Envoyer au client
+                    </button>
+                    @endif
                 @endif
             </div>
             @if($viewRole !== 'client')
@@ -266,6 +332,13 @@
                 <input type="hidden" name="contenu_html" id="wd-reco-hidden">
                 <button type="submit" class="wd-reco-submit wd-reco-save">Enregistrer les modifications</button>
             </form>
+            @if($recommandation->valide_le)
+            <div class="wd-reco-signature-bloc">
+                <span class="wd-reco-signature-label">Le Client</span>
+                <div class="wd-reco-signature-nom">{{ trim(($client->civilite ? $client->civilite.' ' : '').$client->prenom.' '.$client->nom) }}</div>
+                <span class="wd-reco-signature-mention">Validé électroniquement le {{ $recommandation->valide_le->translatedFormat('d F Y à H:i') }}</span>
+            </div>
+            @endif
             @elseif($recommandation->valide_le)
             <div class="wd-reco-flash wd-reco-flash-success">Vous avez validé cette recommandation le {{ $recommandation->valide_le->translatedFormat('d F Y à H:i') }}.</div>
             <iframe src="{{ route('tenant.clients.recommandation-patrimoniale.pdf.voir', $client) }}" class="wd-reco-pdf-frame"></iframe>
@@ -301,19 +374,17 @@
         <div class="wd-modal-title">Lieu de signature</div>
         <input type="text" id="wd-modal-lieu-input" class="wd-modal-input" placeholder="Ville..." autocomplete="off">
         <div id="wd-modal-lieu-suggestions" class="wd-modal-suggestions"></div>
-        <label class="wd-cabinet-checkbox" style="margin-top:14px;">
-            <input type="checkbox" id="wd-modal-lieu-envoyer-email">
-            <span class="wd-cabinet-checkbox-box">
-                <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-            </span>
-            <span>Joindre le PDF à l'email envoyé au client (un email avec le code de validation part dans tous les cas)</span>
-        </label>
+        <p class="wd-reco-hint" style="text-align:left;margin-top:14px;">Un email contenant un code de validation et un lien vers cette page sera envoyé au client.</p>
         <div class="wd-modal-actions">
             <button type="button" id="wd-modal-lieu-cancel" class="wd-modal-btn-cancel">Annuler</button>
-            <button type="button" id="wd-modal-lieu-confirm" class="wd-modal-btn-confirm">Télécharger</button>
+            <button type="button" id="wd-modal-lieu-confirm" class="wd-modal-btn-confirm">Envoyer</button>
         </div>
     </div>
 </div>
+<form id="wd-envoyer-form" method="POST" action="" style="display:none;">
+    @csrf
+    <input type="hidden" name="lieu" id="wd-envoyer-lieu">
+</form>
 <script>
     (function () {
         var btn = document.getElementById('wd-reco-pdf-btn');
@@ -323,6 +394,8 @@
         var suggestions = document.getElementById('wd-modal-lieu-suggestions');
         var cancelBtn = document.getElementById('wd-modal-lieu-cancel');
         var confirmBtn = document.getElementById('wd-modal-lieu-confirm');
+        var envoyerForm = document.getElementById('wd-envoyer-form');
+        var envoyerLieu = document.getElementById('wd-envoyer-lieu');
         var timer = null;
         btn.addEventListener('click', function () {
             input.value = btn.dataset.lieuDefaut || '';
@@ -334,23 +407,9 @@
             overlay.style.display = 'none';
         });
         confirmBtn.addEventListener('click', function () {
-            var lieu = input.value.trim();
-            var envoyerEmail = document.getElementById('wd-modal-lieu-envoyer-email');
-            var params = [];
-            if (lieu) { params.push('lieu=' + encodeURIComponent(lieu)); }
-            if (envoyerEmail && envoyerEmail.checked) { params.push('envoyer_email=1'); }
-            var url = btn.dataset.pdfUrl + (params.length ? '?' + params.join('&') : '');
-            overlay.style.display = 'none';
-            // Déclenche le téléchargement dans un iframe caché (sans quitter
-            // la page), puis redirige vers Plan d'action une fois le
-            // téléchargement lancé.
-            var iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = url;
-            document.body.appendChild(iframe);
-            setTimeout(function () {
-                window.location.href = "{{ route('tenant.clients.plan-action', $client) }}";
-            }, 800);
+            envoyerLieu.value = input.value.trim();
+            envoyerForm.action = btn.dataset.envoyerUrl;
+            envoyerForm.submit();
         });
         input.addEventListener('input', function () {
             var q = input.value.trim();

@@ -1,5 +1,5 @@
 <p>Bonjour {{ $client->civilite ? $client->civilite . ' ' : '' }}{{ $client->prenom }} {{ $client->nom }},</p>
-<p>Votre recommandation patrimoniale, établie par {{ $conseiller?->name ?? $nomCabinet }}, est disponible dans votre espace client.</p>
+<p>Votre recommandation patrimoniale, établie par {{ $conseiller?->name ?? $nomCabinet }}, est disponible dans <a href="{{ route('tenant.clients.recommandation-patrimoniale', $client) }}">votre espace client</a>.</p>
 @if($pdfJoint)
 <p>Vous en trouverez également une copie en pièce jointe.</p>
 @endif

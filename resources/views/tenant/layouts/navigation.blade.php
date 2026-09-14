@@ -229,6 +229,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     @if($wdNotif->data['urgent'] ?? false)<span class="wd-notif-urgent">Urgent</span>@endif
                     @if(($wdNotif->data['type'] ?? null) === 'interet_prestation')
                         Intérêt — {{ $wdNotif->data['titre'] ?? '' }} ({{ $wdNotif->data['client_nom'] ?? '' }})
+                    @elseif(($wdNotif->data['type'] ?? null) === 'recommandation_validee')
+                        Recommandation validée — {{ $wdNotif->data['client_nom'] ?? '' }}
                     @else
                         Demande de RDV — {{ $wdNotif->data['client_nom'] ?? '' }}
                     @endif
