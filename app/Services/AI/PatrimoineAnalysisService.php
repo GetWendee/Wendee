@@ -13,6 +13,8 @@ class PatrimoineAnalysisService
 {
     public const PROMPT_VERSION = 'patrimoine-v1';
 
+    public const MAX_ATTEMPTS = 3;
+
     public function analyze(Client $client): ClientAnalysis
     {
         $client->loadMissing([
@@ -32,97 +34,130 @@ class PatrimoineAnalysisService
             'started_at' => now(),
         ]);
 
-        try {
-            $response = Http::withToken(config('services.openai.key'))
-                ->acceptJson()
-                ->timeout(90)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => config('services.openai.model', 'gpt-4.1'),
-                    'temperature' => 0.3,
-                    'response_format' => [
-                        'type' => 'json_object',
-                    ],
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => $this->systemPrompt(),
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => $this->systemPrompt(),
+            ],
+            [
+                'role' => 'user',
+                'content' => json_encode(
+                    $input,
+                    JSON_UNESCAPED_UNICODE
+                    | JSON_UNESCAPED_SLASHES
+                    | JSON_PRETTY_PRINT
+                ),
+            ],
+        ];
+
+        $lastError = null;
+
+        for ($attempt = 1; $attempt <= self::MAX_ATTEMPTS; $attempt++) {
+
+            $raw = null;
+
+            try {
+                $response = Http::withToken(config('services.openai.key'))
+                    ->acceptJson()
+                    ->timeout(90)
+                    ->post('https://api.openai.com/v1/chat/completions', [
+                        'model' => config('services.openai.model', 'gpt-4.1'),
+                        'temperature' => 0.3,
+                        'response_format' => [
+                            'type' => 'json_object',
                         ],
-                        [
-                            'role' => 'user',
-                            'content' => json_encode(
-                                $input,
-                                JSON_UNESCAPED_UNICODE
-                                | JSON_UNESCAPED_SLASHES
-                                | JSON_PRETTY_PRINT
-                            ),
-                        ],
-                    ],
+                        'messages' => $messages,
+                    ]);
+
+                if (! $response->successful()) {
+                    throw new RuntimeException(
+                        'Erreur OpenAI HTTP '
+                        . $response->status()
+                        . ' : '
+                        . $response->body()
+                    );
+                }
+
+                $payload = $response->json();
+
+                $raw = data_get(
+                    $payload,
+                    'choices.0.message.content'
+                );
+
+                if (! is_string($raw) || trim($raw) === '') {
+                    throw new RuntimeException(
+                        'Réponse OpenAI vide ou invalide.'
+                    );
+                }
+
+                $result = json_decode($raw, true);
+
+                if (! is_array($result)) {
+                    throw new RuntimeException(
+                        'La réponse OpenAI ne contient pas un JSON valide.'
+                    );
+                }
+
+                $this->validateResult($result);
+
+                $analysis->update([
+                    'status' => 'completed',
+                    'result_json' => $result,
+                    'raw_response' => $raw,
+                    'prompt_tokens' => data_get(
+                        $payload,
+                        'usage.prompt_tokens'
+                    ),
+                    'completion_tokens' => data_get(
+                        $payload,
+                        'usage.completion_tokens'
+                    ),
+                    'total_tokens' => data_get(
+                        $payload,
+                        'usage.total_tokens'
+                    ),
+                    'completed_at' => now(),
+                    'error_message' => null,
                 ]);
 
-            if (! $response->successful()) {
-                throw new RuntimeException(
-                    'Erreur OpenAI HTTP '
-                    . $response->status()
-                    . ' : '
-                    . $response->body()
+                return $analysis->fresh();
+
+            } catch (\Throwable $e) {
+
+                $lastError = $e;
+
+                \Illuminate\Support\Facades\Log::warning(
+                    'Analyse Patrimoine OpenAI : tentative échouée',
+                    [
+                        'client_id' => $client->id,
+                        'attempt' => $attempt,
+                        'error' => $e->getMessage(),
+                    ]
                 );
+
+                if ($attempt >= self::MAX_ATTEMPTS) {
+                    break;
+                }
+
+                $messages[] = [
+                    'role' => 'assistant',
+                    'content' => $raw ?? 'Aucune réponse exploitable.',
+                ];
+                $messages[] = [
+                    'role' => 'user',
+                    'content' => "Ta réponse précédente est invalide : {$e->getMessage()}. Corrige-la et renvoie uniquement le JSON attendu, en respectant strictement le format demandé.",
+                ];
             }
-
-            $payload = $response->json();
-
-            $raw = data_get(
-                $payload,
-                'choices.0.message.content'
-            );
-
-            if (! is_string($raw) || trim($raw) === '') {
-                throw new RuntimeException(
-                    'Réponse OpenAI vide ou invalide.'
-                );
-            }
-
-            $result = json_decode($raw, true);
-
-            if (! is_array($result)) {
-                throw new RuntimeException(
-                    'La réponse OpenAI ne contient pas un JSON valide.'
-                );
-            }
-
-            $this->validateResult($result);
-
-            $analysis->update([
-                'status' => 'completed',
-                'result_json' => $result,
-                'raw_response' => $raw,
-                'prompt_tokens' => data_get(
-                    $payload,
-                    'usage.prompt_tokens'
-                ),
-                'completion_tokens' => data_get(
-                    $payload,
-                    'usage.completion_tokens'
-                ),
-                'total_tokens' => data_get(
-                    $payload,
-                    'usage.total_tokens'
-                ),
-                'completed_at' => now(),
-                'error_message' => null,
-            ]);
-
-            return $analysis->fresh();
-
-        } catch (\Throwable $e) {
-
-            $analysis->update([
-                'status' => 'failed',
-                'completed_at' => now(),
-                'error_message' => $e->getMessage(),
-            ]);
-
-            throw $e;
         }
+
+        $analysis->update([
+            'status' => 'failed',
+            'completed_at' => now(),
+            'error_message' => $lastError?->getMessage(),
+        ]);
+
+        throw $lastError;
     }
 
     private function buildInput(Client $client): array
