@@ -5,6 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ tenant('name') ?? config('app.name', 'Laravel') }}</title>
+        <link rel="icon" href="/images/icons/icon-32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="/images/icons/icon-192.png" sizes="192x192" type="image/png">
+        <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png">
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="theme-color" content="#f40087">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=montserrat:400,500,600,700&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
