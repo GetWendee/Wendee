@@ -119,4 +119,13 @@ class TenantProfileController extends Controller
             'bloque' => (bool) $request->user()?->bloque_le,
         ]);
     }
+
+    /**
+     * Page "Paramètres" de l'espace client (sidebar client, section
+     * Compte). Contenu à définir avec Niels, page stub pour l'instant.
+     */
+    public function parametres(Request $request): View
+    {
+        return view('tenant.parametres');
+    }
 }

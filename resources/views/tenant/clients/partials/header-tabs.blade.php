@@ -61,8 +61,10 @@
     $contratTooltip = 'Générez au moins un contrat pour débloquer cet onglet.';
 @endphp
 <style>
+@if($viewRole !== 'client')
 body > div > nav,
 body > div > header{display:none!important}
+@endif
 html,body{
     margin:0!important;
     background:#f3f1ee!important;
@@ -219,6 +221,7 @@ Modifier
 </div>
 </div>
 </section>
+@if($viewRole !== 'client')
 <nav class="wd-tabs">
 <a href="{{ route('tenant.dashboard') }}" class="{{ ($active ?? null) === 'dashboard' ? 'active' : '' }}">
 Tableau de bord
@@ -256,3 +259,4 @@ Conformité
 </a>
 @endif
 </nav>
+@endif

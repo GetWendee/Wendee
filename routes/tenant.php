@@ -121,6 +121,7 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::delete('/dossiers-enrolement/justificatifs/{justificatif}', [BackOfficeEnrolementController::class, 'destroyJustificatif'])->name('back-office-enrolement.justificatifs.destroy');
         Route::get('/profil', [TenantProfileController::class, 'edit'])->name('profil.edit');
         Route::put('/profil', [TenantProfileController::class, 'update'])->name('profil.update');
+        Route::get('/parametres', [TenantProfileController::class, 'parametres'])->name('parametres');
         Route::get('/mon-rib', [UserAccountController::class, 'editRib'])->name('profil.rib.edit');
         Route::put('/mon-rib', [UserAccountController::class, 'updateRib'])->name('profil.rib.update');
         Route::post('/profil/changement-email', [TenantProfileController::class, 'demanderChangementEmail'])->name('profil.email.demander');

@@ -14,12 +14,48 @@
         request()->routeIs('tenant.abonnement.*') => 'Compte · Abonnement',
         default => 'Wendee',
     };
+
+    /*
+     * Sidebar de l'espace client (rôle client) : Tableau de bord / Analyse
+     * / Mission / Contrat / Archives pointent sur la fiche du client
+     * connecté lui-même, avec le même verrouillage que l'ancienne barre
+     * horizontale (header-tabs.blade.php), à garder synchronisé si les
+     * conditions de déblocage changent là-bas.
+     */
+    $clientNav = null;
+    if (Auth::check() && Auth::user()->effectiveRole() === 'client' && Auth::user()->client) {
+        $clientNavClient = Auth::user()->client;
+        $clientDossierStatus = $clientNavClient->completionStatus();
+        $clientDossierComplet = $clientDossierStatus['items']['kyc']['done']
+            && $clientDossierStatus['items']['pat']['done']
+            && $clientDossierStatus['items']['inv']['done'];
+        $clientRecommandationDisponible = $clientNavClient->analyses()
+            ->where('type', 'suggestion')->where('status', 'completed')->exists();
+        $clientPlanActionDisponible = $clientNavClient->analyses()
+            ->where('type', 'recommandation')->where('status', 'completed')->exists();
+        $clientContratsMandatsTypes = [
+            'mandat_assurance_vie', 'mandat_assurance_deces', 'mandat_assurance_emprunteur',
+            'mandat_assurance_habitation', 'mandat_assurance_obseques', 'mandat_complementaire_sante',
+            'mandat_contrat_capitalisation', 'mandat_garantie_accident_vie', 'mandat_assurance_vehicule',
+            'mandat_plan_epargne_retraite',
+        ];
+        $clientNav = [
+            'client' => $clientNavClient,
+            'analyseLocked' => ! $clientDossierComplet,
+            'analyseTooltip' => 'Complétez le KYC, le Patrimoine et le Profil investisseur pour débloquer l\'Analyse.',
+            'missionLocked' => ! ($clientRecommandationDisponible && $clientPlanActionDisponible),
+            'missionTooltip' => 'Complétez la Suggestion et la Recommandation pour débloquer la Mission.',
+            'contratLocked' => ! $clientNavClient->analyses()
+                ->whereIn('type', $clientContratsMandatsTypes)->where('status', 'completed')->exists(),
+            'contratTooltip' => 'Générez au moins un contrat pour débloquer cet onglet.',
+        ];
+    }
 @endphp
 <aside class="wd-sidebar">
     <div class="wd-logo"><b>W</b>endee<small>OS du conseiller patrimonial</small></div>
     <nav class="wd-nav">
         <div class="wd-nav-section">Général</div>
-        <a class="{{ request()->routeIs('tenant.dashboard') || (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) ? 'active' : '' }}" href="{{ Auth::check() && Auth::user()->effectiveRole() === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard') }}">
+        <a class="{{ request()->routeIs('tenant.dashboard') || (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) || ($clientNav && request()->routeIs('tenant.clients.show')) ? 'active' : '' }}" href="{{ $clientNav ? route('tenant.clients.show', $clientNav['client']) : (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard')) }}">
             <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
             <span>Tableau de bord</span>
         </a>
@@ -39,6 +75,45 @@
         <a class="{{ request()->routeIs('tenant.clients.create') ? 'active' : '' }}" href="{{ route('tenant.clients.create') }}">
             <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a6 6 0 0 1 6-6M16 11v6M13 14h6"/></svg>
             <span>Créer un client</span>
+        </a>
+        @endif
+        @if($clientNav)
+        @if($clientNav['analyseLocked'])
+        <a href="#" class="disabled" aria-disabled="true" tabindex="-1" title="{{ $clientNav['analyseTooltip'] }}">
+            <svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-6 3 3 5-8"/></svg>
+            <span>Analyse</span>
+        </a>
+        @else
+        <a class="{{ request()->routeIs('tenant.clients.aide-decision') ? 'active' : '' }}" href="{{ route('tenant.clients.aide-decision', $clientNav['client']) }}">
+            <svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-6 3 3 5-8"/></svg>
+            <span>Analyse</span>
+        </a>
+        @endif
+        @if($clientNav['missionLocked'])
+        <a href="#" class="disabled" aria-disabled="true" tabindex="-1" title="{{ $clientNav['missionTooltip'] }}">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Mission</span>
+        </a>
+        @else
+        <a class="{{ request()->routeIs('tenant.clients.mission') ? 'active' : '' }}" href="{{ route('tenant.clients.mission', $clientNav['client']) }}">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Mission</span>
+        </a>
+        @endif
+        @if($clientNav['contratLocked'])
+        <a href="#" class="disabled" aria-disabled="true" tabindex="-1" title="{{ $clientNav['contratTooltip'] }}">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <span>Contrat</span>
+        </a>
+        @else
+        <a class="{{ request()->routeIs('tenant.clients.contrats-clients') ? 'active' : '' }}" href="{{ route('tenant.clients.contrats-clients', $clientNav['client']) }}">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <span>Contrat</span>
+        </a>
+        @endif
+        <a class="{{ request()->routeIs('tenant.clients.conformites-clients') ? 'active' : '' }}" href="{{ route('tenant.clients.conformites-clients', $clientNav['client']) }}">
+            <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M9 12h6"/></svg>
+            <span>Archives</span>
         </a>
         @endif
         @if(Auth::check() && Auth::user()->effectiveRole() !== 'apporteur')
@@ -133,6 +208,12 @@
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             <span>Profil</span>
         </a>
+        @if($clientNav)
+        <a class="{{ request()->routeIs('tenant.parametres') ? 'active' : '' }}" href="{{ route('tenant.parametres') }}">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+            <span>Paramètres</span>
+        </a>
+        @endif
     </nav>
     <div class="wd-bottom-nav">
         <form method="POST" action="{{ route('tenant.logout') }}">@csrf<button>Déconnexion</button></form>
@@ -295,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <nav class="wd-mobile-menu-nav">
             <div class="wd-mobile-menu-section">Général</div>
-            <a class="{{ request()->routeIs('tenant.dashboard') || ($mobileRole === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) ? 'active' : '' }}" href="{{ $mobileRole === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard') }}">
+            <a class="{{ request()->routeIs('tenant.dashboard') || ($mobileRole === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) || ($clientNav && request()->routeIs('tenant.clients.show')) ? 'active' : '' }}" href="{{ $clientNav ? route('tenant.clients.show', $clientNav['client']) : ($mobileRole === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard')) }}">
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
                 <span>Tableau de bord</span>
             </a>
@@ -316,7 +397,46 @@ document.addEventListener('DOMContentLoaded', function () {
                 <span>Créer un client</span>
             </a>
             @endif
-            @if($mobileRole === 'courtier' || $mobileRole === 'conseiller')
+            @if($clientNav)
+            @if($clientNav['analyseLocked'])
+            <a href="#" class="disabled" aria-disabled="true" tabindex="-1" title="{{ $clientNav['analyseTooltip'] }}">
+                <svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-6 3 3 5-8"/></svg>
+                <span>Analyse</span>
+            </a>
+            @else
+            <a class="{{ request()->routeIs('tenant.clients.aide-decision') ? 'active' : '' }}" href="{{ route('tenant.clients.aide-decision', $clientNav['client']) }}">
+                <svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-6 3 3 5-8"/></svg>
+                <span>Analyse</span>
+            </a>
+            @endif
+            @if($clientNav['missionLocked'])
+            <a href="#" class="disabled" aria-disabled="true" tabindex="-1" title="{{ $clientNav['missionTooltip'] }}">
+                <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Mission</span>
+            </a>
+            @else
+            <a class="{{ request()->routeIs('tenant.clients.mission') ? 'active' : '' }}" href="{{ route('tenant.clients.mission', $clientNav['client']) }}">
+                <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Mission</span>
+            </a>
+            @endif
+            @if($clientNav['contratLocked'])
+            <a href="#" class="disabled" aria-disabled="true" tabindex="-1" title="{{ $clientNav['contratTooltip'] }}">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                <span>Contrat</span>
+            </a>
+            @else
+            <a class="{{ request()->routeIs('tenant.clients.contrats-clients') ? 'active' : '' }}" href="{{ route('tenant.clients.contrats-clients', $clientNav['client']) }}">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                <span>Contrat</span>
+            </a>
+            @endif
+            <a class="{{ request()->routeIs('tenant.clients.conformites-clients') ? 'active' : '' }}" href="{{ route('tenant.clients.conformites-clients', $clientNav['client']) }}">
+                <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M9 12h6"/></svg>
+                <span>Archives</span>
+            </a>
+            @endif
+            @if($mobileRole === 'courtier' || $mobileRole === 'conseiller' || $clientNav)
             <a href="{{ route('tenant.rendez-vous.index') }}" class="{{ request()->routeIs('tenant.rendez-vous.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
                 <span>Rendez-vous</span>
@@ -352,6 +472,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
                 <span>Profil</span>
             </a>
+            @if($clientNav)
+            <a class="{{ request()->routeIs('tenant.parametres') ? 'active' : '' }}" href="{{ route('tenant.parametres') }}">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+                <span>Paramètres</span>
+            </a>
+            @endif
             <div class="wd-mobile-menu-sep"></div>
             <form method="POST" action="{{ route('tenant.logout') }}">
                 @csrf
