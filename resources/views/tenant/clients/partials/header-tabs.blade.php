@@ -61,10 +61,6 @@
     $contratTooltip = 'Générez au moins un contrat pour débloquer cet onglet.';
 @endphp
 <style>
-@if($viewRole !== 'client')
-body > div > nav,
-body > div > header{display:none!important}
-@endif
 html,body{
     margin:0!important;
     background:#f3f1ee!important;
@@ -221,42 +217,4 @@ Modifier
 </div>
 </div>
 </section>
-@if($viewRole !== 'client')
-<nav class="wd-tabs">
-<a href="{{ route('tenant.dashboard') }}" class="{{ ($active ?? null) === 'dashboard' ? 'active' : '' }}">
-Tableau de bord
-</a>
-<a href="{{ route('tenant.clients.show', $client) }}" class="{{ ($active ?? null) === 'vue' ? 'active' : '' }}">
-Profil
-</a>
-@if($analyseLocked)
-<span class="locked" title="{{ $analyseTooltip }}">Analyse</span>
-@else
-<a href="{{ route('tenant.clients.aide-decision', $client) }}" class="{{ ($active ?? null) === 'analyse' ? 'active' : '' }}">
-Analyse
-</a>
-@endif
-@if($missionLocked)
-<span class="locked" title="{{ $missionTooltip }}">Mission</span>
-@else
-<a href="{{ route('tenant.clients.mission', $client) }}" class="{{ ($active ?? null) === 'mission' ? 'active' : '' }}">
-Mission
-</a>
-@endif
-@if($contratLocked)
-<span class="locked" title="{{ $contratTooltip }}">Contrat</span>
-@else
-<a href="{{ route('tenant.clients.contrats-clients', $client) }}" class="{{ ($active ?? null) === 'contrats' ? 'active' : '' }}">
-Contrat
-</a>
-@endif
-<a href="{{ route('tenant.clients.conformites-clients', $client) }}" class="{{ ($active ?? null) === 'archives' ? 'active' : '' }}">
-Archives
-</a>
-@if(in_array($viewRole, ['courtier', 'conseiller']))
-<a href="{{ route('tenant.clients.conformite-lcbft', $client) }}" class="{{ ($active ?? null) === 'conformite' ? 'active' : '' }}">
-Conformité
-</a>
-@endif
-</nav>
-@endif
+</div>
