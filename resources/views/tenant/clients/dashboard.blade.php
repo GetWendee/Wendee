@@ -85,18 +85,16 @@
         <div class="wd-eyebrow">Actualité</div>
         <h2 style="margin:6px 0 0;font-size:16px;">Notifications</h2>
     </div>
-    <div class="wd-panel-body">
-        @if($journal->isEmpty())
-        <p class="wd-tdb-empty">Aucune actualité pour le moment.</p>
-        @else
-        <ul class="wd-tdb-journal">
+    <div class="wd-panel-body" data-journal-panel>
+        <p class="wd-tdb-empty" data-journal-vide {{ $journal->isEmpty() ? '' : 'hidden' }}>Aucune actualité pour le moment.</p>
+        <ul class="wd-tdb-journal" data-journal-liste {{ $journal->isEmpty() ? 'hidden' : '' }}>
             @foreach($journal as $entree)
             <li>
                 <div class="wd-tdb-journal-texte">
                     <time>{{ $entree['date']->translatedFormat('d F Y à H:i') }}</time>
                     {{ $entree['texte'] }}
                 </div>
-                <form method="POST" action="{{ route('tenant.clients.dashboard.journal.lu', $client) }}">
+                <form method="POST" action="{{ route('tenant.clients.dashboard.journal.lu', $client) }}" data-journal-form>
                     @csrf
                     <input type="hidden" name="cle" value="{{ $entree['cle'] }}">
                     <button type="submit" class="wd-tdb-journal-lu">Lu</button>
@@ -104,7 +102,6 @@
             </li>
             @endforeach
         </ul>
-        @endif
     </div>
 </div>
 
@@ -168,46 +165,89 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    var zone = document.querySelector('[data-dropzone]');
-    if (!zone) { return; }
-    var input = zone.querySelector('[data-dropzone-input]');
-    var texte = zone.querySelector('[data-dropzone-texte]');
-    var texteDefaut = texte.innerHTML;
 
-    function afficherFichier(fichier) {
-        texte.textContent = fichier ? fichier.name : '';
-        if (!fichier) { texte.innerHTML = texteDefaut; }
+    // Empêche le navigateur d'ouvrir le fichier dans l'onglet si le
+    // glisser-déposer rate la zone de quelques pixels (comportement par
+    // défaut sinon : navigation hors de la page).
+    ['dragover', 'drop'].forEach(function (evenement) {
+        window.addEventListener(evenement, function (e) { e.preventDefault(); });
+    });
+
+    var zone = document.querySelector('[data-dropzone]');
+    if (zone) {
+        var input = zone.querySelector('[data-dropzone-input]');
+        var texte = zone.querySelector('[data-dropzone-texte]');
+        var texteDefaut = texte.innerHTML;
+
+        function afficherFichier(fichier) {
+            if (fichier) {
+                texte.textContent = fichier.name;
+            } else {
+                texte.innerHTML = texteDefaut;
+            }
+        }
+
+        zone.addEventListener('click', function () { input.click(); });
+
+        input.addEventListener('change', function () {
+            afficherFichier(input.files[0] || null);
+        });
+
+        ['dragenter', 'dragover'].forEach(function (evenement) {
+            zone.addEventListener(evenement, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                zone.classList.add('wd-tdb-dropzone-actif');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(function (evenement) {
+            zone.addEventListener(evenement, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                zone.classList.remove('wd-tdb-dropzone-actif');
+            });
+        });
+
+        zone.addEventListener('drop', function (e) {
+            var fichiers = e.dataTransfer && e.dataTransfer.files;
+            if (fichiers && fichiers.length > 0) {
+                input.files = fichiers;
+                afficherFichier(fichiers[0]);
+            }
+        });
     }
 
-    zone.addEventListener('click', function () { input.click(); });
-
-    input.addEventListener('change', function () {
-        afficherFichier(input.files[0] || null);
-    });
-
-    ['dragenter', 'dragover'].forEach(function (evenement) {
-        zone.addEventListener(evenement, function (e) {
+    // Marquer une actualité comme lue sans recharger la page (on reste au
+    // même endroit sur le tableau de bord).
+    var panneau = document.querySelector('[data-journal-panel]');
+    if (panneau) {
+        panneau.addEventListener('submit', function (e) {
+            var form = e.target.closest('[data-journal-form]');
+            if (!form) { return; }
             e.preventDefault();
-            e.stopPropagation();
-            zone.classList.add('wd-tdb-dropzone-actif');
-        });
-    });
 
-    ['dragleave', 'drop'].forEach(function (evenement) {
-        zone.addEventListener(evenement, function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            zone.classList.remove('wd-tdb-dropzone-actif');
-        });
-    });
+            var donnees = new FormData(form);
 
-    zone.addEventListener('drop', function (e) {
-        var fichiers = e.dataTransfer.files;
-        if (fichiers.length > 0) {
-            input.files = fichiers;
-            afficherFichier(fichiers[0]);
-        }
-    });
+            fetch(form.action, {
+                method: 'POST',
+                body: donnees,
+                headers: { 'Accept': 'application/json' },
+            }).then(function (reponse) {
+                if (!reponse.ok) { throw new Error('Échec de la requête'); }
+                var ligne = form.closest('li');
+                if (ligne) { ligne.remove(); }
+                var liste = panneau.querySelector('[data-journal-liste]');
+                if (liste && liste.children.length === 0) {
+                    liste.hidden = true;
+                    var vide = panneau.querySelector('[data-journal-vide]');
+                    if (vide) { vide.hidden = false; }
+                }
+            }).catch(function () {
+                form.submit();
+            });
+        });
+    }
 });
 </script>
 </x-tenant-app-layout>
