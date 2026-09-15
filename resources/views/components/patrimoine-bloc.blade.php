@@ -148,7 +148,7 @@
                                 min="0"
                                 :name="`elements[{{ $categorie }}_${i}][montant]`"
                                 x-model.number="e.montant"
-                                class="border-gray-300 rounded-md shadow-sm w-full text-sm"
+                                class="border-gray-300 rounded-md shadow-sm flex-1 min-w-0 text-sm"
                             >
 
                             @if($periodiciteMontant)
