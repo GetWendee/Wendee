@@ -155,7 +155,7 @@
                                 <select
                                     :name="`elements[{{ $categorie }}_${i}][periodicite]`"
                                     x-model="e.periodicite"
-                                    class="border-gray-300 rounded-md shadow-sm text-sm w-24 flex-none"
+                                    class="border-gray-300 rounded-md shadow-sm text-sm w-24 flex-none wd-select-compact"
                                 >
                                     <option value="annuel">Annuel</option>
                                     <option value="mensuel">Mensuel</option>

@@ -129,6 +129,10 @@
             width: min(100%, 620px) !important;
         }
 
+        .wd-patrimoine-page select.wd-select-compact {
+            width: 6rem !important;
+        }
+
         .wd-patrimoine-page input:focus,
         .wd-patrimoine-page select:focus,
         .wd-patrimoine-page textarea:focus {
