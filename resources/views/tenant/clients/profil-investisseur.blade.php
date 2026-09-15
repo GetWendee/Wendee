@@ -209,6 +209,28 @@
             color: #8a847f;
         }
 
+        .wd-investisseur-section-title-hors-encadre {
+            margin: 24px 0 16px;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .wd-investisseur-section-title-hors-encadre-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #242424;
+            margin-bottom: 4px;
+        }
+
+        .wd-investisseur-section-title-hors-encadre-desc {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #8a847f;
+        }
+
         .wd-investisseur-question {
             min-width: 0;
             padding: 18px 20px;
@@ -918,11 +940,12 @@
             @method('PUT')
 
             @foreach (config('profil_investisseur_questionnaire') as $section)
-                <div class="bg-white shadow rounded p-6 mb-6">
-                    <h3 class="text-lg font-semibold mb-4">{{ $section['titre'] }}</h3>
+                <div class="mb-6 bg-white shadow rounded p-6">
+                    <h3 class="mb-4 text-lg font-semibold">{{ $section['titre'] }}</h3>
 
                     @php
                         $champsParents = [];
+                        $groupeOuvert = false;
 
                         foreach ($section['champs'] as $champAnalyse) {
                             foreach (($champAnalyse['conditions'] ?? []) as $conditionAnalyse) {
@@ -935,12 +958,29 @@
 
                     @foreach ($section['champs'] as $champ)
                         @if (($champ['type'] ?? null) === 'section-title')
-                            <div class="wd-investisseur-section-title">
-                                <p class="wd-investisseur-section-title-label">{{ $champ['label'] }}</p>
-                                @if (!empty($champ['desc']))
-                                    <p class="wd-investisseur-section-title-desc">{{ $champ['desc'] }}</p>
-                                @endif
-                            </div>
+                            @if ($groupeOuvert)
+                                </div>
+                                @php($groupeOuvert = false)
+                            @endif
+                            @if ($champ['name'] === 'titre_instruments_financiers_profil_investisseur')
+                                </div>
+                                </div>
+                                <div class="wd-investisseur-section-title-hors-encadre">
+                                    <p class="wd-investisseur-section-title-hors-encadre-label">{{ $champ['label'] }}</p>
+                                    @if (!empty($champ['desc']))
+                                        <p class="wd-investisseur-section-title-hors-encadre-desc">{{ $champ['desc'] }}</p>
+                                    @endif
+                                </div>
+                                <div class="mb-6 bg-white shadow rounded p-6">
+                                <div class="wd-investisseur-questions">
+                            @else
+                                <div class="wd-investisseur-section-title">
+                                    <p class="wd-investisseur-section-title-label">{{ $champ['label'] }}</p>
+                                    @if (!empty($champ['desc']))
+                                        <p class="wd-investisseur-section-title-desc">{{ $champ['desc'] }}</p>
+                                    @endif
+                                </div>
+                            @endif
                             @continue
                         @endif
                         @php
@@ -982,11 +1022,12 @@
 
                         @if ($commenceGroupe)
 
-                            @if (! $loop->first)
+                            @if ($groupeOuvert)
                                 </div>
                             @endif
 
                             <div class="wd-investisseur-question-group {{ $groupeLarge ? 'wd-investisseur-question-group-large' : '' }}">
+                            @php($groupeOuvert = true)
 
                         @endif
 
@@ -1546,11 +1587,11 @@
                         </div>
                         @endif
 
-                        @if ($loop->last)
-                            </div>
-                        @endif
-
                     @endforeach
+
+                    @if ($groupeOuvert)
+                        </div>
+                    @endif
 
                     </div>
                 </div>
