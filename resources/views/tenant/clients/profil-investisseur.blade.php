@@ -187,15 +187,13 @@
 
         .wd-investisseur-section-title {
             grid-column: 1 / -1;
-            margin-top: 8px;
-            padding-top: 16px;
-            border-top: 1px solid #ebe7e3;
+            margin-top: 20px;
+            padding-top: 0;
+            border-top: 0;
         }
 
         .wd-investisseur-section-title:first-child {
             margin-top: 0;
-            padding-top: 0;
-            border-top: 0;
         }
 
         .wd-investisseur-section-title-label {
