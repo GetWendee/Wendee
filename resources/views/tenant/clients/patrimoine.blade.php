@@ -130,7 +130,7 @@
         }
 
         .wd-patrimoine-page select.wd-select-compact {
-            width: 6rem !important;
+            width: 8rem !important;
         }
 
         .wd-patrimoine-page input:focus,
