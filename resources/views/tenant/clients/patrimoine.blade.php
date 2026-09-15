@@ -495,7 +495,6 @@
                     </div>
 
                     <div x-show="residentFiscal === 'oui'">
-                    <div class="text-xs font-semibold text-gray-600 mb-3">Impôt sur le revenu (IRPP)</div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Impôt sur le revenu (IRPP)</label>
