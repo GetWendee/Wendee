@@ -40,6 +40,11 @@ return [
                     ['label' => 'Je préfère ne pas répondre.', 'value' => 'non_reponse_type_gestion_profil_investisseur'],
                 ],
             ],
+        ],
+    ],
+    [
+        'titre' => 'Connaissance des produits',
+        'champs' => [
             [
                 'type' => 'section-title',
                 'name' => 'titre_connaissance_produits_profil_investisseur',
