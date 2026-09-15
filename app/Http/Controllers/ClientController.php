@@ -7,6 +7,7 @@ use App\Services\PlacementCompatibilityService;
 use App\Models\CabinetProfile;
 use App\Models\Client;
 use App\Models\Representant;
+use App\Models\RendezVous;
 use App\Models\User;
 use App\Services\CabinetCompletionChecker;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use App\Services\AI\SuggestionAnalysisService;
 use App\Notifications\InteretPrestationNotification;
+use App\Notifications\MessageClientNotification;
 
 class ClientController extends Controller
 {
@@ -280,15 +282,102 @@ class ClientController extends Controller
 
     /**
      * Tableau de bord de l'espace client (sidebar client, section
-     * Général). Contenu (métriques, notifications, rendez-vous,
-     * messagerie) à construire dans une instruction séparée, page stub
-     * pour l'instant.
+     * Général) : avancement du dossier + échéance KYC, journal d'actus
+     * (dérivé des analyses et rendez-vous existants, pas de table dédiée),
+     * prochains rendez-vous, message instantané à envoyer au conseiller.
      */
     public function dashboard(Client $client): View
     {
+        $dossierStatus = $client->completionStatus();
+
+        $kycTitulaire = $client->titulaireKyc();
+        $kycDate = $kycTitulaire->kyc?->updated_at;
+        $kycEcheance = $kycDate?->copy()->addYear();
+
+        $rendezVousAVenir = RendezVous::query()
+            ->where('client_id', $client->id)
+            ->where('statut', '!=', 'annule')
+            ->where('starts_at', '>=', now())
+            ->orderBy('starts_at')
+            ->limit(3)
+            ->get();
+
+        $typesBibliotheque = $this->typesBibliotheque();
+
+        $journal = collect();
+
+        $libellesAnalyses = [
+            'suggestion' => 'Votre suggestion patrimoniale est disponible.',
+            'recommandation' => 'Votre recommandation patrimoniale est disponible.',
+            'plan_action' => "Votre plan d'action est disponible.",
+        ];
+
+        $client->analyses()
+            ->whereIn('type', array_keys($libellesAnalyses))
+            ->where('status', 'completed')
+            ->get()
+            ->each(function ($analyse) use ($journal, $libellesAnalyses) {
+                $journal->push([
+                    'date' => $analyse->completed_at ?? $analyse->updated_at,
+                    'texte' => $libellesAnalyses[$analyse->type],
+                ]);
+            });
+
+        $client->analyses()
+            ->whereIn('type', array_keys($typesBibliotheque))
+            ->whereNotIn('type', array_keys($libellesAnalyses))
+            ->where('status', 'completed')
+            ->get()
+            ->each(function ($analyse) use ($journal, $typesBibliotheque) {
+                $journal->push([
+                    'date' => $analyse->completed_at ?? $analyse->updated_at,
+                    'texte' => 'Contrat généré : '.($typesBibliotheque[$analyse->type]['label'] ?? $analyse->type).'.',
+                ]);
+            });
+
+        RendezVous::query()
+            ->where('client_id', $client->id)
+            ->where('statut', '!=', 'annule')
+            ->get()
+            ->each(function ($rdv) use ($journal) {
+                $journal->push([
+                    'date' => $rdv->created_at,
+                    'texte' => 'Rendez-vous pris le '.$rdv->starts_at->translatedFormat('d F Y à H:i').($rdv->sujet ? ' · '.$rdv->sujet : '').'.',
+                ]);
+            });
+
+        $journal = $journal
+            ->filter(fn ($entree) => $entree['date'])
+            ->sortByDesc('date')
+            ->take(8)
+            ->values();
+
         return view('tenant.clients.dashboard', [
             'client' => $client,
+            'dossierStatus' => $dossierStatus,
+            'kycEcheance' => $kycEcheance,
+            'rendezVousAVenir' => $rendezVousAVenir,
+            'journal' => $journal,
         ]);
+    }
+
+    /**
+     * Message instantané envoyé par le client à son conseiller depuis le
+     * tableau de bord (colonne de droite). Pas de messagerie interne pour
+     * l'instant : le conseiller le reçoit par email (+ cloche de notif,
+     * comme les autres notifications du cabinet).
+     */
+    public function envoyerMessageConseiller(Request $request, Client $client): RedirectResponse
+    {
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+
+        abort_unless($client->conseiller, 404);
+
+        $client->conseiller->notify(new MessageClientNotification($client, $validated['message']));
+
+        return redirect()->route('tenant.clients.dashboard', $client)->with('status', 'message-envoye');
     }
 
     public function show(Client $client, PlacementCompatibilityService $compatibility): View|\Illuminate\Http\RedirectResponse
