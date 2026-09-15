@@ -2783,6 +2783,7 @@ Modifier
 
 </section>
 
+@if($viewRole !== 'client')
 <nav class="wd-tabs">
 
 <a href="{{ route('tenant.dashboard') }}">
@@ -2817,6 +2818,7 @@ Conformité
 @endif
 
 </nav>
+@endif
 
 
 <div style="display:flex;gap:12px;justify-content:flex-start;margin:22px 0 0;">

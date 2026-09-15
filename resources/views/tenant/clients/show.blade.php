@@ -2972,6 +2972,7 @@ function rdvPopup(urlDisponibilites, urlStore) {
 </template>
 </div>
 
+@if($viewRole !== 'client')
 <nav class="wd-tabs">
 
 <a href="{{ route('tenant.dashboard') }}">
@@ -3006,6 +3007,7 @@ Conformité
 @endif
 
 </nav>
+@endif
 
 <nav class="wd-subtabs">
 

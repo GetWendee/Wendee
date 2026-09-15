@@ -134,6 +134,7 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::post('/commissions/valider-virements', [CommissionController::class, 'validerVirements'])->name('commissions.valider-virements');
         Route::get('/clients/creer', [ClientController::class, 'create'])->name('clients.create');
         Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+        Route::get('/dashboard/{client}', [ClientController::class, 'dashboard'])->name('clients.dashboard');
         Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
         Route::get('/aide-decision/{client}', [ClientController::class, 'aideDecision'])->name('clients.aide-decision');
         Route::get('/mission/{client}', [ClientController::class, 'mission'])->name('clients.mission');

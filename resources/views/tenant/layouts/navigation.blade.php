@@ -55,10 +55,16 @@
     <div class="wd-logo"><b>W</b>endee<small>OS du conseiller patrimonial</small></div>
     <nav class="wd-nav">
         <div class="wd-nav-section">Général</div>
-        <a class="{{ request()->routeIs('tenant.dashboard') || (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) || ($clientNav && request()->routeIs('tenant.clients.show')) ? 'active' : '' }}" href="{{ $clientNav ? route('tenant.clients.show', $clientNav['client']) : (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard')) }}">
+        <a class="{{ request()->routeIs('tenant.dashboard') || (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) || ($clientNav && request()->routeIs('tenant.clients.dashboard')) ? 'active' : '' }}" href="{{ $clientNav ? route('tenant.clients.dashboard', $clientNav['client']) : (Auth::check() && Auth::user()->effectiveRole() === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard')) }}">
             <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
             <span>Tableau de bord</span>
         </a>
+        @if($clientNav)
+        <a class="{{ request()->routeIs('tenant.clients.show') ? 'active' : '' }}" href="{{ route('tenant.clients.show', $clientNav['client']) }}">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <span>Mon dossier</span>
+        </a>
+        @endif
         @if(Auth::check() && in_array(Auth::user()->effectiveRole(), ['courtier', 'conseiller'], true))
         <a class="{{ request()->routeIs('tenant.portefeuille.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille.index') }}">
             <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>
@@ -376,10 +382,16 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <nav class="wd-mobile-menu-nav">
             <div class="wd-mobile-menu-section">Général</div>
-            <a class="{{ request()->routeIs('tenant.dashboard') || ($mobileRole === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) || ($clientNav && request()->routeIs('tenant.clients.show')) ? 'active' : '' }}" href="{{ $clientNav ? route('tenant.clients.show', $clientNav['client']) : ($mobileRole === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard')) }}">
+            <a class="{{ request()->routeIs('tenant.dashboard') || ($mobileRole === 'apporteur' && request()->routeIs('tenant.portefeuille.*')) || ($clientNav && request()->routeIs('tenant.clients.dashboard')) ? 'active' : '' }}" href="{{ $clientNav ? route('tenant.clients.dashboard', $clientNav['client']) : ($mobileRole === 'apporteur' ? route('tenant.portefeuille.index') : route('tenant.dashboard')) }}">
                 <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
                 <span>Tableau de bord</span>
             </a>
+            @if($clientNav)
+            <a class="{{ request()->routeIs('tenant.clients.show') ? 'active' : '' }}" href="{{ route('tenant.clients.show', $clientNav['client']) }}">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                <span>Mon dossier</span>
+            </a>
+            @endif
             @if($mobileRole === 'courtier' || $mobileRole === 'conseiller')
             <a class="{{ request()->routeIs('tenant.portefeuille.*') ? 'active' : '' }}" href="{{ route('tenant.portefeuille.index') }}">
                 <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>

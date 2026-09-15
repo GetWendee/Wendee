@@ -278,6 +278,19 @@ class ClientController extends Controller
         return redirect()->route('tenant.clients.show', $titulaire)->with('status', 'Client créé.');
     }
 
+    /**
+     * Tableau de bord de l'espace client (sidebar client, section
+     * Général). Contenu (métriques, notifications, rendez-vous,
+     * messagerie) à construire dans une instruction séparée, page stub
+     * pour l'instant.
+     */
+    public function dashboard(Client $client): View
+    {
+        return view('tenant.clients.dashboard', [
+            'client' => $client,
+        ]);
+    }
+
     public function show(Client $client, PlacementCompatibilityService $compatibility): View|\Illuminate\Http\RedirectResponse
     {
         // Une société n'a pas la même fiche qu'une personne physique, voir
