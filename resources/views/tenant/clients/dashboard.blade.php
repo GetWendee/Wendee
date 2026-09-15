@@ -5,7 +5,7 @@
     $kycJoursRestants = $kycEcheance ? (int) now()->startOfDay()->diffInDays($kycEcheance->copy()->startOfDay(), false) : null;
 @endphp
 <style>
-.wd-tdb-grid{display:grid;grid-template-columns:2fr 1fr;gap:22px;align-items:start;}
+.wd-tdb-grid{display:grid;grid-template-columns:2fr 1fr;gap:22px;align-items:start;max-width:1540px;margin:0 auto;padding:0 34px 60px;}
 @media(max-width:900px){.wd-tdb-grid{grid-template-columns:1fr;}}
 .wd-panel{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:22px;}
 .wd-panel-head{padding:18px 20px 0;}
@@ -21,9 +21,12 @@
 .wd-tdb-kpi strong.warn{color:var(--amber);}
 .wd-tdb-kpi strong.ko{color:var(--red);}
 .wd-tdb-journal{list-style:none;margin:0;padding:0;}
-.wd-tdb-journal li{padding:12px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink);}
+.wd-tdb-journal li{padding:12px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
 .wd-tdb-journal li:first-child{border-top:0;}
 .wd-tdb-journal time{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:4px;}
+.wd-tdb-journal-texte{flex:1;}
+.wd-tdb-journal-lu{flex:0 0 auto;background:none;border:1px solid var(--line);border-radius:7px;padding:5px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);cursor:pointer;font-family:inherit;}
+.wd-tdb-journal-lu:hover{border-color:var(--pink);color:var(--pink);}
 .wd-tdb-empty{color:var(--muted);font-size:12.5px;padding:6px 0;}
 .wd-tdb-rdv{display:grid;gap:10px;}
 .wd-tdb-rdv-tile{border:1px solid var(--line);border-radius:9px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
@@ -32,8 +35,11 @@
 .wd-tdb-msg-form textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:9px;padding:12px 14px;font:inherit;font-size:12.5px;resize:vertical;box-sizing:border-box;}
 .wd-tdb-msg-form button{margin-top:12px;}
 .wd-tdb-msg-status{margin-top:10px;font-size:11.5px;color:var(--green);font-weight:700;}
+.wd-tdb-dropzone{margin-top:10px;border:1.5px dashed var(--line);border-radius:9px;padding:16px 14px;text-align:center;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+.wd-tdb-dropzone:hover,.wd-tdb-dropzone.wd-tdb-dropzone-actif{border-color:var(--pink);background:#fdf2f8;}
+.wd-tdb-dropzone-texte{margin:0;font-size:11.5px;color:var(--muted);}
+.wd-tdb-dropzone-texte span{color:var(--pink);font-weight:700;text-decoration:underline;}
 </style>
-<div class="wd-wrap">
 <div class="wd-tdb-grid">
 <div>
 
@@ -86,12 +92,49 @@
         <ul class="wd-tdb-journal">
             @foreach($journal as $entree)
             <li>
-                <time>{{ $entree['date']->translatedFormat('d F Y à H:i') }}</time>
-                {{ $entree['texte'] }}
+                <div class="wd-tdb-journal-texte">
+                    <time>{{ $entree['date']->translatedFormat('d F Y à H:i') }}</time>
+                    {{ $entree['texte'] }}
+                </div>
+                <form method="POST" action="{{ route('tenant.clients.dashboard.journal.lu', $client) }}">
+                    @csrf
+                    <input type="hidden" name="cle" value="{{ $entree['cle'] }}">
+                    <button type="submit" class="wd-tdb-journal-lu">Lu</button>
+                </form>
             </li>
             @endforeach
         </ul>
         @endif
+    </div>
+</div>
+
+</div>
+<div>
+
+<div class="wd-panel">
+    <div class="wd-panel-head">
+        <div class="wd-eyebrow">Contact</div>
+        <h2 style="margin:6px 0 0;font-size:16px;">Message à mon conseiller</h2>
+    </div>
+    <div class="wd-panel-body">
+        @if(session('status') === 'message-envoye')
+        <p class="wd-tdb-msg-status">Message envoyé à votre conseiller.</p>
+        @endif
+        <form class="wd-tdb-msg-form" method="POST" action="{{ route('tenant.clients.dashboard.message', $client) }}" enctype="multipart/form-data">
+            @csrf
+            <textarea name="message" placeholder="Écrivez votre message ici..." required>{{ old('message') }}</textarea>
+            @error('message')
+            <p style="color:var(--red);font-size:11.5px;margin-top:6px;">{{ $message }}</p>
+            @enderror
+            <div class="wd-tdb-dropzone" data-dropzone>
+                <input type="file" name="piece_jointe" id="wd-tdb-piece-jointe" data-dropzone-input hidden>
+                <p class="wd-tdb-dropzone-texte" data-dropzone-texte>Glissez-déposez une pièce jointe ici, ou <span>parcourir</span></p>
+            </div>
+            @error('piece_jointe')
+            <p style="color:var(--red);font-size:11.5px;margin-top:6px;">{{ $message }}</p>
+            @enderror
+            <button type="submit" class="wd-btn-dark">Envoyer</button>
+        </form>
     </div>
 </div>
 
@@ -122,29 +165,49 @@
 </div>
 
 </div>
-<div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var zone = document.querySelector('[data-dropzone]');
+    if (!zone) { return; }
+    var input = zone.querySelector('[data-dropzone-input]');
+    var texte = zone.querySelector('[data-dropzone-texte]');
+    var texteDefaut = texte.innerHTML;
 
-<div class="wd-panel">
-    <div class="wd-panel-head">
-        <div class="wd-eyebrow">Contact</div>
-        <h2 style="margin:6px 0 0;font-size:16px;">Message à mon conseiller</h2>
-    </div>
-    <div class="wd-panel-body">
-        @if(session('status') === 'message-envoye')
-        <p class="wd-tdb-msg-status">Message envoyé à votre conseiller.</p>
-        @endif
-        <form class="wd-tdb-msg-form" method="POST" action="{{ route('tenant.clients.dashboard.message', $client) }}">
-            @csrf
-            <textarea name="message" placeholder="Écrivez votre message ici..." required>{{ old('message') }}</textarea>
-            @error('message')
-            <p style="color:var(--red);font-size:11.5px;margin-top:6px;">{{ $message }}</p>
-            @enderror
-            <button type="submit" class="wd-btn-dark">Envoyer</button>
-        </form>
-    </div>
-</div>
+    function afficherFichier(fichier) {
+        texte.textContent = fichier ? fichier.name : '';
+        if (!fichier) { texte.innerHTML = texteDefaut; }
+    }
 
-</div>
-</div>
-</div>
+    zone.addEventListener('click', function () { input.click(); });
+
+    input.addEventListener('change', function () {
+        afficherFichier(input.files[0] || null);
+    });
+
+    ['dragenter', 'dragover'].forEach(function (evenement) {
+        zone.addEventListener(evenement, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.add('wd-tdb-dropzone-actif');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(function (evenement) {
+        zone.addEventListener(evenement, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.remove('wd-tdb-dropzone-actif');
+        });
+    });
+
+    zone.addEventListener('drop', function (e) {
+        var fichiers = e.dataTransfer.files;
+        if (fichiers.length > 0) {
+            input.files = fichiers;
+            afficherFichier(fichiers[0]);
+        }
+    });
+});
+</script>
 </x-tenant-app-layout>

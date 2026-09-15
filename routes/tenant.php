@@ -136,6 +136,7 @@ Route::middleware(['auth', 'verified', 'client.access'])->group(function () {
         Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
         Route::get('/dashboard/{client}', [ClientController::class, 'dashboard'])->name('clients.dashboard');
         Route::post('/dashboard/{client}/message', [ClientController::class, 'envoyerMessageConseiller'])->name('clients.dashboard.message');
+        Route::post('/dashboard/{client}/journal/lu', [ClientController::class, 'marquerJournalLu'])->name('clients.dashboard.journal.lu');
         Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
         Route::get('/aide-decision/{client}', [ClientController::class, 'aideDecision'])->name('clients.aide-decision');
         Route::get('/mission/{client}', [ClientController::class, 'mission'])->name('clients.mission');

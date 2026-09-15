@@ -49,6 +49,7 @@ class Client extends Model
             'archive_le' => 'datetime',
             'notification_archivage_envoyee_le' => 'datetime',
             'demande_reactivation_le' => 'datetime',
+            'dashboard_journal_lues' => 'array',
         ];
     }
 

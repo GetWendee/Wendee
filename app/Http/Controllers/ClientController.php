@@ -318,6 +318,7 @@ class ClientController extends Controller
             ->get()
             ->each(function ($analyse) use ($journal, $libellesAnalyses) {
                 $journal->push([
+                    'cle' => 'analyse:'.$analyse->id,
                     'date' => $analyse->completed_at ?? $analyse->updated_at,
                     'texte' => $libellesAnalyses[$analyse->type],
                 ]);
@@ -330,6 +331,7 @@ class ClientController extends Controller
             ->get()
             ->each(function ($analyse) use ($journal, $typesBibliotheque) {
                 $journal->push([
+                    'cle' => 'analyse:'.$analyse->id,
                     'date' => $analyse->completed_at ?? $analyse->updated_at,
                     'texte' => 'Contrat généré : '.($typesBibliotheque[$analyse->type]['label'] ?? $analyse->type).'.',
                 ]);
@@ -341,13 +343,16 @@ class ClientController extends Controller
             ->get()
             ->each(function ($rdv) use ($journal) {
                 $journal->push([
+                    'cle' => 'rdv:'.$rdv->id,
                     'date' => $rdv->created_at,
                     'texte' => 'Rendez-vous pris le '.$rdv->starts_at->translatedFormat('d F Y à H:i').($rdv->sujet ? ' · '.$rdv->sujet : '').'.',
                 ]);
             });
 
+        $journalLues = $client->dashboard_journal_lues ?? [];
+
         $journal = $journal
-            ->filter(fn ($entree) => $entree['date'])
+            ->filter(fn ($entree) => $entree['date'] && ! in_array($entree['cle'], $journalLues, true))
             ->sortByDesc('date')
             ->take(8)
             ->values();
@@ -371,13 +376,51 @@ class ClientController extends Controller
     {
         $validated = $request->validate([
             'message' => ['required', 'string', 'max:2000'],
+            'piece_jointe' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx'],
         ]);
 
         abort_unless($client->conseiller, 404);
 
-        $client->conseiller->notify(new MessageClientNotification($client, $validated['message']));
+        $pieceJointePath = null;
+        $pieceJointeNom = null;
+
+        if ($request->hasFile('piece_jointe')) {
+            $pieceJointePath = $request->file('piece_jointe')->store('messages-client/'.$client->id, 'local');
+            $pieceJointeNom = $request->file('piece_jointe')->getClientOriginalName();
+        }
+
+        $client->conseiller->notify(new MessageClientNotification(
+            $client,
+            $validated['message'],
+            $pieceJointePath,
+            $pieceJointeNom,
+        ));
 
         return redirect()->route('tenant.clients.dashboard', $client)->with('status', 'message-envoye');
+    }
+
+    /**
+     * Marque une entrée du journal d'actus du tableau de bord client comme
+     * lue (le bouton "Lu" la fait disparaître). Pas de table dédiée : la
+     * liste des clés lues est stockée directement sur le client
+     * (dashboard_journal_lues), le journal lui-même restant calculé à la
+     * volée à chaque affichage.
+     */
+    public function marquerJournalLu(Request $request, Client $client): RedirectResponse
+    {
+        $validated = $request->validate([
+            'cle' => ['required', 'string', 'max:255'],
+        ]);
+
+        $lues = $client->dashboard_journal_lues ?? [];
+
+        if (! in_array($validated['cle'], $lues, true)) {
+            $lues[] = $validated['cle'];
+            $client->dashboard_journal_lues = $lues;
+            $client->save();
+        }
+
+        return redirect()->route('tenant.clients.dashboard', $client);
     }
 
     public function show(Client $client, PlacementCompatibilityService $compatibility): View|\Illuminate\Http\RedirectResponse
